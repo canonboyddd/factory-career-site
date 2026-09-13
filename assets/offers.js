@@ -12,21 +12,18 @@
     zen:{type:'退職サポート',desc:'転職先探しとは別に、退職手続きの支援が必要な段階の人向け。'}
   };
 
-  // Some older guides did not have an ad block when they were first created.
-  // If an approved program is mapped to the page, create a compact block automatically.
   if(availablePriority.length && !document.querySelector('.offer-grid')){
     const article=document.querySelector('.article-main');
     if(article){
       const section=document.createElement('section');
       section.className='offer-section';
       section.dataset.offerSection='';
-      section.innerHTML='<h2>条件に合う転職支援を確認</h2><p>現在利用できる提携サービスだけを表示しています。対象者・サービス内容はリンク先の最新情報を確認してください。</p><div class="offer-grid" data-offer-grid></div>';
+      section.innerHTML='<h2>条件に合う転職支援を確認</h2><p>現在利用できる提携サービスだけを表示しています。対象者・サービス内容はリンク先の最新情報を確認してください。</p><div class="offer-grid" data-offer-grid></div><p class="offer-disclosure">PR：リンク経由の申込み等で当サイトが報酬を受け取る場合があります。</p>';
       const next=document.querySelector('.internal-link-hub');
       if(next&&next.parentNode===article) article.insertBefore(section,next); else article.appendChild(section);
     }
   }
 
-  // Add any approved program that is relevant to this page but missing from its old HTML.
   document.querySelectorAll('.offer-grid').forEach(grid=>{
     availablePriority.forEach(key=>{
       if(grid.querySelector(`[data-program-card="${key}"]`)) return;
@@ -35,7 +32,7 @@
       card.className='offer-card';
       card.dataset.programCard=key;
       card.hidden=true;
-      card.innerHTML=`<span class="offer-type">${meta.type}</span><h3 data-program-name>${programs[key]?.name||''}</h3><p>${meta.desc}</p><a class="btn btn-secondary" data-program-link href="#">サービス内容を確認する</a>`;
+      card.innerHTML=`<span class="offer-type">${meta.type}</span><span class="pr-label">PR</span><h3 data-program-name>${programs[key]?.name||''}</h3><p>${meta.desc}</p><a class="btn btn-secondary" data-program-link href="#">サービス内容を確認する</a>`;
       grid.appendChild(card);
     });
   });
@@ -49,6 +46,10 @@
       if(!url){card.hidden=true;return;}
       card.hidden=false;
       card.dataset.programKey=key;
+      if(!card.querySelector('.pr-label')){
+        const type=card.querySelector('.offer-type');
+        if(type){const pr=document.createElement('span');pr.className='pr-label';pr.textContent='PR';type.insertAdjacentElement('afterend',pr);}
+      }
       card.querySelectorAll('[data-program-link]').forEach(link=>{
         link.href=url;
         link.target='_blank';
@@ -60,15 +61,10 @@
         }
       });
       card.querySelectorAll('[data-program-name]').forEach(el=>{if(program.name)el.textContent=program.name;});
-
       const pixel=String(program.impressionPixel||'').trim();
       if(pixel&&!card.querySelector('[data-affiliate-impression]')){
         const img=document.createElement('img');
-        img.src=pixel;
-        img.width=1;
-        img.height=1;
-        img.alt='';
-        img.decoding='async';
+        img.src=pixel;img.width=1;img.height=1;img.alt='';img.decoding='async';
         img.referrerPolicy=program.referrerPolicy||'no-referrer-when-downgrade';
         img.dataset.affiliateImpression='';
         img.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;';
@@ -85,6 +81,10 @@
     }
     const visible=[...grid.querySelectorAll('[data-program-card]')].filter(el=>!el.hidden);
     visible.forEach((card,i)=>card.classList.toggle('featured',i===0));
+    const section=grid.closest('.offer-section');
+    if(section && visible.length && !section.querySelector('.offer-disclosure')){
+      const p=document.createElement('p');p.className='offer-disclosure';p.textContent='PR：リンク経由の申込み等で当サイトが報酬を受け取る場合があります。';section.appendChild(p);
+    }
   });
 
   document.querySelectorAll('[data-offer-grid]').forEach(grid=>{
