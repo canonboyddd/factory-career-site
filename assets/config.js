@@ -31,7 +31,9 @@ window.SITE_CONFIG = {
     "factory-shift-change.html": ["makersJob"], "factory-commute-long.html": ["makersJob"], "factory-small-company.html": ["makersJob", "samuraiJob"],
     "assembly-career.html": ["makersJob"], "automotive-parts-career.html": ["makersJob", "samuraiJob"],
     "manufacturing-20s.html": ["makersJob", "magicari"], "manufacturing-50s.html": ["makersJob"],
-    "factory-night-to-day.html": ["makersJob"], "factory-bonus-low.html": ["makersJob", "samuraiJob"]
+    "factory-night-to-day.html": ["makersJob"], "factory-bonus-low.html": ["makersJob", "samuraiJob"],
+    "factory-resume.html": ["samuraiJob", "makersJob"], "factory-interview.html": ["samuraiJob", "makersJob"],
+    "factory-job-offer-check.html": ["samuraiJob", "makersJob"]
   },
   disclosure: "当サイトはアフィリエイト広告を利用しています。"
 };
