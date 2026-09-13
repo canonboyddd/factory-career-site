@@ -31,7 +31,15 @@ window.SITE_CONFIG = {
     "quality-assurance-career.html": ["samuraiJob", "makersJob"],
     "inspection-career.html": ["makersJob"],
     "operator-quit.html": ["makersJob", "magicari"],
-    "line-work-quit.html": ["makersJob", "magicari"]
+    "line-work-quit.html": ["makersJob", "magicari"],
+    "factory-overtime.html": ["makersJob"],
+    "factory-holidays.html": ["makersJob"],
+    "factory-body-hard.html": ["makersJob", "magicari"],
+    "factory-no-future.html": ["makersJob", "magicari"],
+    "factory-resignation-reasons.html": ["makersJob", "zen"],
+    "factory-shift-change.html": ["makersJob"],
+    "factory-commute-long.html": ["makersJob"],
+    "factory-small-company.html": ["makersJob", "samuraiJob"]
   },
   disclosure: "当サイトはアフィリエイト広告を利用しています。"
 };
