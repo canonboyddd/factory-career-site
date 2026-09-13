@@ -3,6 +3,42 @@
   const programs=cfg.affiliatePrograms||{};
   const page=window.location.pathname.split('/').pop()||'';
   const priority=cfg.articleProgramPriority?.[page]||[];
+  const availablePriority=priority.filter(key=>String(programs[key]?.url||'').trim());
+
+  const labels={
+    makersJob:{type:'メーカー・製造業転職',desc:'製造業の経験を活かしながら、条件の違う求人を比較したい人向け。'},
+    samuraiJob:{type:'専門職・年収重視',desc:'技術職・専門職としての経験を活かし、年収やポジションを重視して比較したい人向け。'},
+    magicari:{type:'キャリア整理',desc:'異業種も含めて、今後のキャリアや転職軸を整理したい人向け。'},
+    zen:{type:'退職サポート',desc:'転職先探しとは別に、退職手続きの支援が必要な段階の人向け。'}
+  };
+
+  // Some older guides did not have an ad block when they were first created.
+  // If an approved program is mapped to the page, create a compact block automatically.
+  if(availablePriority.length && !document.querySelector('.offer-grid')){
+    const article=document.querySelector('.article-main');
+    if(article){
+      const section=document.createElement('section');
+      section.className='offer-section';
+      section.dataset.offerSection='';
+      section.innerHTML='<h2>条件に合う転職支援を確認</h2><p>現在利用できる提携サービスだけを表示しています。対象者・サービス内容はリンク先の最新情報を確認してください。</p><div class="offer-grid" data-offer-grid></div>';
+      const next=document.querySelector('.internal-link-hub');
+      if(next&&next.parentNode===article) article.insertBefore(section,next); else article.appendChild(section);
+    }
+  }
+
+  // Add any approved program that is relevant to this page but missing from its old HTML.
+  document.querySelectorAll('.offer-grid').forEach(grid=>{
+    availablePriority.forEach(key=>{
+      if(grid.querySelector(`[data-program-card="${key}"]`)) return;
+      const meta=labels[key]||{type:'転職支援',desc:'条件に合うサービスか、最新の対象者・利用条件を確認してください。'};
+      const card=document.createElement('div');
+      card.className='offer-card';
+      card.dataset.programCard=key;
+      card.hidden=true;
+      card.innerHTML=`<span class="offer-type">${meta.type}</span><h3 data-program-name>${programs[key]?.name||''}</h3><p>${meta.desc}</p><a class="btn btn-secondary" data-program-link href="#">サービス内容を確認する</a>`;
+      grid.appendChild(card);
+    });
+  });
 
   document.querySelectorAll('.offer-grid').forEach(grid=>{
     const cards=[...grid.querySelectorAll('[data-program-card]')];
@@ -18,7 +54,10 @@
         link.target='_blank';
         link.rel='sponsored nofollow noopener';
         link.referrerPolicy=program.referrerPolicy||'no-referrer-when-downgrade';
-        link.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:window.location.pathname,placement:'offer_card'}));
+        if(!link.dataset.trackingBound){
+          link.dataset.trackingBound='';
+          link.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:window.location.pathname,placement:'offer_card'}));
+        }
       });
       card.querySelectorAll('[data-program-name]').forEach(el=>{if(program.name)el.textContent=program.name;});
 
