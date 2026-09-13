@@ -58,7 +58,26 @@
       pr.style.display='block';
       pr.innerHTML='<span class="pr-label">PR</span><h3>条件に近い支援サービス</h3><p>診断回答から、比較しやすい順に表示しています。対象者・成果条件・サービス内容は公式情報を確認してください。</p><div class="diag-offers"></div>';
       const wrap=pr.querySelector('.diag-offers');
-      available.forEach(([key,p],i)=>{const a=document.createElement('a');a.className='btn '+(i===0?'btn-primary':'btn-secondary');a.href=p.url;a.target='_blank';a.rel='sponsored nofollow noopener';a.textContent=p.name+'を確認する';a.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:'diagnosis',placement:'diagnosis_result',result_type:type}));wrap.appendChild(a);});
+      available.forEach(([key,p],i)=>{
+        const a=document.createElement('a');
+        a.className='btn '+(i===0?'btn-primary':'btn-secondary');
+        a.href=p.url;
+        a.target='_blank';
+        a.rel='sponsored nofollow noopener';
+        a.referrerPolicy=p.referrerPolicy||'no-referrer-when-downgrade';
+        a.textContent=p.name+'を確認する';
+        a.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:'diagnosis',placement:'diagnosis_result',result_type:type}));
+        wrap.appendChild(a);
+
+        const pixel=String(p.impressionPixel||'').trim();
+        if(pixel){
+          const img=document.createElement('img');
+          img.src=pixel;img.width=1;img.height=1;img.alt='';img.decoding='async';
+          img.referrerPolicy=p.referrerPolicy||'no-referrer-when-downgrade';
+          img.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;';
+          pr.appendChild(img);
+        }
+      });
     }else pr.style.display='none';
 
     window.trackSiteEvent?.('diagnosis_complete',{score,result_type:type,job,change,intent});
