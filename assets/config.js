@@ -35,3 +35,17 @@ window.SITE_CONFIG = {
   },
   disclosure: "当サイトはアフィリエイト広告を利用しています。"
 };
+
+// Older article pages do not all include offers.js directly. After the parser
+// finishes, load it once on article pages so approved programs can appear
+// without rewriting every article whenever an ASP approves a new program.
+setTimeout(() => {
+  const path = window.location.pathname;
+  if (!path.includes('/articles/') || path.endsWith('/articles/') || path.endsWith('/articles/index.html')) return;
+  const alreadyLoaded = [...document.scripts].some(s => /\/assets\/offers\.js(?:\?|$)/.test(s.src));
+  if (alreadyLoaded || document.querySelector('[data-auto-offers-script]')) return;
+  const script = document.createElement('script');
+  script.src = '../assets/offers.js';
+  script.dataset.autoOffersScript = '';
+  document.body.appendChild(script);
+}, 0);
