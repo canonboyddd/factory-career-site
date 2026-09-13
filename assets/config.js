@@ -27,7 +27,11 @@ window.SITE_CONFIG = {
     "maintenance-career.html": ["makersJob", "samuraiJob"],
     "machine-design-career.html": ["samuraiJob", "makersJob"],
     "electrical-design-career.html": ["samuraiJob", "makersJob"],
-    "production-control-career.html": ["makersJob", "samuraiJob"]
+    "production-control-career.html": ["makersJob", "samuraiJob"],
+    "quality-assurance-career.html": ["samuraiJob", "makersJob"],
+    "inspection-career.html": ["makersJob"],
+    "operator-quit.html": ["makersJob", "magicari"],
+    "line-work-quit.html": ["makersJob", "magicari"]
   },
   disclosure: "当サイトはアフィリエイト広告を利用しています。"
 };
