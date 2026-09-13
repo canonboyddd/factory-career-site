@@ -51,3 +51,17 @@ setTimeout(() => {
   script.dataset.autoOffersScript = '';
   document.body.appendChild(script);
 }, 0);
+
+// Build one consistent internal-link cluster across both old and newly added
+// article pages. The article hub is included so priority pillar links sit close
+// to the top of the site architecture.
+setTimeout(() => {
+  const path = window.location.pathname;
+  if (!path.includes('/articles/')) return;
+  const alreadyLoaded = [...document.scripts].some(s => /\/assets\/seo-clusters\.js(?:\?|$)/.test(s.src));
+  if (alreadyLoaded || document.querySelector('[data-auto-seo-clusters-script]')) return;
+  const script = document.createElement('script');
+  script.src = '../assets/seo-clusters.js';
+  script.dataset.autoSeoClustersScript = '';
+  document.body.appendChild(script);
+}, 0);
