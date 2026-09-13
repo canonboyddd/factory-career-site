@@ -5,7 +5,12 @@ window.SITE_CONFIG = {
   analytics: { ga4MeasurementId: "" },
   affiliatePrograms: {
     makersJob: { name: "メーカーズジョブ", url: "" },
-    samuraiJob: { name: "Samurai Job", url: "" },
+    samuraiJob: {
+      name: "Samurai Job",
+      url: "https://h.accesstrade.net/sp/cc?rk=0100q6np00oyrf",
+      impressionPixel: "https://h.accesstrade.net/sp/rr?rk=0100q6np00oyrf",
+      referrerPolicy: "no-referrer-when-downgrade"
+    },
     magicari: { name: "マジキャリ", url: "" },
     zen: { name: "ZENの退職代行", url: "" }
   },
