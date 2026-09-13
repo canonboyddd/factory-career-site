@@ -39,24 +39,38 @@
     let guide='articles/factory-quit.html',guideText='工場勤務を辞めたい人の判断軸を読む';
     if(night>=2||change==='worktime'){guide='articles/night-shift-hard.html';guideText='夜勤・勤務時間の転職条件を読む';}
     if(change==='salary'){guide='articles/manufacturing-500-income.html';guideText='年収アップの条件を読む';}
-    if(job==='production-tech'){guide='articles/production-tech-career.html';guideText='生産技術の転職条件を読む';}
-    if(job==='quality'){guide='articles/quality-quit.html';guideText='品質経験を活かす転職先を読む';}
-    if(job==='period'){guide='articles/period-worker-next.html';guideText='期間工のその後の進路を読む';}
+    const roleGuides={
+      'production-tech':['articles/production-tech-career.html','生産技術の転職条件を読む'],
+      'quality':['articles/quality-quit.html','品質経験を活かす転職先を読む'],
+      'mechanical':['articles/machine-design-career.html','機械設計の転職条件を読む'],
+      'electrical':['articles/electrical-design-career.html','電気・制御設計の転職条件を読む'],
+      'maintenance':['articles/maintenance-career.html','設備保全の転職条件を読む'],
+      'period':['articles/period-worker-next.html','期間工のその後の進路を読む']
+    };
+    if(roleGuides[job]&&change!=='worktime') [guide,guideText]=roleGuides[job];
+    if(change==='salary'&&['production-tech','quality','mechanical','electrical','maintenance'].includes(job)){
+      guide='articles/manufacturing-500-income.html';guideText='専門性を活かした年収アップ条件を読む';
+    }
     if(change==='work'&&job==='other'){guide='articles/manufacturing-other-industry.html';guideText='製造業から異業種への進み方を読む';}
 
     const ctaRow=result.querySelector('.cta-row');
     if(ctaRow&&!result.querySelector('[data-result-guide]')){const a=document.createElement('a');a.className='btn btn-primary';a.href=guide;a.textContent=guideText;a.dataset.resultGuide='';ctaRow.prepend(a);}
 
+    if(ctaRow&&!result.querySelector('[data-result-service-guide]')&&intent!=='stay'){
+      const a=document.createElement('a');a.className='btn btn-secondary';a.href='articles/manufacturing-agent-guide.html';a.textContent='転職サービスの選び方を見る';a.dataset.resultServiceGuide='';ctaRow.insertBefore(a,ctaRow.lastElementChild);
+    }
+
     const programs=window.SITE_CONFIG?.affiliatePrograms||{};
     let preferred=['makersJob'];
-    if((expert>=4&&(income==='500'||income==='600'))||['mechanical','electrical'].includes(job)) preferred=['samuraiJob','makersJob'];
+    const specialistJobs=['production-tech','quality','mechanical','electrical','maintenance'];
+    if(specialistJobs.includes(job)||expert>=4||(income==='500'||income==='600')) preferred=['samuraiJob','makersJob'];
     else if(change==='work'&&job==='other') preferred=['magicari','makersJob'];
     else if(intent==='soon'&&change==='people') preferred=['makersJob','zen'];
     const available=preferred.map(k=>[k,programs[k]]).filter(([,p])=>p&&String(p.url||'').trim());
     const pr=document.getElementById('prBox');
     if(available.length){
       pr.style.display='block';
-      pr.innerHTML='<span class="pr-label">PR</span><h3>条件に近い支援サービス</h3><p>診断回答から、比較しやすい順に表示しています。対象者・成果条件・サービス内容は公式情報を確認してください。</p><div class="diag-offers"></div>';
+      pr.innerHTML='<span class="pr-label">PR</span><h3>条件に近い支援サービス</h3><p>診断回答から、比較しやすい順に表示しています。対象者・サービス内容はリンク先の最新情報を確認してください。</p><div class="diag-offers"></div>';
       const wrap=pr.querySelector('.diag-offers');
       available.forEach(([key,p],i)=>{
         const a=document.createElement('a');
@@ -66,7 +80,7 @@
         a.rel='sponsored nofollow noopener';
         a.referrerPolicy=p.referrerPolicy||'no-referrer-when-downgrade';
         a.textContent=p.name+'を確認する';
-        a.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:'diagnosis',placement:'diagnosis_result',result_type:type}));
+        a.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:'diagnosis',placement:'diagnosis_result',result_type:type,job}));
         wrap.appendChild(a);
 
         const pixel=String(p.impressionPixel||'').trim();
@@ -80,7 +94,7 @@
       });
     }else pr.style.display='none';
 
-    window.trackSiteEvent?.('diagnosis_complete',{score,result_type:type,job,change,intent});
+    window.trackSiteEvent?.('diagnosis_complete',{score,result_type:type,job,change,intent,guide});
     shell.style.display='none';result.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});
   }
   render();
