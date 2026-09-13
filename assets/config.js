@@ -4,7 +4,11 @@ window.SITE_CONFIG = {
   affiliateServiceName: "メーカー・製造業特化の転職支援サービス",
   analytics: { ga4MeasurementId: "G-MR6KP8HJNR" },
   affiliatePrograms: {
-    makersJob: { name: "メーカーズジョブ", url: "" },
+    makersJob: {
+      name: "メーカーズジョブ",
+      url: "https://px.a8.net/svt/ejp?a8mat=4BCA79+GHL6WI+5B0Y+TRVYQ",
+      impressionPixel: "https://www15.a8.net/0.gif?a8mat=4BCA79+GHL6WI+5B0Y+TRVYQ"
+    },
     samuraiJob: {
       name: "Samurai Job",
       url: "https://h.accesstrade.net/sp/cc?rk=0100q6np00oyrf",
