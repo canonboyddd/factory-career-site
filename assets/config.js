@@ -2,7 +2,7 @@ window.SITE_CONFIG = {
   siteName: "工場キャリア診断",
   affiliateUrl: "",
   affiliateServiceName: "メーカー・製造業特化の転職支援サービス",
-  analytics: { ga4MeasurementId: "" },
+  analytics: { ga4MeasurementId: "G-MR6KP8HJNR" },
   affiliatePrograms: {
     makersJob: { name: "メーカーズジョブ", url: "" },
     samuraiJob: {
