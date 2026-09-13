@@ -14,10 +14,27 @@
       card.hidden=false;
       card.dataset.programKey=key;
       card.querySelectorAll('[data-program-link]').forEach(link=>{
-        link.href=url;link.target='_blank';link.rel='sponsored nofollow noopener';
+        link.href=url;
+        link.target='_blank';
+        link.rel='sponsored nofollow noopener';
+        link.referrerPolicy=program.referrerPolicy||'no-referrer-when-downgrade';
         link.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:window.location.pathname,placement:'offer_card'}));
       });
       card.querySelectorAll('[data-program-name]').forEach(el=>{if(program.name)el.textContent=program.name;});
+
+      const pixel=String(program.impressionPixel||'').trim();
+      if(pixel&&!card.querySelector('[data-affiliate-impression]')){
+        const img=document.createElement('img');
+        img.src=pixel;
+        img.width=1;
+        img.height=1;
+        img.alt='';
+        img.decoding='async';
+        img.referrerPolicy=program.referrerPolicy||'no-referrer-when-downgrade';
+        img.dataset.affiliateImpression='';
+        img.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;';
+        card.appendChild(img);
+      }
     });
 
     if(priority.length){
