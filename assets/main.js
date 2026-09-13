@@ -171,6 +171,23 @@
   }
   addCoreLinks();
 
+  // High-intent guides get one consistent bridge into the service-comparison page.
+  const serviceBridgePages=new Set([
+    'factory-quit.html','night-shift-hard.html','manufacturing-20s.html','manufacturing-30s.html','manufacturing-40s.html','manufacturing-50s.html',
+    'manufacturing-500-income.html','manufacturing-other-industry.html','period-worker-next.html','operator-quit.html','line-work-quit.html',
+    'production-tech-career.html','quality-quit.html','maintenance-career.html','machine-design-career.html','electrical-design-career.html',
+    'production-control-career.html','quality-assurance-career.html','automotive-parts-career.html','factory-salary-up.html','factory-day-shift-job.html',
+    'factory-permanent-employee.html','factory-job-offer-check.html','factory-job-change-failure.html','factory-white-company.html'
+  ]);
+  if(isArticle&&serviceBridgePages.has(currentFile)&&currentFile!=='manufacturing-agent-guide.html'&&!document.querySelector('[data-service-bridge]')){
+    const article=document.querySelector('.article-main');
+    if(article){
+      const bridge=document.createElement('section');bridge.className='inline-cta';bridge.dataset.serviceBridge='';
+      bridge.innerHTML='<span class="eyebrow">次の一手</span><h3>求人を比較する段階なら、サービスの違いを先に確認</h3><p>製造業向け・専門職向け・キャリア整理型を、職種と目的で使い分ける方法をまとめています。</p><a class="btn btn-primary" href="manufacturing-agent-guide.html" data-service-guide-link>製造業向け転職サービスの選び方</a>';
+      const core=article.querySelector('[data-core-links]');if(core) article.insertBefore(bridge,core); else article.appendChild(bridge);
+    }
+  }
+
   // Old footers get trust-policy links without requiring every old HTML file to be rewritten.
   const footer=document.querySelector('.footer .container');
   if(footer&&!footer.querySelector('[data-trust-links]')){
@@ -181,6 +198,7 @@
     const core=e.target.closest('[data-core-link]');if(core)window.trackSiteEvent('core_article_click',{from_page:path,to_article:core.dataset.coreLink});
     const diag=e.target.closest('a[href*="diagnosis.html"]');if(diag)window.trackSiteEvent('diagnosis_link_click',{from_page:path});
     const tool=e.target.closest('a[href*="tools/"]');if(tool)window.trackSiteEvent('tool_link_click',{from_page:path,to_url:tool.getAttribute('href')});
+    const service=e.target.closest('[data-service-guide-link]');if(service)window.trackSiteEvent('service_guide_click',{from_page:path,to_article:'manufacturing-agent-guide.html'});
   });
 
   document.querySelectorAll('[data-affiliate-link]').forEach(link=>ensureConfig(()=>{
