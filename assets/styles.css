@@ -138,3 +138,19 @@ h1{font-size:clamp(36px,5.5vw,64px);line-height:1.1;letter-spacing:-.03em;margin
 .internal-link-card strong{color:var(--ink);line-height:1.45}.internal-link-card span{margin-top:6px;color:var(--muted);font-size:13px}.internal-link-card b{margin-top:auto;padding-top:12px;color:var(--brand-dark);font-size:14px}
 @media (max-width:900px){.internal-link-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:680px){.core-guide-grid,.internal-link-grid{grid-template-columns:1fr}.core-guide-hub,.internal-link-hub{padding:18px}.internal-link-card{min-height:auto}}
+
+/* Japanese line wrapping: avoid awkward punctuation/phrase breaks on narrow screens. */
+html{line-break:strict}
+body,p,li,dd,dt,summary,a,button,strong,small,span{word-break:normal;overflow-wrap:break-word}
+h1,h2,h3,h4,.result-label,.question h2,.section-head h2,.core-guide-card strong,.internal-link-card strong{text-wrap:balance}
+p,li,dd,.article-main p,.article-main li,.section-head p,.card p,.article-card p{text-wrap:pretty}
+.btn,.eyebrow,.quick-link,.tag,.pr-label{white-space:normal}
+@supports (word-break:auto-phrase){
+  h1,h2,h3,h4,p,li,dd,dt,summary,.btn,.choice,.card,.article-card,.core-guide-card,.internal-link-card{word-break:auto-phrase}
+}
+@media (max-width:680px){
+  h1,h2,h3,h4{line-height:1.35}
+  .article-main h1{line-height:1.35}
+  .article-main h2{line-height:1.5}
+  .btn{line-height:1.45}
+}
