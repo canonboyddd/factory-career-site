@@ -11,7 +11,19 @@
     return `<div class="grid-2">${hubs.map(h=>`<a class="card" href="${h.href}"><div class="icon">${h.icon}</div><h3>${h.title}</h3><p>${h.desc}</p><strong>まとめて見る →</strong></a>`).join('')}</div>`;
   }
 
-  if((path==='/'||path.endsWith('/index.html'))&&!document.querySelector('[data-discovery-hubs]')){
+  const isHome=path==='/'||path.endsWith('/index.html');
+  const staticHomeHub=document.querySelector('#topic-hubs');
+
+  if(isHome&&staticHomeHub){
+    const googleHeading=[...staticHomeHub.querySelectorAll('h2')].find(el=>el.textContent.includes('Google'));
+    if(googleHeading) googleHeading.textContent='まず読む重要ガイド';
+    [...staticHomeHub.querySelectorAll('p')].forEach(p=>{
+      if(p.textContent.includes('Googleにも')) p.textContent='主要テーマから重要記事へ迷わず進めるよう、記事同士のつながりを整理しています。';
+      if(p.textContent.includes('トップページから直接リンク')) p.textContent='サイト内の中心になる記事へ、トップページから直接たどれます。';
+    });
+  }
+
+  if(isHome&&!document.querySelector('[data-discovery-hubs],#topic-hubs')){
     const anchor=document.querySelector('#roles')||document.querySelector('[data-tool-home]');
     if(anchor){
       const sec=document.createElement('section');sec.className='section alt';sec.dataset.discoveryHubs='';
@@ -33,14 +45,15 @@
     const article=document.querySelector('.article-main');
     if(article){
       const box=document.createElement('section');box.className='internal-link-hub';box.dataset.topicHubLinks='';
-      box.innerHTML=`<div class="internal-link-head"><span class="eyebrow">テーマ別まとめ</span><h2>関連テーマを広く見る</h2><p>近い悩みを横断して比較できます。</p></div><div class="internal-link-grid">${hubs.slice(0,3).map(h=>`<a class="internal-link-card" href="${h.href}"><strong>${h.icon} ${h.title}</strong><span>${h.desc}</span><b>まとめて見る →</b></a>`).join('')}</div>`;
+      box.innerHTML=`<div class="internal-link-head"><span class="eyebrow">テーマ別まとめ</span><h2>関連テーマを広く見る</h2><p>近い悩みを横断して比較できます。</p></div><div class="internal-link-grid">${hubs.map(h=>`<a class="internal-link-card" href="${h.href}"><strong>${h.icon} ${h.title}</strong><span>${h.desc}</span><b>まとめて見る →</b></a>`).join('')}</div>`;
       const service=article.querySelector('[data-service-bridge]');
       if(service) article.insertBefore(box,service); else article.appendChild(box);
     }
   }
 
   const footer=document.querySelector('.footer .container');
-  if(footer&&!footer.querySelector('[data-html-sitemap-link]')){
+  const hasSitemapLink=footer&&footer.querySelector('a[href="/site-map.html"],a[href="site-map.html"],a[href="../site-map.html"]');
+  if(footer&&!footer.querySelector('[data-html-sitemap-link]')&&!hasSitemapLink){
     const p=document.createElement('p');p.dataset.htmlSitemapLink='';p.style.fontSize='13px';
     p.innerHTML='<a href="/site-map.html">サイトマップ</a> ・ <a href="/workstyle-guide.html">働き方</a> ・ <a href="/salary-guide.html">年収</a> ・ <a href="/career-guide.html">職種</a> ・ <a href="/job-change-guide.html">転職準備</a>';
     footer.appendChild(p);
