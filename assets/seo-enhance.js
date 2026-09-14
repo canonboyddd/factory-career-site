@@ -53,6 +53,9 @@
     ensureMeta('meta[property="og:site_name"]',{property:'og:site_name',content:'工場キャリア診断'});
     ensureMeta('meta[name="twitter:card"]',{name:'twitter:card',content:'summary'});
 
+    // Keep ad labels and affiliate copy from becoming the search-result snippet.
+    document.querySelectorAll('.ad-note,.offer-section,.pr-box').forEach(el=>el.setAttribute('data-nosnippet',''));
+
     document.querySelectorAll('script[data-auto-schema],script[data-seo-schema-v2]').forEach(el=>el.remove());
 
     const orgId=SITE+'/#organization';
