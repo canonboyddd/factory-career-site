@@ -73,3 +73,14 @@ setTimeout(() => {
   script.dataset.autoSeoClustersScript = '';
   document.body.appendChild(script);
 }, 0);
+
+// Load one sitewide SEO layer after the normal page scripts. It upgrades
+// structured data, social metadata and crawler preview directives without
+// rewriting every legacy HTML file.
+setTimeout(() => {
+  if (document.querySelector('[data-auto-seo-enhance-script]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/seo-enhance.js';
+  script.dataset.autoSeoEnhanceScript = '';
+  document.body.appendChild(script);
+}, 0);
