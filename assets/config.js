@@ -46,9 +46,6 @@ window.SITE_CONFIG = {
   disclosure: "当サイトはアフィリエイト広告を利用しています。"
 };
 
-// Older article pages do not all include offers.js directly. After the parser
-// finishes, load it once on article pages so approved programs can appear
-// without rewriting every article whenever an ASP approves a new program.
 setTimeout(() => {
   const path = window.location.pathname;
   if (!path.includes('/articles/') || path.endsWith('/articles/') || path.endsWith('/articles/index.html')) return;
@@ -60,9 +57,6 @@ setTimeout(() => {
   document.body.appendChild(script);
 }, 0);
 
-// Build one consistent internal-link cluster across both old and newly added
-// article pages. The article hub is included so priority pillar links sit close
-// to the top of the site architecture.
 setTimeout(() => {
   const path = window.location.pathname;
   if (!path.includes('/articles/')) return;
@@ -74,9 +68,6 @@ setTimeout(() => {
   document.body.appendChild(script);
 }, 0);
 
-// Load one sitewide SEO layer after the normal page scripts. It upgrades
-// structured data, social metadata and crawler preview directives without
-// rewriting every legacy HTML file.
 setTimeout(() => {
   if (document.querySelector('[data-auto-seo-enhance-script]')) return;
   const script = document.createElement('script');
@@ -85,8 +76,6 @@ setTimeout(() => {
   document.body.appendChild(script);
 }, 0);
 
-// Load the brighter visual theme sitewide after the base stylesheet so it can
-// safely override colors without duplicating every HTML page.
 (() => {
   if (document.querySelector('link[data-colorful-theme]')) return;
   const link = document.createElement('link');
@@ -95,3 +84,11 @@ setTimeout(() => {
   link.dataset.colorfulTheme = '';
   document.head.appendChild(link);
 })();
+
+setTimeout(() => {
+  if (document.querySelector('[data-auto-discovery-hubs-script]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/discovery-hubs.js';
+  script.dataset.autoDiscoveryHubsScript = '';
+  document.body.appendChild(script);
+}, 0);
