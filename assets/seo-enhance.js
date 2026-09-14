@@ -1,0 +1,158 @@
+(() => {
+  const SITE='https://factory-career-site.pages.dev';
+  const path=window.location.pathname;
+  const file=path.split('/').pop()||'';
+  const isArticlePath=path.includes('/articles/');
+  const isArticleDetail=isArticlePath && file && file!=='index.html';
+  const isArticleHub=isArticlePath && (!file || file==='index.html');
+  const isToolHub=path==='/tools/' || path.endsWith('/tools/index.html');
+
+  function ensureMeta(selector, attrs){
+    let el=document.head.querySelector(selector);
+    if(!el){
+      el=document.createElement('meta');
+      Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+      document.head.appendChild(el);
+    }
+    return el;
+  }
+
+  function canonicalUrl(){
+    const existing=document.querySelector('link[rel="canonical"]')?.href;
+    if(existing) return existing;
+    const clean=path.replace(/\/index\.html$/,'/');
+    return SITE+clean;
+  }
+
+  function applySeo(){
+    const canonical=canonicalUrl();
+    const title=(document.title||'工場キャリア診断').trim();
+    const h1=document.querySelector('h1')?.textContent.trim()||title;
+    const description=document.querySelector('meta[name="description"]')?.content?.trim()||'';
+
+    const robots=document.querySelector('meta[name="robots"]');
+    if(!robots){
+      const m=document.createElement('meta');
+      m.name='robots';
+      m.content='index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
+      document.head.appendChild(m);
+    }else if(!/noindex/i.test(robots.content||'')){
+      const rules=new Set((robots.content||'').split(',').map(v=>v.trim()).filter(Boolean));
+      ['index','follow','max-image-preview:large','max-snippet:-1','max-video-preview:-1'].forEach(v=>rules.add(v));
+      robots.content=[...rules].join(',');
+    }
+
+    const ogTitle=ensureMeta('meta[property="og:title"]',{property:'og:title',content:title});
+    if(!ogTitle.content) ogTitle.content=title;
+    const ogDesc=ensureMeta('meta[property="og:description"]',{property:'og:description',content:description});
+    if(!ogDesc.content&&description) ogDesc.content=description;
+    const ogUrl=ensureMeta('meta[property="og:url"]',{property:'og:url',content:canonical});
+    ogUrl.content=canonical;
+    const ogType=ensureMeta('meta[property="og:type"]',{property:'og:type',content:isArticleDetail?'article':'website'});
+    ogType.content=isArticleDetail?'article':'website';
+    ensureMeta('meta[property="og:site_name"]',{property:'og:site_name',content:'工場キャリア診断'});
+    ensureMeta('meta[name="twitter:card"]',{name:'twitter:card',content:'summary'});
+
+    document.querySelectorAll('script[data-auto-schema],script[data-seo-schema-v2]').forEach(el=>el.remove());
+
+    const orgId=SITE+'/#organization';
+    const websiteId=SITE+'/#website';
+    const webPageId=canonical+'#webpage';
+    const graph=[
+      {
+        '@type':'Organization',
+        '@id':orgId,
+        name:'工場キャリア診断',
+        url:SITE+'/'
+      },
+      {
+        '@type':'WebSite',
+        '@id':websiteId,
+        url:SITE+'/',
+        name:'工場キャリア診断',
+        inLanguage:'ja',
+        publisher:{'@id':orgId}
+      }
+    ];
+
+    let pageType='WebPage';
+    if(isArticleHub||isToolHub) pageType='CollectionPage';
+    if(path.endsWith('/about.html')) pageType='AboutPage';
+
+    const webPage={
+      '@type':pageType,
+      '@id':webPageId,
+      url:canonical,
+      name:h1,
+      description,
+      inLanguage:'ja',
+      isPartOf:{'@id':websiteId}
+    };
+    graph.push(webPage);
+
+    if(isArticleDetail){
+      const section=(document.querySelector('.article-main .eyebrow')?.textContent||'').trim();
+      const article={
+        '@type':'Article',
+        '@id':canonical+'#article',
+        mainEntityOfPage:{'@id':webPageId},
+        headline:h1,
+        description,
+        inLanguage:'ja',
+        author:{'@type':'Organization','@id':orgId,name:'工場キャリア診断',url:SITE+'/about.html'},
+        publisher:{'@id':orgId},
+        isPartOf:{'@id':websiteId}
+      };
+      if(section&&section.length<=40) article.articleSection=section;
+      graph.push(article);
+    }
+
+    const bc=document.querySelector('.breadcrumbs');
+    if(bc){
+      const items=[];
+      [...bc.querySelectorAll('a')].forEach((a,i)=>{
+        try{
+          items.push({
+            '@type':'ListItem',
+            position:i+1,
+            name:a.textContent.trim(),
+            item:new URL(a.getAttribute('href'),location.href).href
+          });
+        }catch(_){ }
+      });
+      if(h1) items.push({'@type':'ListItem',position:items.length+1,name:h1,item:canonical});
+      if(items.length>1) graph.push({'@type':'BreadcrumbList','@id':canonical+'#breadcrumb',itemListElement:items});
+    }
+
+    if(isArticleHub){
+      const links=[...document.querySelectorAll('[data-seo-priority-hub] a, .core-guide-hub a')]
+        .filter((a,i,arr)=>arr.indexOf(a)===i)
+        .slice(0,12);
+      if(links.length){
+        graph.push({
+          '@type':'ItemList',
+          '@id':canonical+'#priority-guides',
+          name:'製造業・工場勤務の重要ガイド',
+          itemListElement:links.map((a,i)=>({
+            '@type':'ListItem',
+            position:i+1,
+            name:a.textContent.trim().replace(/\s+/g,' '),
+            url:new URL(a.getAttribute('href'),location.href).href
+          }))
+        });
+      }
+    }
+
+    const script=document.createElement('script');
+    script.type='application/ld+json';
+    script.dataset.seoSchemaV2='';
+    script.textContent=JSON.stringify({'@context':'https://schema.org','@graph':graph});
+    document.head.appendChild(script);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(applySeo,0),{once:true});
+  }else{
+    setTimeout(applySeo,0);
+  }
+})();
