@@ -92,3 +92,11 @@ setTimeout(() => {
   script.dataset.autoDiscoveryHubsScript = '';
   document.body.appendChild(script);
 }, 0);
+
+setTimeout(() => {
+  if (document.querySelector('[data-auto-seo-architecture-script]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/seo-architecture.js';
+  script.dataset.autoSeoArchitectureScript = '';
+  document.body.appendChild(script);
+}, 0);
