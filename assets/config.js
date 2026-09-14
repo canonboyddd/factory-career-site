@@ -84,3 +84,14 @@ setTimeout(() => {
   script.dataset.autoSeoEnhanceScript = '';
   document.body.appendChild(script);
 }, 0);
+
+// Load the brighter visual theme sitewide after the base stylesheet so it can
+// safely override colors without duplicating every HTML page.
+(() => {
+  if (document.querySelector('link[data-colorful-theme]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = '/assets/colorful.css';
+  link.dataset.colorfulTheme = '';
+  document.head.appendChild(link);
+})();
