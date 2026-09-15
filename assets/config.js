@@ -46,6 +46,60 @@ window.SITE_CONFIG = {
   disclosure: "当サイトはアフィリエイト広告を利用しています。"
 };
 
+// Cloudflare Pages serves HTML files at clean URLs (for example, /articles/foo).
+// Keep affiliate routing compatible with both legacy .html paths and the live clean paths.
+Object.entries(window.SITE_CONFIG.articleProgramPriority || {}).forEach(([key, value]) => {
+  if (key.endsWith('.html')) {
+    const cleanKey = key.slice(0, -5);
+    if (!window.SITE_CONFIG.articleProgramPriority[cleanKey]) {
+      window.SITE_CONFIG.articleProgramPriority[cleanKey] = value;
+    }
+  }
+});
+
+// Normalize browser-visible internal links and canonical signals to the URL that Cloudflare actually serves.
+(() => {
+  const SITE = 'https://factory-career-site.pages.dev';
+  const cleanPath = value => {
+    try {
+      const u = new URL(value, location.href);
+      if (u.origin !== location.origin) return value;
+      if (/\/index\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\/index\.html$/i, '/');
+      else if (/\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\.html$/i, '');
+      return u.pathname + u.search + u.hash;
+    } catch (_) {
+      return value;
+    }
+  };
+  const cleanAbsolute = value => {
+    try {
+      const u = new URL(value, location.href);
+      if (u.origin !== location.origin) return value;
+      if (/\/index\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\/index\.html$/i, '/');
+      else if (/\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\.html$/i, '');
+      return SITE + u.pathname + u.search + u.hash;
+    } catch (_) {
+      return value;
+    }
+  };
+  const apply = () => {
+    document.querySelectorAll('a[href]').forEach(a => {
+      const raw = a.getAttribute('href');
+      if (!raw || raw.startsWith('#') || /^(?:mailto:|tel:|javascript:)/i.test(raw)) return;
+      try {
+        const u = new URL(raw, location.href);
+        if (u.origin === location.origin) a.setAttribute('href', cleanPath(raw));
+      } catch (_) { }
+    });
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.href = cleanAbsolute(canonical.href);
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl?.content) ogUrl.content = cleanAbsolute(ogUrl.content);
+  };
+  apply();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply, { once: true });
+})();
+
 setTimeout(() => {
   const path = window.location.pathname;
   if (!path.includes('/articles/') || path.endsWith('/articles/') || path.endsWith('/articles/index.html')) return;
@@ -98,5 +152,13 @@ setTimeout(() => {
   const script = document.createElement('script');
   script.src = '/assets/seo-architecture.js';
   script.dataset.autoSeoArchitectureScript = '';
+  document.body.appendChild(script);
+}, 0);
+
+setTimeout(() => {
+  if (document.querySelector('[data-auto-clean-url-seo-script]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/clean-url-seo.js';
+  script.dataset.autoCleanUrlSeoScript = '';
   document.body.appendChild(script);
 }, 0);
