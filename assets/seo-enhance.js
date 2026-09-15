@@ -1,13 +1,14 @@
 (() => {
   const SITE='https://factory-career-site.pages.dev';
   const path=window.location.pathname;
+  const normalizedPath=path.replace(/\.html$/i,'').replace(/\/index$/i,'/');
   const file=path.split('/').pop()||'';
   const isArticlePath=path.includes('/articles/');
   const isArticleDetail=isArticlePath && file && file!=='index.html';
   const isArticleHub=isArticlePath && (!file || file==='index.html');
-  const isToolHub=path==='/tools/' || path.endsWith('/tools/index.html');
-  const hubPaths=new Set(['/workstyle-guide.html','/salary-guide.html','/career-guide.html','/job-change-guide.html','/site-map.html']);
-  const isTopicHub=hubPaths.has(path);
+  const isToolHub=normalizedPath==='/tools/' || normalizedPath==='/tools';
+  const hubPaths=new Set(['/workstyle-guide','/salary-guide','/career-guide','/job-change-guide','/site-map']);
+  const isTopicHub=hubPaths.has(normalizedPath);
 
   function ensureMeta(selector, attrs){
     let el=document.head.querySelector(selector);
@@ -19,11 +20,20 @@
     return el;
   }
 
+  function cleanAbsolute(value){
+    try{
+      const u=new URL(value,location.href);
+      if(u.origin!==location.origin) return value;
+      if(/\/index\.html$/i.test(u.pathname)) u.pathname=u.pathname.replace(/\/index\.html$/i,'/');
+      else if(/\.html$/i.test(u.pathname)) u.pathname=u.pathname.replace(/\.html$/i,'');
+      return SITE+u.pathname+u.search+u.hash;
+    }catch(_){return value;}
+  }
+
   function canonicalUrl(){
     const existing=document.querySelector('link[rel="canonical"]')?.href;
-    if(existing) return existing;
-    const clean=path.replace(/\/index\.html$/,'/');
-    return SITE+clean;
+    if(existing) return cleanAbsolute(existing).split('#')[0];
+    return SITE+normalizedPath;
   }
 
   function uniqueLinks(selector, limit=40){
@@ -34,7 +44,7 @@
       let url;
       try{ url=new URL(href,location.href); }catch(_){ return false; }
       if(url.origin!==location.origin) return false;
-      const clean=url.href.split('#')[0];
+      const clean=cleanAbsolute(url.href).split('#')[0];
       if(seen.has(clean)) return false;
       seen.add(clean);
       return true;
@@ -43,6 +53,8 @@
 
   function applySeo(){
     const canonical=canonicalUrl();
+    const canonicalEl=document.querySelector('link[rel="canonical"]');
+    if(canonicalEl) canonicalEl.href=canonical;
     const title=(document.title||'工場キャリア診断').trim();
     const h1=document.querySelector('h1')?.textContent.trim()||title;
     const description=document.querySelector('meta[name="description"]')?.content?.trim()||'';
@@ -96,7 +108,7 @@
 
     let pageType='WebPage';
     if(isArticleHub||isToolHub||isTopicHub) pageType='CollectionPage';
-    if(path.endsWith('/about.html')) pageType='AboutPage';
+    if(normalizedPath==='/about') pageType='AboutPage';
 
     const webPage={
       '@type':pageType,
@@ -119,7 +131,7 @@
         headline:h1,
         description,
         inLanguage:'ja',
-        author:{'@type':'Organization','@id':orgId,name:'工場キャリア診断',url:SITE+'/about.html'},
+        author:{'@type':'Organization','@id':orgId,name:'工場キャリア診断',url:SITE+'/about'},
         publisher:{'@id':orgId},
         isPartOf:{'@id':websiteId}
       };
@@ -136,7 +148,7 @@
             '@type':'ListItem',
             position:i+1,
             name:a.textContent.trim(),
-            item:new URL(a.getAttribute('href'),location.href).href
+            item:cleanAbsolute(new URL(a.getAttribute('href'),location.href).href)
           });
         }catch(_){ }
       });
@@ -154,7 +166,7 @@
           itemListElement:links.map((a,i)=>({
             '@type':'ListItem',position:i+1,
             name:a.textContent.trim().replace(/\s+/g,' '),
-            url:new URL(a.getAttribute('href'),location.href).href
+            url:cleanAbsolute(new URL(a.getAttribute('href'),location.href).href)
           }))
         });
       }
@@ -173,7 +185,7 @@
             '@type':'ListItem',
             position:i+1,
             name:a.textContent.trim().replace(/\s+/g,' '),
-            url:new URL(a.getAttribute('href'),location.href).href
+            url:cleanAbsolute(new URL(a.getAttribute('href'),location.href).href)
           }))
         });
         webPage.mainEntity={'@id':listId};
