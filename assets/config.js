@@ -162,3 +162,13 @@ setTimeout(() => {
   script.dataset.autoCleanUrlSeoScript = '';
   document.body.appendChild(script);
 }, 0);
+
+setTimeout(() => {
+  const path = window.location.pathname;
+  if (!path.includes('/articles/') || path.endsWith('/articles/')) return;
+  if (document.querySelector('[data-auto-pillar-content-script]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/pillar-content.js';
+  script.dataset.autoPillarContentScript = '';
+  document.body.appendChild(script);
+}, 0);
