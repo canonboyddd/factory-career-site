@@ -6,6 +6,8 @@
   const isArticleDetail=isArticlePath && file && file!=='index.html';
   const isArticleHub=isArticlePath && (!file || file==='index.html');
   const isToolHub=path==='/tools/' || path.endsWith('/tools/index.html');
+  const hubPaths=new Set(['/workstyle-guide.html','/salary-guide.html','/career-guide.html','/job-change-guide.html','/site-map.html']);
+  const isTopicHub=hubPaths.has(path);
 
   function ensureMeta(selector, attrs){
     let el=document.head.querySelector(selector);
@@ -22,6 +24,21 @@
     if(existing) return existing;
     const clean=path.replace(/\/index\.html$/,'/');
     return SITE+clean;
+  }
+
+  function uniqueLinks(selector, limit=40){
+    const seen=new Set();
+    return [...document.querySelectorAll(selector)].filter(a=>{
+      const href=a.getAttribute('href');
+      if(!href || href.startsWith('#') || href.startsWith('javascript:')) return false;
+      let url;
+      try{ url=new URL(href,location.href); }catch(_){ return false; }
+      if(url.origin!==location.origin) return false;
+      const clean=url.href.split('#')[0];
+      if(seen.has(clean)) return false;
+      seen.add(clean);
+      return true;
+    }).slice(0,limit);
   }
 
   function applySeo(){
@@ -53,9 +70,7 @@
     ensureMeta('meta[property="og:site_name"]',{property:'og:site_name',content:'工場キャリア診断'});
     ensureMeta('meta[name="twitter:card"]',{name:'twitter:card',content:'summary'});
 
-    // Keep ad labels and affiliate copy from becoming the search-result snippet.
     document.querySelectorAll('.ad-note,.offer-section,.pr-box').forEach(el=>el.setAttribute('data-nosnippet',''));
-
     document.querySelectorAll('script[data-auto-schema],script[data-seo-schema-v2]').forEach(el=>el.remove());
 
     const orgId=SITE+'/#organization';
@@ -66,7 +81,8 @@
         '@type':'Organization',
         '@id':orgId,
         name:'工場キャリア診断',
-        url:SITE+'/'
+        url:SITE+'/',
+        description:'製造業・工場勤務者向けに、転職判断・働き方・年収・職種別キャリア・応募準備を整理する情報サイト。'
       },
       {
         '@type':'WebSite',
@@ -79,7 +95,7 @@
     ];
 
     let pageType='WebPage';
-    if(isArticleHub||isToolHub) pageType='CollectionPage';
+    if(isArticleHub||isToolHub||isTopicHub) pageType='CollectionPage';
     if(path.endsWith('/about.html')) pageType='AboutPage';
 
     const webPage={
@@ -89,7 +105,8 @@
       name:h1,
       description,
       inLanguage:'ja',
-      isPartOf:{'@id':websiteId}
+      isPartOf:{'@id':websiteId},
+      about:{'@id':orgId}
     };
     graph.push(webPage);
 
@@ -128,14 +145,30 @@
     }
 
     if(isArticleHub){
-      const links=[...document.querySelectorAll('[data-seo-priority-hub] a, .core-guide-hub a')]
-        .filter((a,i,arr)=>arr.indexOf(a)===i)
-        .slice(0,12);
+      const links=uniqueLinks('[data-seo-priority-hub] a, .core-guide-hub a',12);
       if(links.length){
         graph.push({
           '@type':'ItemList',
           '@id':canonical+'#priority-guides',
           name:'製造業・工場勤務の重要ガイド',
+          itemListElement:links.map((a,i)=>({
+            '@type':'ListItem',position:i+1,
+            name:a.textContent.trim().replace(/\s+/g,' '),
+            url:new URL(a.getAttribute('href'),location.href).href
+          }))
+        });
+      }
+    }
+
+    if(isTopicHub){
+      const links=uniqueLinks('main a[href*="/articles/"], main a[href^="articles/"]',30);
+      if(links.length){
+        const listId=canonical+'#related-guides';
+        graph.push({
+          '@type':'ItemList',
+          '@id':listId,
+          name:h1+' 関連ガイド',
+          numberOfItems:links.length,
           itemListElement:links.map((a,i)=>({
             '@type':'ListItem',
             position:i+1,
@@ -143,6 +176,7 @@
             url:new URL(a.getAttribute('href'),location.href).href
           }))
         });
+        webPage.mainEntity={'@id':listId};
       }
     }
 
