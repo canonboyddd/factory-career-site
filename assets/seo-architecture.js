@@ -17,12 +17,20 @@
         ['factory-three-shift-hard.html','3交替勤務がきつい'],
         ['factory-fixed-night-shift.html','夜勤専属を辞めたい'],
         ['factory-night-to-day.html','夜勤から日勤へ転職'],
+        ['factory-day-shift-job.html','日勤のみ正社員求人の見方'],
         ['factory-day-shift-salary-drop.html','日勤転職で年収は下がる？'],
         ['factory-overtime.html','工場の残業が多い'],
         ['factory-weekend-work.html','休日出勤が多い'],
         ['factory-holidays.html','工場の休日が少ない'],
         ['factory-shift-change.html','交替勤務を辞めたい'],
-        ['factory-commute-long.html','工場の通勤時間が長い']
+        ['factory-commute-long.html','工場の通勤時間が長い'],
+        ['factory-transfer-relocation.html','転勤したくない']
+      ],
+      additional: [
+        ['factory-human-relations.html','工場の人間関係がきつい'],
+        ['factory-body-hard.html','工場勤務が体力的にきつい'],
+        ['factory-no-future.html','工場勤務の将来性が不安'],
+        ['factory-resignation-reasons.html','工場を辞める理由を整理する']
       ]
     },
     salary: {
@@ -41,8 +49,14 @@
         ['factory-day-shift-salary-drop.html','日勤転職で年収は下がる？'],
         ['manufacturing-supervisor-career.html','班長・リーダー経験を年収につなげる'],
         ['factory-small-company.html','中小工場から転職する'],
+        ['manufacturing-20s.html','製造業20代の転職'],
         ['manufacturing-40s.html','製造業40代の転職'],
         ['manufacturing-50s.html','製造業50代の転職']
+      ],
+      additional: [
+        ['manufacturing-job-change-age.html','製造業の転職は何歳まで？'],
+        ['factory-permanent-employee.html','工場で正社員を目指す'],
+        ['period-worker-next.html','期間工のその後を考える']
       ]
     },
     career: {
@@ -67,6 +81,14 @@
         ['inspection-career.html','検査から転職'],
         ['assembly-career.html','組立から転職'],
         ['machining-career.html','機械加工から転職']
+      ],
+      additional: [
+        ['welding-career.html','溶接工から転職'],
+        ['factory-logistics-career.html','工場内物流から転職'],
+        ['operator-quit.html','機械オペレーターを辞めたい'],
+        ['line-work-quit.html','ライン作業を辞めたい'],
+        ['cleanroom-career.html','クリーンルーム勤務がきつい'],
+        ['automotive-parts-career.html','自動車部品メーカーの転職']
       ]
     },
     prep: {
@@ -90,13 +112,18 @@
         ['factory-high-school-graduate-job-change.html','高卒の製造業転職'],
         ['factory-temp-worker-job-change.html','工場派遣から転職'],
         ['factory-contract-worker-permanent.html','契約社員から正社員へ']
+      ],
+      additional: [
+        ['production-tech-agent.html','生産技術向け転職サービス'],
+        ['quality-agent.html','品質職向け転職サービス'],
+        ['manufacturing-other-industry.html','製造業から異業種へ転職']
       ]
     }
   };
 
   const articleToGroup = new Map();
   Object.entries(groups).forEach(([key,g]) => {
-    [...g.important, ...g.tails].forEach(([f]) => {
+    [...g.important, ...g.tails, ...(g.additional||[])].forEach(([f]) => {
       if (!articleToGroup.has(f)) articleToGroup.set(f, key);
     });
   });
@@ -151,6 +178,18 @@
     anchor.insertAdjacentElement('afterend',sec);
   }
 
+  function addSiblingHubLinks(){
+    const currentKey=Object.keys(groups).find(k=>groups[k].hub===path);
+    if(!currentKey) return;
+    const main=document.querySelector('main .section .container') || document.querySelector('main .container');
+    if(!main || main.querySelector('[data-sibling-hubs]')) return;
+    const sec=document.createElement('section');
+    sec.className='internal-link-hub';
+    sec.dataset.siblingHubs='';
+    sec.innerHTML=`<div class="internal-link-head"><span class="eyebrow">次のテーマ</span><h2>別の切り口でも比較する</h2><p>働き方・年収・職種・転職準備はつながっています。近いテーマも確認すると条件の見落としを減らせます。</p></div><div class="internal-link-grid">${Object.entries(groups).filter(([k])=>k!==currentKey).map(([,g])=>card(g.hub,g.label,'テーマ別まとめ')).join('')}</div>`;
+    main.appendChild(sec);
+  }
+
   const hubPathMap = {
     '/workstyle-guide.html':'workstyle',
     '/salary-guide.html':'salary',
@@ -160,4 +199,5 @@
   if(hubPathMap[path]) injectHubHierarchy(hubPathMap[path]);
   injectArticleHierarchy();
   addHomepagePriorityLinks();
+  addSiblingHubLinks();
 })();
