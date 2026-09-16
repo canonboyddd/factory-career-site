@@ -46,90 +46,16 @@ window.SITE_CONFIG = {
   disclosure: "当サイトはアフィリエイト広告を利用しています。"
 };
 
-// Cloudflare Pages serves HTML files at clean URLs (for example, /articles/foo).
-// Keep affiliate routing compatible with both legacy .html paths and the live clean paths.
+// Support both historical *.html filenames and Cloudflare Pages clean URLs.
 Object.entries(window.SITE_CONFIG.articleProgramPriority || {}).forEach(([key, value]) => {
-  if (key.endsWith('.html')) {
-    const cleanKey = key.slice(0, -5);
-    if (!window.SITE_CONFIG.articleProgramPriority[cleanKey]) {
-      window.SITE_CONFIG.articleProgramPriority[cleanKey] = value;
-    }
+  if (!key.endsWith('.html')) return;
+  const cleanKey = key.slice(0, -5);
+  if (!window.SITE_CONFIG.articleProgramPriority[cleanKey]) {
+    window.SITE_CONFIG.articleProgramPriority[cleanKey] = value;
   }
 });
 
-// Normalize browser-visible internal links and canonical signals to the URL that Cloudflare actually serves.
-(() => {
-  const SITE = 'https://factory-career-site.pages.dev';
-  const cleanPath = value => {
-    try {
-      const u = new URL(value, location.href);
-      if (u.origin !== location.origin) return value;
-      if (/\/index\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\/index\.html$/i, '/');
-      else if (/\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\.html$/i, '');
-      return u.pathname + u.search + u.hash;
-    } catch (_) {
-      return value;
-    }
-  };
-  const cleanAbsolute = value => {
-    try {
-      const u = new URL(value, location.href);
-      if (u.origin !== location.origin) return value;
-      if (/\/index\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\/index\.html$/i, '/');
-      else if (/\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\.html$/i, '');
-      return SITE + u.pathname + u.search + u.hash;
-    } catch (_) {
-      return value;
-    }
-  };
-  const apply = () => {
-    document.querySelectorAll('a[href]').forEach(a => {
-      const raw = a.getAttribute('href');
-      if (!raw || raw.startsWith('#') || /^(?:mailto:|tel:|javascript:)/i.test(raw)) return;
-      try {
-        const u = new URL(raw, location.href);
-        if (u.origin === location.origin) a.setAttribute('href', cleanPath(raw));
-      } catch (_) { }
-    });
-    const canonical = document.querySelector('link[rel="canonical"]');
-    if (canonical) canonical.href = cleanAbsolute(canonical.href);
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl?.content) ogUrl.content = cleanAbsolute(ogUrl.content);
-  };
-  apply();
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply, { once: true });
-})();
-
-setTimeout(() => {
-  const path = window.location.pathname;
-  if (!path.includes('/articles/') || path.endsWith('/articles/') || path.endsWith('/articles/index.html')) return;
-  const alreadyLoaded = [...document.scripts].some(s => /\/assets\/offers\.js(?:\?|$)/.test(s.src));
-  if (alreadyLoaded || document.querySelector('[data-auto-offers-script]')) return;
-  const script = document.createElement('script');
-  script.src = '../assets/offers.js';
-  script.dataset.autoOffersScript = '';
-  document.body.appendChild(script);
-}, 0);
-
-setTimeout(() => {
-  const path = window.location.pathname;
-  if (!path.includes('/articles/')) return;
-  const alreadyLoaded = [...document.scripts].some(s => /\/assets\/seo-clusters\.js(?:\?|$)/.test(s.src));
-  if (alreadyLoaded || document.querySelector('[data-auto-seo-clusters-script]')) return;
-  const script = document.createElement('script');
-  script.src = '../assets/seo-clusters.js';
-  script.dataset.autoSeoClustersScript = '';
-  document.body.appendChild(script);
-}, 0);
-
-setTimeout(() => {
-  if (document.querySelector('[data-auto-seo-enhance-script]')) return;
-  const script = document.createElement('script');
-  script.src = '/assets/seo-enhance.js';
-  script.dataset.autoSeoEnhanceScript = '';
-  document.body.appendChild(script);
-}, 0);
-
+// Load the visual layer once.
 (() => {
   if (document.querySelector('link[data-colorful-theme]')) return;
   const link = document.createElement('link');
@@ -139,36 +65,68 @@ setTimeout(() => {
   document.head.appendChild(link);
 })();
 
-setTimeout(() => {
-  if (document.querySelector('[data-auto-discovery-hubs-script]')) return;
-  const script = document.createElement('script');
-  script.src = '/assets/discovery-hubs.js';
-  script.dataset.autoDiscoveryHubsScript = '';
-  document.body.appendChild(script);
-}, 0);
+// Normalize the first HTML payload immediately; clean-url-seo.js also watches later DOM additions.
+(() => {
+  const SITE = 'https://factory-career-site.pages.dev';
+  const clean = value => {
+    try {
+      const u = new URL(value, location.href);
+      if (u.origin !== location.origin) return value;
+      if (/\/index\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\/index\.html$/i, '/');
+      else if (/\.html$/i.test(u.pathname)) u.pathname = u.pathname.replace(/\.html$/i, '');
+      return u.pathname + u.search + u.hash;
+    } catch (_) { return value; }
+  };
+  const apply = () => {
+    document.querySelectorAll('a[href]').forEach(a => {
+      const raw = a.getAttribute('href');
+      if (!raw || raw.startsWith('#') || /^(?:mailto:|tel:|javascript:)/i.test(raw)) return;
+      try {
+        const u = new URL(raw, location.href);
+        if (u.origin === location.origin) a.setAttribute('href', clean(raw));
+      } catch (_) { }
+    });
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.href = SITE + clean(canonical.href).split('#')[0];
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl?.content) ogUrl.content = SITE + clean(ogUrl.content).split('#')[0];
+  };
+  apply();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply, { once: true });
+})();
 
-setTimeout(() => {
-  if (document.querySelector('[data-auto-seo-architecture-script]')) return;
-  const script = document.createElement('script');
-  script.src = '/assets/seo-architecture.js';
-  script.dataset.autoSeoArchitectureScript = '';
-  document.body.appendChild(script);
-}, 0);
+function loadSiteScript(src, marker) {
+  return new Promise(resolve => {
+    if ([...document.scripts].some(s => s.src && new URL(s.src, location.href).pathname === new URL(src, location.href).pathname) || document.querySelector(`[${marker}]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = false;
+    script.setAttribute(marker, '');
+    script.onload = () => resolve();
+    script.onerror = () => resolve();
+    document.body.appendChild(script);
+  });
+}
 
-setTimeout(() => {
-  if (document.querySelector('[data-auto-clean-url-seo-script]')) return;
-  const script = document.createElement('script');
-  script.src = '/assets/clean-url-seo.js';
-  script.dataset.autoCleanUrlSeoScript = '';
-  document.body.appendChild(script);
-}, 0);
-
-setTimeout(() => {
+async function bootstrapSiteEnhancements() {
   const path = window.location.pathname;
-  if (!path.includes('/articles/') || path.endsWith('/articles/')) return;
-  if (document.querySelector('[data-auto-pillar-content-script]')) return;
-  const script = document.createElement('script');
-  script.src = '/assets/pillar-content.js';
-  script.dataset.autoPillarContentScript = '';
-  document.body.appendChild(script);
-}, 0);
+  const isArticleDetail = path.includes('/articles/') && !path.endsWith('/articles/') && !/\/articles\/index(?:\.html)?$/i.test(path);
+
+  // Keep one canonical implementation for each feature. Older cluster/hub injectors remain in the repo
+  // for rollback only; loading all of them caused duplicate sections and non-deterministic ordering.
+  if (isArticleDetail) {
+    await loadSiteScript('/assets/offers.js', 'data-auto-offers-script');
+    await loadSiteScript('/assets/pillar-content.js', 'data-auto-pillar-content-script');
+  }
+
+  await loadSiteScript('/assets/clean-url-seo.js', 'data-auto-clean-url-seo-script');
+  await loadSiteScript('/assets/seo-enhance.js', 'data-auto-seo-enhance-script');
+  await loadSiteScript('/assets/runtime-fixes.js', 'data-auto-runtime-fixes-script');
+}
+
+// main.js is included immediately after config.js on the site. Deferring one task lets main.js finish first,
+// then enhancements are applied in a stable, predictable order.
+setTimeout(bootstrapSiteEnhancements, 0);
