@@ -8,22 +8,67 @@
   let current=0,started=false;
   const answers={};
 
+  const syncChoiceA11y=q=>{
+    q.querySelectorAll('.choice').forEach(btn=>btn.setAttribute('aria-pressed',btn.classList.contains('selected')?'true':'false'));
+  };
+
   const render=()=>{
-    questions.forEach((q,i)=>q.classList.toggle('active',i===current));
+    questions.forEach((q,i)=>{
+      const active=i===current;
+      q.classList.toggle('active',active);
+      q.setAttribute('aria-hidden',active?'false':'true');
+      syncChoiceA11y(q);
+    });
     progress.style.width=`${((current+1)/questions.length)*100}%`;
     prevBtn.style.visibility=current===0?'hidden':'visible';
     nextBtn.textContent=current===questions.length-1?'結果を見る':'次へ';
     nextBtn.disabled=!questions[current].querySelector('.choice.selected');
   };
 
-  questions.forEach(q=>q.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>{
-    if(!started){started=true;window.trackSiteEvent?.('diagnosis_start',{page:'diagnosis'});}
-    q.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected');
-    answers[q.dataset.key]={value:btn.dataset.value,score:Number(btn.dataset.score||0),expert:Number(btn.dataset.expert||0),night:Number(btn.dataset.night||0)};
-    nextBtn.disabled=false;
-  })));
-  prevBtn.addEventListener('click',()=>{if(current>0){current--;render();}});
-  nextBtn.addEventListener('click',()=>{if(!answers[questions[current].dataset.key])return;if(current<questions.length-1){current++;render();return;}showResult();});
+  const focusCurrentQuestion=()=>{
+    const q=questions[current];
+    if(!q)return;
+    const heading=q.querySelector('h2');
+    shell?.scrollIntoView({behavior:'smooth',block:'start'});
+    if(heading){
+      heading.setAttribute('tabindex','-1');
+      setTimeout(()=>heading.focus({preventScroll:true}),220);
+    }
+  };
+
+  questions.forEach(q=>q.querySelectorAll('.choice').forEach(btn=>{
+    btn.setAttribute('aria-pressed','false');
+    btn.addEventListener('click',()=>{
+      if(!started){started=true;window.trackSiteEvent?.('diagnosis_start',{page:'diagnosis'});}
+      q.querySelectorAll('.choice').forEach(x=>{
+        x.classList.remove('selected');
+        x.setAttribute('aria-pressed','false');
+      });
+      btn.classList.add('selected');
+      btn.setAttribute('aria-pressed','true');
+      answers[q.dataset.key]={value:btn.dataset.value,score:Number(btn.dataset.score||0),expert:Number(btn.dataset.expert||0),night:Number(btn.dataset.night||0)};
+      nextBtn.disabled=false;
+    });
+  }));
+
+  prevBtn.addEventListener('click',()=>{
+    if(current>0){
+      current--;
+      render();
+      focusCurrentQuestion();
+    }
+  });
+
+  nextBtn.addEventListener('click',()=>{
+    if(!answers[questions[current].dataset.key])return;
+    if(current<questions.length-1){
+      current++;
+      render();
+      focusCurrentQuestion();
+      return;
+    }
+    showResult();
+  });
 
   function showResult(){
     let raw=0,expert=0,night=0;Object.values(answers).forEach(a=>{raw+=a.score;expert+=a.expert;night+=a.night;});
