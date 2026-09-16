@@ -1,6 +1,4 @@
 (() => {
-  const path = window.location.pathname;
-
   function cleanInternalHref(value) {
     try {
       const u = new URL(value, location.href);
@@ -52,20 +50,26 @@
     ]);
   }
 
+  function removeUnavailableProgramCards() {
+    const programs = window.SITE_CONFIG?.affiliatePrograms || {};
+    document.querySelectorAll('[data-program-card]').forEach(card => {
+      const key = card.dataset.programCard;
+      const url = String(programs[key]?.url || '').trim();
+      if (!url) card.remove();
+    });
+  }
+
   function dedupeDynamicSections() {
     const article = document.querySelector('.article-main');
     if (!article) return;
 
-    // The clean-URL cluster is the current canonical related-links block.
-    // Remove older helper blocks when both are present to avoid repeated cards/H2s.
     if (article.querySelector('[data-clean-seo-links]')) {
       article.querySelectorAll('[data-seo-article-hierarchy],[data-seo-cluster-links],[data-core-links]').forEach(el => el.remove());
     }
 
-    // Keep only one affiliate offer section if legacy markup and auto-injected markup coexist.
     const offers = [...article.querySelectorAll('.offer-section')];
     if (offers.length > 1) {
-      const preferred = offers.find(el => el.querySelector('[data-program-card], [data-offer-grid]')) || offers[0];
+      const preferred = offers.find(el => el.querySelector('[data-program-card], [data-offer-grid], .always-card')) || offers[0];
       offers.forEach(el => { if (el !== preferred) el.remove(); });
     }
   }
@@ -121,6 +125,7 @@
   function run() {
     normalizeLinks(document);
     dedupeHead();
+    removeUnavailableProgramCards();
     dedupeDynamicSections();
     fixMobileMenu();
     fixImages();
@@ -135,9 +140,10 @@
       if (node.nodeType !== 1) return;
       normalizeLinks(node);
       if (node.matches?.('img') || node.querySelector?.('img')) fixImages();
-      if (node.matches?.('.offer-section,[data-clean-seo-links],[data-seo-cluster-links],[data-core-links]') || node.querySelector?.('.offer-section,[data-clean-seo-links],[data-seo-cluster-links],[data-core-links]')) needsGlobalPass = true;
+      if (node.matches?.('.offer-section,[data-program-card],[data-clean-seo-links],[data-seo-cluster-links],[data-core-links]') || node.querySelector?.('.offer-section,[data-program-card],[data-clean-seo-links],[data-seo-cluster-links],[data-core-links]')) needsGlobalPass = true;
     }));
     if (needsGlobalPass) {
+      removeUnavailableProgramCards();
       dedupeDynamicSections();
       fixEmptyOfferSections();
     }
