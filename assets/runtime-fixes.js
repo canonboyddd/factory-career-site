@@ -23,7 +23,6 @@
         } else if (a.target === '_blank') {
           const rel = new Set((a.rel || '').split(/\s+/).filter(Boolean));
           rel.add('noopener');
-          rel.add('noreferrer');
           a.rel = [...rel].join(' ');
         }
       } catch (_) { }
@@ -98,6 +97,16 @@
         btn.setAttribute('aria-expanded', 'false');
       });
     }
+
+    if (!btn.dataset.runtimeEscapeBound) {
+      btn.dataset.runtimeEscapeBound = '';
+      document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape' || !nav.classList.contains('open')) return;
+        nav.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.focus();
+      });
+    }
   }
 
   function fixImages() {
@@ -122,6 +131,66 @@
     });
   }
 
+  function ensureFooterSiteMap() {
+    const footer = document.querySelector('.footer .container, footer .container');
+    if (!footer || footer.querySelector('[data-runtime-sitemap-link]')) return;
+    let row = footer.querySelector('[data-trust-links]');
+    if (!row) {
+      row = document.createElement('p');
+      row.style.fontSize = '13px';
+      footer.appendChild(row);
+    }
+    if (row.textContent.trim()) row.append(' ・ ');
+    const link = document.createElement('a');
+    link.href = '/site-map';
+    link.textContent = 'サイトマップ';
+    link.dataset.runtimeSitemapLink = '';
+    row.appendChild(link);
+  }
+
+  function ensureCleanUrlServiceBridge() {
+    const match = location.pathname.match(/^\/articles\/([^/]+)$/);
+    if (!match) return;
+    const slug = match[1].replace(/\.html$/i, '');
+    const supported = new Set([
+      'factory-quit','night-shift-hard','manufacturing-20s','manufacturing-30s','manufacturing-40s','manufacturing-50s',
+      'manufacturing-500-income','manufacturing-other-industry','period-worker-next','operator-quit','line-work-quit',
+      'production-tech-career','quality-quit','maintenance-career','machine-design-career','electrical-design-career',
+      'production-control-career','quality-assurance-career','automotive-parts-career','factory-salary-up','factory-day-shift-job',
+      'factory-permanent-employee','factory-job-offer-check','factory-job-change-failure','factory-white-company'
+    ]);
+    if (!supported.has(slug) || slug === 'manufacturing-agent-guide') return;
+    const article = document.querySelector('.article-main');
+    if (!article || article.querySelector('[data-service-bridge]')) return;
+
+    const bridge = document.createElement('section');
+    bridge.className = 'inline-cta';
+    bridge.dataset.serviceBridge = '';
+    bridge.innerHTML = '<span class="eyebrow">次の一手</span><h3>求人を比較する段階なら、サービスの違いを先に確認</h3><p>製造業向け・専門職向けの転職支援を、職種と目的で使い分ける方法をまとめています。</p><a class="btn btn-primary" href="/articles/manufacturing-agent-guide" data-service-guide-link>製造業向け転職サービスの選び方</a>';
+
+    const related = article.querySelector('[data-clean-seo-links]');
+    const offer = article.querySelector('.offer-section,[data-offer-section]');
+    if (related) article.insertBefore(bridge, related);
+    else if (offer) article.insertBefore(bridge, offer);
+    else article.appendChild(bridge);
+  }
+
+  function bindCleanUrlTracking() {
+    if (document.documentElement.dataset.runtimeCleanTrackingBound) return;
+    document.documentElement.dataset.runtimeCleanTrackingBound = '';
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href]');
+      if (!a) return;
+      try {
+        const u = new URL(a.getAttribute('href'), location.href);
+        const cleanPath = u.pathname.replace(/\.html$/i, '').replace(/\/index$/i, '/');
+        if (u.origin === location.origin && cleanPath === '/diagnosis') {
+          window.trackSiteEvent?.('diagnosis_link_click', { from_page: location.pathname });
+        }
+      } catch (_) { }
+    });
+  }
+
   function run() {
     normalizeLinks(document);
     dedupeHead();
@@ -130,6 +199,10 @@
     fixMobileMenu();
     fixImages();
     fixEmptyOfferSections();
+    ensureFooterSiteMap();
+    ensureCleanUrlServiceBridge();
+    bindCleanUrlTracking();
+    normalizeLinks(document);
   }
 
   run();
@@ -146,6 +219,7 @@
       removeUnavailableProgramCards();
       dedupeDynamicSections();
       fixEmptyOfferSections();
+      ensureCleanUrlServiceBridge();
     }
   });
   if (document.body) observer.observe(document.body, { childList: true, subtree: true });
