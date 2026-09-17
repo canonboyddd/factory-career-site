@@ -126,6 +126,7 @@ async function bootstrapSiteEnhancements() {
   await loadSiteScript('/assets/seo-enhance.js', 'data-auto-seo-enhance-script');
   await loadSiteScript('/assets/runtime-fixes.js', 'data-auto-runtime-fixes-script');
   await loadSiteScript('/assets/benchmark-layout.js', 'data-auto-benchmark-layout-script');
+  await loadSiteScript('/assets/article-conversion-layout.js', 'data-auto-article-conversion-layout-script');
 }
 
 // main.js is included immediately after config.js on the site. Deferring one task lets main.js finish first,
