@@ -24,12 +24,14 @@
     makersJob: {
       short: 'メーカーズジョブ',
       fit: '製造業の経験を活かして、会社・仕事内容・勤務条件を変えたい人向け',
-      point: '製造業・メーカー領域を中心に求人や支援内容を確認'
+      point: '製造業に特化した転職支援。まず個別ページで特徴と向いている人を確認',
+      review: '/articles/makers-job-review'
     },
     samuraiJob: {
       short: 'Samurai Job',
       fit: '生産技術・設計・品質・保全など、専門性や役割を重視したい人向け',
-      point: '専門職経験・年収・ポジションを軸に求人や支援内容を確認'
+      point: 'グローバル・外資系・ハイクラス寄り。個別ページで対象イメージを確認',
+      review: '/articles/samurai-job-review'
     }
   };
 
@@ -57,6 +59,17 @@
     return true;
   }
 
+  function bindReview(link, key, placement) {
+    const review = labels[key]?.review;
+    if (!review) return false;
+    link.href = review;
+    link.removeAttribute('target');
+    link.removeAttribute('rel');
+    link.removeAttribute('referrerpolicy');
+    link.addEventListener('click', () => track('service_review_entry_click', { program:key, placement, to_url:review }));
+    return true;
+  }
+
   function addTrustRow() {
     if (article.querySelector('[data-top-sites-trust]')) return;
     const meta = article.querySelector('.article-meta');
@@ -80,14 +93,14 @@
       <div class="top-sites-section-head">
         <span class="eyebrow">先に比較</span>
         <h2>製造業転職で最初に比較する2つの選択肢</h2>
-        <p>長い説明を読む前に、自分の目的に近い方だけ確認できます。転職をまだ決めていない場合は、サービス登録より先に条件整理から進めます。</p>
+        <p>比較記事ではサービスの違いだけを確認し、気になるサービスは個別ページで対象者・特徴・注意点を確認してから公式申込みへ進めます。</p>
       </div>
       <div class="top-sites-compare-list" data-top-sites-compare-list></div>
       <div class="top-sites-undecided">
         <div><strong>まだ転職するか決めていない</strong><p>夜勤・年収・仕事内容・将来性を7問で整理してから比較できます。</p></div>
         <a class="btn btn-secondary" href="/diagnosis" data-top-sites-internal>3分で無料診断 →</a>
       </div>
-      <p class="top-sites-disclosure">PR：提携サービスへの申込み等で当サイトが報酬を受け取る場合があります。掲載順は報酬額ではなく、ページの目的との適合性で整理しています。</p>`;
+      <p class="top-sites-disclosure">PR：個別ページから提携サービスへ申込み等があった場合、当サイトが報酬を受け取る場合があります。掲載順は報酬額ではなく、ページの目的との適合性で整理しています。</p>`;
 
     const list = section.querySelector('[data-top-sites-compare-list]');
     approved.forEach(key => {
@@ -95,13 +108,39 @@
       const card = document.createElement('article');
       card.className = 'top-sites-compare-card';
       card.dataset.program = key;
-      card.innerHTML = `<div class="top-sites-compare-title"><span class="pr-label">PR</span><h3>${meta.short}</h3></div><p class="top-sites-fit">${meta.fit}</p><p class="top-sites-point">${meta.point}</p><a class="btn btn-primary">サービス内容を確認 →</a>`;
-      if (bindAffiliate(card.querySelector('a'), key, 'guide_top_comparison')) list.appendChild(card);
+      card.innerHTML = `<div class="top-sites-compare-title"><span class="pr-label">PR</span><h3>${meta.short}</h3></div><p class="top-sites-fit">${meta.fit}</p><p class="top-sites-point">${meta.point}</p><a class="btn btn-primary">特徴・向いている人を見る →</a>`;
+      if (bindReview(card.querySelector('a'), key, 'guide_top_comparison')) list.appendChild(card);
     });
 
     const existing = article.querySelector('[data-benchmark-guide]') || article.querySelector('[data-priority-conversion]') || article.querySelector('.answer-box') || article.querySelector('.article-lead');
     if (existing) existing.insertAdjacentElement('afterend', section); else article.prepend(section);
     section.querySelectorAll('[data-top-sites-internal]').forEach(a => a.addEventListener('click', () => track('top_sites_cta_click', { kind:'internal', placement:'guide_top_comparison', to_url:a.getAttribute('href') })));
+  }
+
+  // On the main comparison article, keep the intended 3-step funnel:
+  // comparison article -> dedicated service review -> official affiliate application.
+  function rewriteGuideDirectLinksToReviews() {
+    if (slug !== 'manufacturing-agent-guide') return;
+    ['makersJob','samuraiJob'].forEach(key => {
+      const review = labels[key]?.review;
+      if (!review) return;
+      const selectors = [
+        `.offer-section [data-program-card="${key}"] [data-program-link]`,
+        `[data-benchmark-program="${key}"] [data-affiliate-shortlist]`
+      ];
+      document.querySelectorAll(selectors.join(',')).forEach(oldLink => {
+        const link = oldLink.cloneNode(true);
+        link.href = review;
+        link.removeAttribute('target');
+        link.removeAttribute('rel');
+        link.removeAttribute('referrerpolicy');
+        link.removeAttribute('data-program-link');
+        link.removeAttribute('data-affiliate-shortlist');
+        link.textContent = '特徴・向いている人を確認 →';
+        link.addEventListener('click', () => track('service_review_entry_click', { program:key, placement:'guide_existing_card', to_url:review }));
+        oldLink.replaceWith(link);
+      });
+    });
   }
 
   function addTocIfMissing() {
@@ -134,8 +173,8 @@
       keys.forEach((key, i) => {
         const a = document.createElement('a');
         a.className = `top-sites-sticky-btn${i === 0 ? ' primary' : ''}`;
-        a.innerHTML = `<small>PR</small>${labels[key].short}`;
-        if (bindAffiliate(a, key, 'mobile_sticky_guide')) wrap.appendChild(a);
+        a.innerHTML = `<small>PR</small>${labels[key].short} 詳細`;
+        if (bindReview(a, key, 'mobile_sticky_guide')) wrap.appendChild(a);
       });
       if (!wrap.children.length) return;
     } else {
@@ -171,6 +210,7 @@
 
   addTrustRow();
   addGuideComparison();
+  rewriteGuideDirectLinksToReviews();
   addTocIfMissing();
   addMobileSticky();
 })();
