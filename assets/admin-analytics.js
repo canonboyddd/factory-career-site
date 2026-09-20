@@ -8,15 +8,17 @@
     tokenInput:$('tokenInput'), loadBtn:$('loadBtn'), authMessage:$('authMessage'),
     ownerPanel:$('ownerPanel'), ownerText:$('ownerText'), ownerToggle:$('ownerToggle'),
     dashboard:$('dashboard'), metricGrid:$('metricGrid'), trendChart:$('trendChart'),
-    sourceList:$('sourceList'), landingList:$('landingList'), pagesBody:$('pagesBody'),
-    engagementBody:$('engagementBody'), affiliateBody:$('affiliateBody'),
-    actionList:$('actionList'), deviceList:$('deviceList'), funnel:$('funnel'),
-    updatedAt:$('updatedAt'), periodLabel:$('periodLabel'), refreshBtn:$('refreshBtn')
+    hourlyChart:$('hourlyChart'), sourceBody:$('sourceBody'), landingList:$('landingList'),
+    sessionDepthList:$('sessionDepthList'), deviceList:$('deviceList'),
+    engagementBody:$('engagementBody'), scrollDepthList:$('scrollDepthList'),
+    exitList:$('exitList'), navigationBody:$('navigationBody'), affiliateBody:$('affiliateBody'),
+    campaignBody:$('campaignBody'), actionList:$('actionList'), popularList:$('popularList'),
+    funnel:$('funnel'), updatedAt:$('updatedAt'), periodLabel:$('periodLabel'),
+    refreshBtn:$('refreshBtn')
   };
 
   let days = 7;
   let token = sessionStorage.getItem(tokenKey) || '';
-  let lastData = null;
 
   function randomId() {
     return crypto.randomUUID ? crypto.randomUUID() :
@@ -63,7 +65,8 @@
     try { data = await res.json(); } catch (_) {}
     if (!res.ok) {
       const err = new Error(data.detail || data.error || data.missing || ('HTTP ' + res.status));
-      err.status = res.status; err.data = data;
+      err.status = res.status;
+      err.data = data;
       throw err;
     }
     return data;
@@ -76,12 +79,14 @@
 
   function renderMetrics(data) {
     const s = data.summary || {};
-    const affiliateSessions = Number(data.funnel?.affiliate_sessions || 0);
+    const f = data.funnel || {};
     const cards = [
       ['ページ閲覧数', fmt(s.pv) + ' PV', '運営者端末を除外'],
-      ['外部ブラウザ数', fmt(s.browsers) + ' 人相当', '匿名ブラウザ単位'],
       ['セッション', fmt(s.sessions) + ' 回', '訪問単位'],
-      ['収益CTA到達', fmt(affiliateSessions) + ' セッション', '案件リンクをクリック']
+      ['平均PV / 訪問', Number(s.avg_pages_per_session || 0).toFixed(2), '回遊の深さ'],
+      ['新規ブラウザ', fmt(s.new_browsers) + ' 人相当', '期間内に初めて訪問'],
+      ['再訪ブラウザ', fmt(s.returning_browsers) + ' 人相当', '以前にも訪問'],
+      ['収益CTA到達率', pct(f.affiliate_sessions, f.visit_sessions), fmt(f.affiliate_sessions) + ' / ' + fmt(f.visit_sessions) + ' セッション']
     ];
     els.metricGrid.innerHTML = cards.map(([l,v,n]) =>
       `<div class="metric"><div class="metric-label">${esc(l)}</div><div class="metric-value">${esc(v)}</div><div class="metric-note">${esc(n)}</div></div>`
@@ -89,7 +94,10 @@
   }
 
   function renderTrend(items) {
-    if (!items.length) { els.trendChart.innerHTML='<div class="empty">まだデータがありません。</div>'; return; }
+    if (!items.length) {
+      els.trendChart.innerHTML='<div class="empty">まだデータがありません。</div>';
+      return;
+    }
     const max = Math.max(...items.map(x=>Number(x.pv||0)), 1);
     els.trendChart.innerHTML = items.map(x => {
       const h = Math.max(3, Math.round((Number(x.pv||0)/max)*160));
@@ -98,33 +106,62 @@
     }).join('');
   }
 
-  function renderRank(target, items, labelKey, valueKey) {
-    if (!items.length) { target.innerHTML='<div class="empty">まだデータがありません。</div>'; return; }
-    const max = Math.max(...items.map(x=>Number(x[valueKey]||0)),1);
-    target.innerHTML = items.map(x => {
-      const v=Number(x[valueKey]||0);
-      return `<div class="rank-row"><div class="rank-label" title="${esc(x[labelKey])}">${esc(x[labelKey])}</div><div class="rank-value">${fmt(v)}</div><div class="rank-track"><div class="rank-fill" style="width:${Math.max(2,(v/max)*100)}%"></div></div></div>`;
+  function renderHourly(items) {
+    const map = new Map(items.map(x=>[Number(x.hour),Number(x.pv||0)]));
+    const values = Array.from({length:24},(_,h)=>map.get(h)||0);
+    const max = Math.max(...values,1);
+    els.hourlyChart.innerHTML = values.map((v,h) => {
+      const height=Math.max(3,Math.round((v/max)*92));
+      return `<div class="hour-col" title="${h}:00  ${v} PV"><div class="hour-bar-wrap"><div class="hour-bar" style="height:${height}px"></div></div><span>${h}</span></div>`;
     }).join('');
   }
 
-  function renderPages(items) {
-    els.pagesBody.innerHTML = items.length ? items.map(x =>
-      `<tr><td class="page-cell"><strong>${esc(x.title || x.page_path)}</strong><br><span class="muted">${esc(x.page_path)}</span></td><td>${fmt(x.pv)}</td><td>${fmt(x.browsers)}</td><td>${fmt(x.sessions)}</td></tr>`
-    ).join('') : '<tr><td colspan="4" class="empty">まだデータがありません。</td></tr>';
+  function renderRank(target, items, labelFn, valueKey) {
+    if (!items.length) {
+      target.innerHTML='<div class="empty">まだデータがありません。</div>';
+      return;
+    }
+    const max = Math.max(...items.map(x=>Number(x[valueKey]||0)),1);
+    target.innerHTML = items.map(x => {
+      const v=Number(x[valueKey]||0);
+      const label=typeof labelFn==='function' ? labelFn(x) : x[labelFn];
+      return `<div class="rank-row"><div class="rank-label" title="${esc(label)}">${esc(label)}</div><div class="rank-value">${fmt(v)}</div><div class="rank-track"><div class="rank-fill" style="width:${Math.max(2,(v/max)*100)}%"></div></div></div>`;
+    }).join('');
+  }
+
+  function renderSources(items) {
+    els.sourceBody.innerHTML = items.length ? items.map(x => {
+      const sessions=Number(x.sessions||0), cta=Number(x.affiliate_sessions||0);
+      return `<tr><td><strong>${esc(x.source||'direct')}</strong></td><td>${fmt(sessions)}</td><td>${fmt(cta)}</td><td class="good">${pct(cta,sessions)}</td></tr>`;
+    }).join('') : '<tr><td colspan="4" class="empty">まだ流入データがありません。</td></tr>';
   }
 
   function renderEngagement(items) {
     els.engagementBody.innerHTML = items.length ? items.map(x => {
-      const p=Number(x.pv||0), e=Number(x.engaged_30s||0), s=Number(x.scroll_90||0);
-      return `<tr><td class="page-cell">${esc(x.page_path)}</td><td>${fmt(p)}</td><td>${fmt(e)}</td><td>${pct(e,p)}</td><td>${fmt(s)}</td><td>${pct(s,p)}</td></tr>`;
+      const pv=Number(x.pv||0), e=Number(x.engaged_30s||0), s90=Number(x.scroll_90||0), cta=Number(x.cta_clicks||0);
+      return `<tr><td class="page-cell"><strong>${esc(x.title||x.page_path)}</strong><br><span class="muted">${esc(x.page_path)}</span></td><td>${fmt(pv)}</td><td>${pct(e,pv)}</td><td>${pct(s90,pv)}</td><td>${fmt(cta)}</td><td class="good">${pct(cta,pv)}</td></tr>`;
     }).join('') : '<tr><td colspan="6" class="empty">まだデータがありません。</td></tr>';
+  }
+
+  function renderNavigation(items) {
+    els.navigationBody.innerHTML = items.length ? items.map(x =>
+      `<tr><td class="page-cell">${esc(x.page_path)}</td><td class="page-cell">${esc(x.to_path)}</td><td>${esc(x.link_area||'link')}</td><td>${fmt(x.clicks)}</td><td>${fmt(x.sessions)}</td></tr>`
+    ).join('') : '<tr><td colspan="5" class="empty">まだページ間移動データがありません。</td></tr>';
   }
 
   function renderAffiliate(items) {
     els.affiliateBody.innerHTML = items.length ? items.map(x => {
-      const clicks=Number(x.clicks||0), pv=Number(x.pv||0);
-      return `<tr><td><strong>${esc(labelProgram(x.program))}</strong></td><td class="page-cell">${esc(x.page_path)}</td><td>${esc(x.placement||'-')}</td><td>${fmt(clicks)}</td><td>${fmt(pv)}</td><td class="good">${pct(clicks,pv)}</td></tr>`;
-    }).join('') : '<tr><td colspan="6" class="empty">まだCTAクリックはありません。</td></tr>';
+      const clicks=Number(x.clicks||0), pv=Number(x.pv||0), views=Number(x.offer_views||0);
+      const den=views||pv;
+      return `<tr><td><strong>${esc(labelProgram(x.program))}</strong></td><td class="page-cell">${esc(x.page_path)}</td><td>${esc(x.placement||'-')}</td><td>${fmt(views)}</td><td>${fmt(clicks)}</td><td>${fmt(pv)}</td><td class="good">${pct(clicks,den)}</td></tr>`;
+    }).join('') : '<tr><td colspan="7" class="empty">まだCTAクリックはありません。</td></tr>';
+  }
+
+  function renderCampaigns(items) {
+    els.campaignBody.innerHTML = items.length ? items.map(x => {
+      const sessions=Number(x.sessions||0), cta=Number(x.affiliate_sessions||0);
+      return `<tr><td>${esc(x.utm_source||'-')}</td><td>${esc(x.utm_medium||'-')}</td><td>${esc(x.utm_campaign||'-')}</td><td>${fmt(sessions)}</td><td>${fmt(cta)}</td><td class="good">${pct(cta,sessions)}</td></tr>`;
+    }).join('') : '<tr><td colspan="6" class="empty">UTM付き流入はまだありません。</td></tr>';
   }
 
   function renderActions(items) {
@@ -159,16 +196,21 @@
   }
 
   function render(data) {
-    lastData = data;
     renderMetrics(data);
     renderTrend(data.trend || []);
-    renderRank(els.sourceList, data.sources || [], 'source', 'sessions');
+    renderHourly(data.hourly || []);
+    renderSources(data.sources || []);
     renderRank(els.landingList, data.landings || [], 'landing_page', 'sessions');
-    renderPages(data.pages || []);
-    renderEngagement(data.engagement || []);
-    renderAffiliate(data.affiliate || []);
-    renderActions(data.actions || []);
+    renderRank(els.sessionDepthList, data.session_depth || [], 'depth', 'sessions');
     renderRank(els.deviceList, data.devices || [], 'device_type', 'sessions');
+    renderEngagement(data.engagement || []);
+    renderRank(els.scrollDepthList, data.scroll_depth || [], x => (x.percent||0) + '%到達', 'sessions');
+    renderRank(els.exitList, data.exits || [], x => x.title || x.page_path, 'exits');
+    renderNavigation(data.navigation || []);
+    renderAffiliate(data.affiliate || []);
+    renderCampaigns(data.campaigns || []);
+    renderActions(data.actions || []);
+    renderRank(els.popularList, data.pages || [], x => x.title || x.page_path, 'pv');
     renderFunnel(data.funnel || {});
     renderOwner(data);
     els.periodLabel.textContent = days===1 ? '今日' : '過去'+days+'日';
