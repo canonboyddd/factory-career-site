@@ -226,7 +226,12 @@
     try {
       const data = await api('/api/admin/analytics?days='+days);
       sessionStorage.setItem(tokenKey, token);
-      setAuthMessage('認証済み', true);
+      if (Array.isArray(data.query_errors) && data.query_errors.length) {
+        const names = data.query_errors.map(x => x.name).join(', ');
+        setAuthMessage('認証済み（一部集計をスキップ: ' + names + '）', false);
+      } else {
+        setAuthMessage('認証済み', true);
+      }
       render(data);
     } catch (e) {
       els.dashboard.classList.add('is-hidden');
