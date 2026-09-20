@@ -4,6 +4,26 @@
 
   const cfg = window.SITE_CONFIG?.analytics || {};
   const path = location.pathname;
+  const browserKey = 'fc_browser_id';
+  const sessionKey = 'fc_session_id';
+  const ownerExcludedKey = 'fc_owner_excluded';
+
+  function randomId(prefix) {
+    const id = crypto.randomUUID ? crypto.randomUUID() :
+      Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+    return prefix + id;
+  }
+  function storedId(storage, key, prefix) {
+    let id = storage.getItem(key);
+    if (!id) {
+      id = randomId(prefix);
+      storage.setItem(key, id);
+    }
+    return id;
+  }
+  const browserId = storedId(localStorage, browserKey, 'b-');
+  const sessionId = storedId(sessionStorage, sessionKey, 's-');
+  const deviceType = innerWidth <= 767 ? 'mobile' : innerWidth <= 1100 ? 'tablet' : 'desktop';
   const pageName = path.split('/').filter(Boolean).pop() || 'home';
   const pageType = path === '/' ? 'home'
     : path.startsWith('/articles/') ? 'article'
@@ -47,6 +67,43 @@
     };
   }
 
+  const d1Events = new Set([
+    'scroll_depth',
+    'engaged_30s',
+    'affiliate_click_unified',
+    'comparison_page_click',
+    'diagnosis_entry_click',
+    'tool_entry_click',
+    'internal_navigation',
+    'external_link_click',
+    'affiliate_offer_view'
+  ]);
+
+  function collect(eventName, detail={}) {
+    if (localStorage.getItem(ownerExcludedKey) === '1') return;
+    const payload = {
+      event_name: eventName,
+      browser_id: browserId,
+      session_id: sessionId,
+      page_path: path,
+      page_name: pageName,
+      page_type: pageType,
+      page_title: document.title,
+      device_type: deviceType,
+      ...attribution,
+      ...detail
+    };
+    try {
+      fetch('/api/analytics/collect', {
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify(payload),
+        keepalive:true,
+        credentials:'same-origin'
+      }).catch(()=>{});
+    } catch (_) {}
+  }
+
   const originalTrack = window.trackSiteEvent || function(name, detail={}) {
     window.dataLayer = window.dataLayer || [];
     if (typeof window.gtag === 'function') window.gtag('event', name, detail);
@@ -81,8 +138,10 @@
     const payload = common(detail);
     originalTrack(name, payload);
     try { window.posthog?.capture?.(name, payload); } catch (_) {}
+    if (d1Events.has(name)) collect(name, detail);
   };
 
+  collect('page_view', {});
   window.trackSiteEvent('site_page_context', {
     referrer_type: safeReferrer || 'direct',
     title: document.title
