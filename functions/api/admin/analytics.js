@@ -70,13 +70,13 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const requestedDays = Number(url.searchParams.get('days') || 7);
   const days = [1, 7, 30].includes(requestedDays) ? requestedDays : 7;
-  const modifier = `-${days} days`;
+  const modifier = `-${Math.max(days - 1, 0)} days`;
   const db = env.ANALYTICS_DB;
 
   await ensureSchema(db);
 
   const external = `browser_id NOT IN (SELECT browser_id FROM owner_exclusions)`;
-  const since = `occurred_at >= datetime('now', ?)`;
+  const since = `occurred_at >= datetime(date('now', '+9 hours', ?), '-9 hours')`;
 
   const [
     summary,
@@ -99,7 +99,7 @@ export async function onRequestGet({ request, env }) {
       WHERE event_name='page_view' AND ${since} AND ${external}`)
       .bind(modifier).first(),
 
-    db.prepare(`SELECT substr(occurred_at,1,10) AS day,
+    db.prepare(`SELECT date(occurred_at, '+9 hours') AS day,
       COUNT(*) AS pv,
       COUNT(DISTINCT browser_id) AS browsers
       FROM analytics_events
