@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>運営分析｜工場キャリア診断</title>
-  <meta name="description" content="工場キャリア診断の運営者専用アクセス・収益導線分析画面">
+  <meta name="description" content="工場キャリア診断の運営者専用アクセス・行動・収益導線分析画面">
   <link rel="stylesheet" href="/assets/admin-analytics.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
     <div>
       <span class="admin-kicker">PRIVATE DASHBOARD</span>
       <h1>工場キャリア診断｜運営分析</h1>
-      <p>アクセス、流入、記事の読まれ方、転職サービスCTAを1画面で確認します。</p>
+      <p>流入 → 回遊 → 読了 → 転職サービスCTAまで、サイト内行動を詳しく確認します。</p>
     </div>
     <a class="public-link" href="/" target="_blank" rel="noopener">公開サイトを見る ↗</a>
   </header>
@@ -45,6 +45,7 @@
           <button data-days="1">今日</button>
           <button data-days="7" class="active">7日</button>
           <button data-days="30">30日</button>
+          <button data-days="90">90日</button>
         </div>
         <div class="toolbar-meta"><span id="periodLabel">過去7日</span> <button id="refreshBtn" class="text-btn">再読み込み</button></div>
       </div>
@@ -61,8 +62,26 @@
         </section>
 
         <section class="panel">
-          <div class="panel-heading"><div><span class="eyebrow">ENTRY</span><h2>流入元</h2></div></div>
-          <div id="sourceList" class="rank-list"></div>
+          <div class="panel-heading"><div><span class="eyebrow">TIME</span><h2>アクセス時間帯</h2></div><span class="muted">JST</span></div>
+          <div id="hourlyChart" class="hourly-chart"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">SESSION DEPTH</span><h2>回遊の深さ</h2></div></div>
+          <div id="sessionDepthList" class="rank-list"></div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-heading">
+            <div><span class="eyebrow">ACQUISITION</span><h2>流入元ごとのCTA到達</h2></div>
+            <span class="muted">流入セッション → 転職サービスCTA</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>流入元</th><th>セッション</th><th>CTA到達</th><th>到達率</th></tr></thead>
+              <tbody id="sourceBody"></tbody>
+            </table>
+          </div>
         </section>
 
         <section class="panel">
@@ -70,28 +89,43 @@
           <div id="landingList" class="rank-list"></div>
         </section>
 
-        <section class="panel span-2">
-          <div class="panel-heading">
-            <div><span class="eyebrow">CONTENT</span><h2>人気ページ</h2></div>
-            <span class="muted">PV / 外部ブラウザ / セッション</span>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>ページ</th><th>PV</th><th>外部ブラウザ</th><th>セッション</th></tr></thead>
-              <tbody id="pagesBody"></tbody>
-            </table>
-          </div>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">DEVICE</span><h2>端末</h2></div></div>
+          <div id="deviceList" class="rank-list"></div>
         </section>
 
         <section class="panel span-2">
           <div class="panel-heading">
-            <div><span class="eyebrow">ENGAGEMENT</span><h2>記事の読まれ方</h2></div>
-            <span class="muted">30秒滞在 / 90%スクロール</span>
+            <div><span class="eyebrow">CONTENT</span><h2>ページ別パフォーマンス</h2></div>
+            <span class="muted">PV / 30秒 / 90%読了 / CTA</span>
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>ページ</th><th>PV</th><th>30秒</th><th>30秒率</th><th>90%</th><th>読了目安</th></tr></thead>
+              <thead><tr><th>ページ</th><th>PV</th><th>30秒率</th><th>90%率</th><th>CTA</th><th>CTA率</th></tr></thead>
               <tbody id="engagementBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">SCROLL</span><h2>スクロール到達</h2></div></div>
+          <div id="scrollDepthList" class="rank-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">EXIT</span><h2>離脱ページ</h2></div></div>
+          <div id="exitList" class="rank-list"></div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-heading">
+            <div><span class="eyebrow">PATH</span><h2>ページ間の移動</h2></div>
+            <span class="muted">どこから → どこへ</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>移動元</th><th>移動先</th><th>リンク位置</th><th>クリック</th><th>セッション</th></tr></thead>
+              <tbody id="navigationBody"></tbody>
             </table>
           </div>
         </section>
@@ -99,13 +133,26 @@
         <section class="panel span-2">
           <div class="panel-heading">
             <div><span class="eyebrow">REVENUE PATH</span><h2>転職サービスへの収益導線</h2></div>
-            <span class="muted">案件 / 掲載位置 / 元ページ</span>
+            <span class="muted">表示 → クリック → CTR</span>
           </div>
           <div class="funnel" id="funnel"></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>案件</th><th>元ページ</th><th>掲載位置</th><th>クリック</th><th>PV</th><th>CTR</th></tr></thead>
+              <thead><tr><th>案件</th><th>元ページ</th><th>掲載位置</th><th>表示</th><th>クリック</th><th>PV</th><th>CTR</th></tr></thead>
               <tbody id="affiliateBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-heading">
+            <div><span class="eyebrow">UTM</span><h2>キャンペーン分析</h2></div>
+            <span class="muted">utm_source / medium / campaign</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Source</th><th>Medium</th><th>Campaign</th><th>セッション</th><th>CTA到達</th><th>到達率</th></tr></thead>
+              <tbody id="campaignBody"></tbody>
             </table>
           </div>
         </section>
@@ -116,15 +163,15 @@
         </section>
 
         <section class="panel">
-          <div class="panel-heading"><div><span class="eyebrow">DEVICE</span><h2>端末</h2></div></div>
-          <div id="deviceList" class="rank-list"></div>
+          <div class="panel-heading"><div><span class="eyebrow">POPULAR</span><h2>人気ページ</h2></div></div>
+          <div id="popularList" class="rank-list"></div>
         </section>
       </div>
 
       <section class="panel info-panel">
-        <h2>この画面の見方</h2>
-        <p><strong>PV</strong>はページ表示回数、<strong>外部ブラウザ</strong>は運営者除外後の匿名ブラウザ数、<strong>セッション</strong>はブラウザを開いてからの訪問単位です。30秒率と90%スクロール率は、記事の内容が実際に読まれているかを見る目安です。</p>
-        <p>メーカーズジョブ / Samurai Jobのクリックは <code>affiliate_click_unified</code> を集計します。診断入力内容、氏名、電話番号、メールアドレスはこの分析DBへ保存しません。</p>
+        <h2>見るポイント</h2>
+        <p><strong>新規/再訪</strong>でリピーターの有無、<strong>平均PV/訪問</strong>で回遊、<strong>流入元CTA率</strong>で集客の質、<strong>30秒率・90%率</strong>で記事の読まれ方、<strong>ページ間の移動</strong>で内部リンク導線を確認できます。</p>
+        <p>メーカーズジョブ / Samurai Jobのクリックは <code>affiliate_click_unified</code> を集計します。診断入力内容、氏名、電話番号、メールアドレスは分析DBへ保存しません。</p>
       </section>
     </section>
   </main>
