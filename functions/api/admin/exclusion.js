@@ -13,18 +13,18 @@ function authorized(request, env) {
   if (!expected) return false;
   const auth = request.headers.get('authorization') || '';
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-  return token && token === expected;
+  return Boolean(token && token === expected);
 }
 
 function clean(value, max = 100) {
   return String(value ?? '').trim().slice(0, max);
 }
 
-async function ensureSchema(db) {
-  await db.exec(`CREATE TABLE IF NOT EXISTS owner_exclusions (
+async function ensureOwnerTable(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS owner_exclusions (
     browser_id TEXT PRIMARY KEY,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  )`);
+  )`).run();
 }
 
 export async function onRequestPost({ request, env }) {
@@ -51,27 +51,35 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, error: 'invalid_request' }, 400);
   }
 
-  await ensureSchema(env.ANALYTICS_DB);
+  try {
+    const db = env.ANALYTICS_DB;
+    await ensureOwnerTable(db);
 
-  if (action === 'add') {
-    await env.ANALYTICS_DB
-      .prepare('INSERT OR IGNORE INTO owner_exclusions(browser_id) VALUES (?)')
-      .bind(browserId)
-      .run();
-  } else {
-    await env.ANALYTICS_DB
-      .prepare('DELETE FROM owner_exclusions WHERE browser_id = ?')
-      .bind(browserId)
-      .run();
+    if (action === 'add') {
+      await db.prepare(
+        'INSERT INTO owner_exclusions (browser_id) VALUES (?) ON CONFLICT(browser_id) DO NOTHING'
+      ).bind(browserId).run();
+    } else {
+      await db.prepare(
+        'DELETE FROM owner_exclusions WHERE browser_id = ?'
+      ).bind(browserId).run();
+    }
+
+    const countResult = await db.prepare(
+      'SELECT COUNT(*) AS count FROM owner_exclusions'
+    ).all();
+    const count = Number(countResult?.results?.[0]?.count || 0);
+
+    return json({
+      ok: true,
+      excluded: action === 'add',
+      owner_exclusions: count
+    });
+  } catch (error) {
+    return json({
+      ok: false,
+      error: 'exclusion_db_failed',
+      detail: String(error?.message || error || 'unknown').slice(0, 240)
+    }, 500);
   }
-
-  const row = await env.ANALYTICS_DB
-    .prepare('SELECT COUNT(*) AS count FROM owner_exclusions')
-    .first();
-
-  return json({
-    ok: true,
-    excluded: action === 'add',
-    owner_exclusions: Number(row?.count || 0)
-  });
 }
