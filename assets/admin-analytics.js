@@ -62,7 +62,7 @@
     let data = {};
     try { data = await res.json(); } catch (_) {}
     if (!res.ok) {
-      const err = new Error(data.error || data.missing || ('HTTP ' + res.status));
+      const err = new Error(data.detail || data.error || data.missing || ('HTTP ' + res.status));
       err.status = res.status; err.data = data;
       throw err;
     }
