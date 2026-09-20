@@ -2,7 +2,7 @@ window.SITE_CONFIG = {
   siteName: "工場キャリア診断",
   affiliateUrl: "",
   affiliateServiceName: "メーカー・製造業特化の転職支援サービス",
-  analytics: { ga4MeasurementId: "G-MR6KP8HJNR" },
+  analytics: { ga4MeasurementId: "G-MR6KP8HJNR", posthogProjectKey: "", posthogHost: "https://us.i.posthog.com" },
   affiliatePrograms: {
     makersJob: {
       name: "メーカーズジョブ",
@@ -112,6 +112,7 @@ function loadSiteScript(src, marker) {
 }
 
 async function bootstrapSiteEnhancements() {
+  await loadSiteScript('/assets/analytics.js', 'data-auto-analytics-script');
   const path = window.location.pathname;
   const isArticleDetail = path.includes('/articles/') && !path.endsWith('/articles/') && !/\/articles\/index(?:\.html)?$/i.test(path);
 
