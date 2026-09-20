@@ -204,7 +204,7 @@
       const to = target.pathname;
       window.trackSiteEvent('internal_navigation', {
         to_path: to,
-        link_area: String(placement).slice(0,100)
+        placement: String(placement).slice(0,100)
       });
       if (to.includes('/articles/manufacturing-agent-guide')) {
         window.trackSiteEvent('comparison_page_click', { to_path: to });
