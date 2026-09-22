@@ -10,6 +10,10 @@
   Content-Type: application/xml; charset=UTF-8
   Cache-Control: public, max-age=3600
 
+/sitemap.txt
+  Content-Type: text/plain; charset=UTF-8
+  Cache-Control: public, max-age=3600
+
 /robots.txt
   Content-Type: text/plain; charset=UTF-8
 
