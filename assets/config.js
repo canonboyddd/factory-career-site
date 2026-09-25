@@ -31,7 +31,7 @@ window.SITE_CONFIG = {
   articleProgramPriority: {
     "factory-quit.html": ["makersJob", "zen"], "night-shift-hard.html": ["makersJob", "zen"],
     "manufacturing-30s.html": ["makersJob", "samuraiJob"], "production-tech-career.html": ["makersJob", "samuraiJob"],
-    "quality-quit.html": ["makersJob", "samuraiJob"], "manufacturing-500-income.html": ["samuraiJob", "makersJob"],
+    "quality-quit.html": ["makersJob", "zen", "samuraiJob"], "manufacturing-500-income.html": ["samuraiJob", "makersJob"],
     "manufacturing-other-industry.html": ["magicari", "makersJob"], "period-worker-next.html": ["makersJob", "magicari"],
     "manufacturing-agent-guide.html": ["makersJob", "samuraiJob", "magicari"], "production-tech-agent.html": ["samuraiJob", "makersJob"],
     "quality-agent.html": ["samuraiJob", "makersJob"], "factory-salary-up.html": ["samuraiJob", "makersJob"],
@@ -42,7 +42,8 @@ window.SITE_CONFIG = {
     "operator-quit.html": ["makersJob", "zen"], "line-work-quit.html": ["makersJob", "zen"],
     "factory-overtime.html": ["makersJob"], "factory-holidays.html": ["makersJob"], "factory-body-hard.html": ["makersJob", "zen"],
     "factory-no-future.html": ["makersJob", "zen"], "factory-resignation-reasons.html": ["makersJob", "zen"],
-    "factory-shift-change.html": ["makersJob"], "factory-commute-long.html": ["makersJob"], "factory-small-company.html": ["makersJob", "samuraiJob"],
+    "factory-shift-change.html": ["makersJob"], "factory-fixed-night-shift.html": ["makersJob", "zen"],
+    "factory-commute-long.html": ["makersJob"], "factory-small-company.html": ["makersJob", "samuraiJob"],
     "assembly-career.html": ["makersJob"], "automotive-parts-career.html": ["makersJob", "samuraiJob"],
     "manufacturing-20s.html": ["makersJob", "magicari"], "manufacturing-50s.html": ["makersJob"],
     "factory-night-to-day.html": ["makersJob"], "factory-bonus-low.html": ["makersJob", "samuraiJob"],
@@ -52,41 +53,29 @@ window.SITE_CONFIG = {
     "plc-career.html": ["samuraiJob", "makersJob"], "maintenance-qualification.html": ["samuraiJob", "makersJob"],
     "production-tech-overseas-travel.html": ["samuraiJob", "makersJob"], "quality-claim-hard.html": ["samuraiJob", "makersJob"],
     "quality-audit-hard.html": ["samuraiJob", "makersJob"], "production-control-overtime.html": ["samuraiJob", "makersJob"],
-    "manufacturing-supervisor-career.html": ["samuraiJob", "makersJob"]
+    "manufacturing-supervisor-career.html": ["samuraiJob", "makersJob"], "factory-heat-hard.html": ["makersJob"]
   },
   disclosure: "当サイトはアフィリエイト広告を利用しています。"
 };
 
-// Support both historical *.html filenames and Cloudflare Pages clean URLs.
 Object.entries(window.SITE_CONFIG.articleProgramPriority || {}).forEach(([key, value]) => {
   if (!key.endsWith('.html')) return;
   const cleanKey = key.slice(0, -5);
-  if (!window.SITE_CONFIG.articleProgramPriority[cleanKey]) {
-    window.SITE_CONFIG.articleProgramPriority[cleanKey] = value;
-  }
+  if (!window.SITE_CONFIG.articleProgramPriority[cleanKey]) window.SITE_CONFIG.articleProgramPriority[cleanKey] = value;
 });
 
-// Load the visual layer once.
 (() => {
   if (document.querySelector('link[data-colorful-theme]')) return;
   const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = '/assets/colorful.css';
-  link.dataset.colorfulTheme = '';
-  document.head.appendChild(link);
+  link.rel = 'stylesheet'; link.href = '/assets/colorful.css'; link.dataset.colorfulTheme = ''; document.head.appendChild(link);
 })();
 
-// Load Rakuten widgets style once. The JS stays harmless on pages without a product slot.
 (() => {
   if (document.querySelector('link[data-rakuten-theme]')) return;
   const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = '/assets/rakuten.css';
-  link.dataset.rakutenTheme = '';
-  document.head.appendChild(link);
+  link.rel = 'stylesheet'; link.href = '/assets/rakuten.css'; link.dataset.rakutenTheme = ''; document.head.appendChild(link);
 })();
 
-// Normalize the first HTML payload immediately; clean-url-seo.js also watches later DOM additions.
 (() => {
   const SITE = 'https://factory-career-site.pages.dev';
   const clean = value => {
@@ -102,10 +91,7 @@ Object.entries(window.SITE_CONFIG.articleProgramPriority || {}).forEach(([key, v
     document.querySelectorAll('a[href]').forEach(a => {
       const raw = a.getAttribute('href');
       if (!raw || raw.startsWith('#') || /^(?:mailto:|tel:|javascript:)/i.test(raw)) return;
-      try {
-        const u = new URL(raw, location.href);
-        if (u.origin === location.origin) a.setAttribute('href', clean(raw));
-      } catch (_) { }
+      try { const u = new URL(raw, location.href); if (u.origin === location.origin) a.setAttribute('href', clean(raw)); } catch (_) { }
     });
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.href = SITE + clean(canonical.href).split('#')[0];
@@ -118,17 +104,9 @@ Object.entries(window.SITE_CONFIG.articleProgramPriority || {}).forEach(([key, v
 
 function loadSiteScript(src, marker) {
   return new Promise(resolve => {
-    if ([...document.scripts].some(s => s.src && new URL(s.src, location.href).pathname === new URL(src, location.href).pathname) || document.querySelector(`[${marker}]`)) {
-      resolve();
-      return;
-    }
+    if ([...document.scripts].some(s => s.src && new URL(s.src, location.href).pathname === new URL(src, location.href).pathname) || document.querySelector(`[${marker}]`)) { resolve(); return; }
     const script = document.createElement('script');
-    script.src = src;
-    script.async = false;
-    script.setAttribute(marker, '');
-    script.onload = () => resolve();
-    script.onerror = () => resolve();
-    document.body.appendChild(script);
+    script.src = src; script.async = false; script.setAttribute(marker, ''); script.onload = () => resolve(); script.onerror = () => resolve(); document.body.appendChild(script);
   });
 }
 
@@ -137,14 +115,10 @@ async function bootstrapSiteEnhancements() {
   await loadSiteScript('/assets/rakuten-products.js', 'data-rakuten-products-script');
   const path = window.location.pathname;
   const isArticleDetail = path.includes('/articles/') && !path.endsWith('/articles/') && !/\/articles\/index(?:\.html)?$/i.test(path);
-
-  // Keep one canonical implementation for each feature. Older cluster/hub injectors remain in the repo
-  // for rollback only; loading all of them caused duplicate sections and non-deterministic ordering.
   if (isArticleDetail) {
     await loadSiteScript('/assets/offers.js', 'data-auto-offers-script');
     await loadSiteScript('/assets/pillar-content.js', 'data-auto-pillar-content-script');
   }
-
   await loadSiteScript('/assets/clean-url-seo.js', 'data-auto-clean-url-seo-script');
   await loadSiteScript('/assets/seo-enhance.js', 'data-auto-seo-enhance-script');
   await loadSiteScript('/assets/runtime-fixes.js', 'data-auto-runtime-fixes-script');
@@ -152,7 +126,4 @@ async function bootstrapSiteEnhancements() {
   await loadSiteScript('/assets/article-conversion-layout.js', 'data-auto-article-conversion-layout-script');
   await loadSiteScript('/assets/top-sites-layout.js', 'data-auto-top-sites-layout-script');
 }
-
-// main.js is included immediately after config.js on the site. Deferring one task lets main.js finish first,
-// then enhancements are applied in a stable, predictable order.
 setTimeout(bootstrapSiteEnhancements, 0);
