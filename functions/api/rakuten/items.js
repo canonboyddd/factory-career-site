@@ -20,15 +20,6 @@ function json(data, status = 200, extra = {}) {
   });
 }
 
-function debugHtml(data) {
-  const safe = JSON.stringify(data).replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]));
-  const title = String(data?.detail || (Array.isArray(data?.missing) ? `missing:${data.missing.join(',')}` : (data?.ok ? `ok:${Array.isArray(data.items) ? data.items.length : 0}` : data?.error || 'diagnostic'))).replace(/[<>]/g,'').slice(0,160);
-  return new Response(`<!doctype html><meta charset="utf-8"><title>${title}</title><pre>${safe}</pre>`, {
-    status: 200,
-    headers: { 'content-type':'text/html; charset=utf-8', 'cache-control':'no-store' }
-  });
-}
-
 function imageOf(item) {
   const list = item.mediumImageUrls || item.smallImageUrls || item.imageUrls || [];
   const first = Array.isArray(list) ? list[0] : '';
@@ -49,18 +40,14 @@ export async function onRequestGet({ request, env }) {
   const appId = String(env.RAKUTEN_APP_ID || '').trim();
   const accessKey = String(env.RAKUTEN_ACCESS_KEY || '').trim();
   const affiliateId = String(env.RAKUTEN_AFFILIATE_ID || '').trim();
-  const url = new URL(request.url);
-  const debug = url.searchParams.get('debug') === '1';
 
   const missing = [];
   if (!appId) missing.push('RAKUTEN_APP_ID');
   if (!accessKey) missing.push('RAKUTEN_ACCESS_KEY');
   if (!affiliateId) missing.push('RAKUTEN_AFFILIATE_ID');
-  if (missing.length) {
-    const payload = { ok:false, setup_required:true, missing };
-    return debug ? debugHtml(payload) : json(payload, 503);
-  }
+  if (missing.length) return json({ ok:false, setup_required:true, missing }, 503);
 
+  const url = new URL(request.url);
   const key = String(url.searchParams.get('category') || 'work');
   const category = CATEGORIES[key] || CATEGORIES.work;
   const hits = Math.min(8, Math.max(3, Number(url.searchParams.get('hits') || 6)));
@@ -84,15 +71,14 @@ export async function onRequestGet({ request, env }) {
       cf: { cacheEverything: true, cacheTtl: 21600 }
     });
     const body = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      const payload = {
+      return json({
         ok:false,
         error:'rakuten_api_error',
         status:res.status,
-        detail:String(body?.error_description || body?.error || 'Rakuten API error').slice(0,240),
-        diagnostics:{ app_id_present:!!appId, access_key_present:!!accessKey, affiliate_id_present:!!affiliateId }
-      };
-      return debug ? debugHtml(payload) : json(payload, res.status === 429 ? 429 : 502);
+        detail:String(body?.error_description || body?.error || 'Rakuten API error').slice(0,240)
+      }, res.status === 429 ? 429 : 502);
     }
 
     const rawItems = body.items || body.Items || [];
@@ -108,16 +94,18 @@ export async function onRequestGet({ request, env }) {
       postageFlag: safeNumber(item.postageFlag)
     })).filter(item => item.name && item.url);
 
-    const payload = {
+    return json({
       ok:true,
       category:key,
       label:category.label,
       updated_at:new Date().toISOString(),
       items
-    };
-    return debug ? debugHtml({ ...payload, diagnostics:{ app_id_present:!!appId, access_key_present:!!accessKey, affiliate_id_present:!!affiliateId } }) : json(payload);
+    });
   } catch (error) {
-    const payload = { ok:false, error:'rakuten_fetch_failed', detail:String(error?.message || error).slice(0,240), diagnostics:{ app_id_present:!!appId, access_key_present:!!accessKey, affiliate_id_present:!!affiliateId } };
-    return debug ? debugHtml(payload) : json(payload, 502);
+    return json({
+      ok:false,
+      error:'rakuten_fetch_failed',
+      detail:String(error?.message || error).slice(0,240)
+    }, 502);
   }
 }
