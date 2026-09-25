@@ -55,8 +55,8 @@
 
       <section class="panel revenue-intelligence is-hidden" id="revenueIntelligence">
         <div class="panel-heading">
-          <div><span class="eyebrow">AFFILIATE INTELLIGENCE</span><h2>アフィリエイト収益導線</h2><p id="revenueSummaryNote" class="muted"></p></div>
-          <span id="revenueStatus" class="muted">収益導線を集計中…</span>
+          <div><span class="eyebrow">AFFILIATE INTELLIGENCE</span><h2>アフィリエイト収益分析</h2><p id="revenueSummaryNote" class="muted"></p></div>
+          <span id="revenueStatus" class="muted">収益データを集計中…</span>
         </div>
         <div id="revenueMetricGrid" class="revenue-metric-grid"></div>
 
@@ -90,7 +90,7 @@
             <tbody id="programPageBody"></tbody>
           </table>
         </div>
-        <p class="muted" style="margin-top:12px">※ ここで分かるのはサイト内の表示・クリック・CTRです。購入・申込・確定報酬は楽天/A8.net/AccessTrade各管理画面の成果データで確認してください。</p>
+        <p class="muted" style="margin-top:12px">※ 記事別の表はサイト内クリック計測です。実際の発生・確定報酬は、上部のASP成果CSV取込データから集計します。</p>
       </section>
 
       <div class="dashboard-grid">
@@ -212,12 +212,14 @@
       <section class="panel info-panel">
         <h2>見るポイント</h2>
         <p><strong>新規/再訪</strong>でリピーターの有無、<strong>平均PV/訪問</strong>で回遊、<strong>流入元CTA率</strong>で集客の質、<strong>30秒率・90%率</strong>で記事の読まれ方、<strong>ページ間の移動</strong>で内部リンク導線を確認できます。</p>
-        <p>楽天 / ZEN / メーカーズジョブ / Samurai Jobの表示・クリックは匿名のサイト内イベントとして集計します。診断入力内容、氏名、電話番号、メールアドレスは分析DBへ保存しません。</p>
+        <p>楽天 / ZEN / メーカーズジョブ / Samurai Jobの表示・クリックは匿名のサイト内イベントとして集計します。ASP成果CSVの発生・確定報酬は別テーブルへ保存します。診断入力内容、氏名、電話番号、メールアドレスは分析DBへ保存しません。</p>
       </section>
     </section>
   </main>
 
   <script src="/assets/admin-analytics.js"></script>
+  <script src="/assets/admin-affiliate-ui.js"></script>
+  <script src="/assets/admin-affiliate-import.js"></script>
   <script src="/assets/admin-revenue.js"></script>
 </body>
 </html>
