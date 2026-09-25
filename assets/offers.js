@@ -61,6 +61,31 @@
         }
       });
       card.querySelectorAll('[data-program-name]').forEach(el=>{if(program.name)el.textContent=program.name;});
+
+      if(key==='zen' && program.banners?.large && !card.querySelector('[data-zen-banner]')){
+        const banner=program.banners.large;
+        const wrap=document.createElement('a');
+        wrap.href=banner.url;
+        wrap.target='_blank';
+        wrap.rel='sponsored nofollow noopener';
+        wrap.referrerPolicy=program.referrerPolicy||'no-referrer-when-downgrade';
+        wrap.dataset.programLink='';
+        wrap.dataset.zenBanner='';
+        wrap.dataset.placement='zen_banner_300x250';
+        wrap.style.cssText='display:block;text-align:center;margin:12px auto 14px;max-width:300px;';
+        const img=document.createElement('img');
+        img.src=banner.image;
+        img.width=banner.width;
+        img.height=banner.height;
+        img.alt='ZENの退職代行';
+        img.loading='lazy';
+        img.decoding='async';
+        img.style.cssText='display:block;max-width:100%;height:auto;margin:auto;';
+        wrap.appendChild(img);
+        const button=card.querySelector('[data-program-link]');
+        if(button) button.before(wrap); else card.appendChild(wrap);
+      }
+
       const pixel=String(program.impressionPixel||'').trim();
       if(pixel&&!card.querySelector('[data-affiliate-impression]')){
         const img=document.createElement('img');
