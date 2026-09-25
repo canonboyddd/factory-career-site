@@ -22,7 +22,8 @@ function json(data, status = 200, extra = {}) {
 
 function debugHtml(data) {
   const safe = JSON.stringify(data).replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]));
-  return new Response(`<!doctype html><meta charset="utf-8"><title>Rakuten diagnostic</title><pre>${safe}</pre>`, {
+  const title = String(data?.detail || (Array.isArray(data?.missing) ? `missing:${data.missing.join(',')}` : (data?.ok ? `ok:${Array.isArray(data.items) ? data.items.length : 0}` : data?.error || 'diagnostic'))).replace(/[<>]/g,'').slice(0,160);
+  return new Response(`<!doctype html><meta charset="utf-8"><title>${title}</title><pre>${safe}</pre>`, {
     status: 200,
     headers: { 'content-type':'text/html; charset=utf-8', 'cache-control':'no-store' }
   });
