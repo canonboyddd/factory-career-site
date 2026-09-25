@@ -9,6 +9,8 @@ const CATEGORIES = {
   light: { label: '作業ライト', keyword: 'LED ライト 作業用 充電式', sort: '-reviewCount' }
 };
 
+const SITE_ORIGIN = 'https://factory-career-site.pages.dev';
+
 function json(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -48,6 +50,15 @@ function parseBody(raw) {
   try { return raw ? JSON.parse(raw) : {}; } catch (_) { return {}; }
 }
 
+function errorDetail(body, raw, secrets) {
+  return body?.error_description
+    || body?.error
+    || body?.errors?.[0]?.errorMessage
+    || body?.errors?.[0]?.message
+    || redact(raw, secrets)
+    || 'Rakuten API error';
+}
+
 export async function onRequestGet({ request, env }) {
   const appId = String(env.RAKUTEN_APP_ID || '').trim();
   const accessKey = String(env.RAKUTEN_ACCESS_KEY || '').trim();
@@ -80,7 +91,15 @@ export async function onRequestGet({ request, env }) {
     if (useAffiliate && affiliateId) params.set('affiliateId', affiliateId);
 
     const endpoint = `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701?${params}`;
-    const res = await fetch(endpoint, { cf: { cacheEverything: false } });
+    const res = await fetch(endpoint, {
+      headers: {
+        'Origin': SITE_ORIGIN,
+        'Referer': `${SITE_ORIGIN}/`,
+        'Accept': 'application/json',
+        'User-Agent': `factory-career-site/1.0 (+${SITE_ORIGIN}/)`
+      },
+      cf: { cacheEverything: false }
+    });
     const raw = await res.text();
     return { res, raw, body: parseBody(raw) };
   }
@@ -104,7 +123,7 @@ export async function onRequestGet({ request, env }) {
             affiliate_id_present:true,
             request_with_affiliate_status:first.res.status,
             request_without_affiliate_status:withoutAffiliate.res.status,
-            affiliate_error:first.body?.error_description || first.body?.error || redact(first.raw, [appId, accessKey, affiliateId]),
+            affiliate_error:errorDetail(first.body, first.raw, [appId, accessKey, affiliateId]),
             affiliate_error_body:redact(first.raw, [appId, accessKey, affiliateId])
           };
         }
@@ -116,7 +135,7 @@ export async function onRequestGet({ request, env }) {
 
     const { res, raw, body } = first;
     if (!res.ok) {
-      const detail = body?.error_description || body?.error || redact(raw, [appId, accessKey, affiliateId]) || 'Rakuten API error';
+      const detail = errorDetail(body, raw, [appId, accessKey, affiliateId]);
       const payload = {
         ok:false,
         error:'rakuten_api_error',
@@ -129,6 +148,7 @@ export async function onRequestGet({ request, env }) {
           access_key_present:true,
           affiliate_id_present:Boolean(affiliateId),
           authentication_test_without_affiliate:true,
+          request_origin:SITE_ORIGIN,
           content_type:res.headers.get('content-type') || '',
           body_preview:redact(raw, [appId, accessKey, affiliateId])
         };
@@ -156,7 +176,7 @@ export async function onRequestGet({ request, env }) {
       updated_at:new Date().toISOString(),
       affiliate_active:Boolean(affiliateId),
       items,
-      ...(diag ? { diagnostics:{ item_count:items.length, content_type:res.headers.get('content-type') || '' } } : {})
+      ...(diag ? { diagnostics:{ item_count:items.length, request_origin:SITE_ORIGIN, content_type:res.headers.get('content-type') || '' } } : {})
     }, 200, { 'cache-control': diag ? 'no-store' : 'public, max-age=900, s-maxage=21600' });
   } catch (error) {
     const payload = {
