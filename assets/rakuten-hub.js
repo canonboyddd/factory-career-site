@@ -31,22 +31,22 @@
     }
   }
 
-  function render(items, category) {
+  function render(items, category, affiliateActive) {
     if (!grid) return;
     grid.innerHTML = items.map((item, index) => `
       <article class="rakuten-product" data-rakuten-card="${esc(category)}_${index + 1}">
-        <a class="rakuten-product-image" href="${esc(item.url)}" target="_blank" rel="nofollow sponsored noopener" data-rakuten-link data-placement="product_image">
+        <a class="rakuten-product-image" href="${esc(item.url)}" target="_blank" rel="nofollow ${affiliateActive ? 'sponsored ' : ''}noopener" data-rakuten-link data-placement="product_image">
           ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" decoding="async">` : '<span class="rakuten-no-image">画像準備中</span>'}
         </a>
         <div class="rakuten-product-body">
-          <span class="rakuten-pr">PR・楽天市場</span>
+          <span class="rakuten-pr">${affiliateActive ? 'PR・楽天市場' : '楽天市場'}</span>
           <h3>${esc(item.name)}</h3>
           <div class="rakuten-meta">
             <strong>¥${money(item.price)}</strong>
             ${item.reviewCount ? `<span>★ ${Number(item.reviewAverage || 0).toFixed(1)} / ${money(item.reviewCount)}件</span>` : ''}
           </div>
           ${item.shop ? `<p class="rakuten-shop">${esc(item.shop)}</p>` : ''}
-          <a class="btn btn-primary rakuten-buy" href="${esc(item.url)}" target="_blank" rel="nofollow sponsored noopener" data-rakuten-link data-placement="product_button">楽天市場で詳細を見る ↗</a>
+          <a class="btn btn-primary rakuten-buy" href="${esc(item.url)}" target="_blank" rel="nofollow ${affiliateActive ? 'sponsored ' : ''}noopener" data-rakuten-link data-placement="product_button">楽天市場で詳細を見る ↗</a>
         </div>
       </article>`).join('');
 
@@ -59,7 +59,8 @@
         window.trackSiteEvent?.('affiliate_click', {
           program: 'rakuten',
           page: location.pathname,
-          placement: link.dataset.placement || 'product'
+          placement: link.dataset.placement || 'product',
+          affiliate_active: affiliateActive
         });
       });
     });
@@ -102,9 +103,10 @@
       return;
     }
 
-    render(items, category);
+    const affiliateActive = data.affiliate_active === true;
+    render(items, category, affiliateActive);
     setStatus(`${data.label || '楽天市場の商品'}を${items.length}件表示中。価格・在庫は楽天市場で最新情報をご確認ください。`);
-    window.trackSiteEvent?.('affiliate_offer_view', { program: 'rakuten', placement: `rakuten_${category}`, items: items.length });
+    window.trackSiteEvent?.('affiliate_offer_view', { program: 'rakuten', placement: `rakuten_${category}`, items: items.length, affiliate_active: affiliateActive });
   }
 
   buttons.forEach(button => {
