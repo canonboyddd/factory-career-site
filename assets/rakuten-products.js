@@ -16,12 +16,27 @@
   const articleCategory = (() => {
     const slug = location.pathname.split('/').filter(Boolean).pop() || '';
     const map = {
-      'night-shift-hard':'night','factory-night-to-day':'night','factory-fixed-night-shift':'night','factory-shift-change':'night',
-      'factory-body-hard':'shoes','line-work-quit':'shoes','operator-quit':'shoes','assembly-career':'shoes','inspection-career':'shoes',
-      'factory-overtime':'hydration','factory-weekend-work':'hydration','factory-holidays':'commute','factory-commute-long':'commute',
+      // 夜勤・交替勤務の記事だけに睡眠環境アイテムを表示
+      'night-shift-hard':'night','factory-night-to-day':'night','factory-fixed-night-shift':'night',
+      'factory-shift-change':'night','factory-three-shift-hard':'night','factory-two-shift-hard':'night',
+      'factory-rotating-shift-lifestyle':'night','night-shift-income-dependence':'night','no-night-shift':'night',
+      'factory-early-shift-check':'night','factory-late-shift-check':'night',
+
+      // 立ち仕事・現場負担の記事だけに足元用品を表示
+      'factory-body-hard':'shoes','line-work-quit':'shoes','operator-quit':'shoes',
+      'assembly-career':'shoes','inspection-career':'shoes',
+
+      // 暑熱環境の記事
+      'factory-heat-hard':'summer',
+
+      // 通勤負担の記事
+      'factory-commute-long':'commute',
+
+      // 応募準備の記事
       'factory-resume':'interview','factory-interview':'interview','factory-job-offer-check':'interview',
-      'production-tech-career':'light','maintenance-career':'light','plc-career':'light','machine-design-career':'light',
-      'quality-quit':'work','quality-assurance-career':'work','production-control-career':'work'
+
+      // 設備・保全系の記事だけに作業ライトを表示
+      'production-tech-career':'light','maintenance-career':'light','plc-career':'light','machine-design-career':'light'
     };
     return map[slug] || '';
   })();
@@ -53,28 +68,30 @@
         return;
       }
 
+      const affiliateActive = data.affiliate_active === true;
+      const affiliateFlag = affiliateActive ? '1' : '0';
       grid.innerHTML = items.map((item, index) => `
-        <article class="rakuten-product" data-program-card="rakuten" data-placement="rakuten_${esc(category)}_${index + 1}">
-          <a class="rakuten-product-image" href="${esc(item.url)}" target="_blank" rel="nofollow sponsored noopener" data-program-link data-placement="product_image">
+        <article class="rakuten-product" data-rakuten-card="${esc(category)}_${index + 1}">
+          <a class="rakuten-product-image" href="${esc(item.url)}" target="_blank" rel="nofollow ${affiliateActive ? 'sponsored ' : ''}noopener" data-rakuten-link data-affiliate-active="${affiliateFlag}" data-placement="rakuten_${esc(category)}_image">
             ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" decoding="async">` : '<span class="rakuten-no-image">画像準備中</span>'}
           </a>
           <div class="rakuten-product-body">
-            <span class="rakuten-pr">PR・楽天市場</span>
+            <span class="rakuten-pr">${affiliateActive ? 'PR・楽天市場' : '楽天市場'}</span>
             <h3>${esc(item.name)}</h3>
             <div class="rakuten-meta">
               <strong>¥${money(item.price)}</strong>
               ${item.reviewCount ? `<span>★ ${Number(item.reviewAverage || 0).toFixed(1)} / ${money(item.reviewCount)}件</span>` : ''}
             </div>
             ${item.shop ? `<p class="rakuten-shop">${esc(item.shop)}</p>` : ''}
-            <a class="btn btn-primary rakuten-buy" href="${esc(item.url)}" target="_blank" rel="nofollow sponsored noopener" data-program-link data-placement="product_button">楽天市場で詳細を見る ↗</a>
+            <a class="btn btn-primary rakuten-buy" href="${esc(item.url)}" target="_blank" rel="nofollow ${affiliateActive ? 'sponsored ' : ''}noopener" data-rakuten-link data-affiliate-active="${affiliateFlag}" data-placement="rakuten_${esc(category)}_button">楽天市場で詳細を見る ↗</a>
           </div>
         </article>`).join('');
 
       if (status) status.textContent = `${data.label || 'おすすめ商品'}を表示中。価格・在庫は楽天市場で最新情報をご確認ください。`;
       container.hidden = false;
 
-      if (typeof window.trackSiteEvent === 'function') {
-        window.trackSiteEvent('affiliate_offer_view', {program:'rakuten', placement:`rakuten_${category}`});
+      if (affiliateActive && typeof window.trackSiteEvent === 'function') {
+        window.trackSiteEvent('affiliate_offer_view', {program:'rakuten',placement:`rakuten_${category}`,items:items.length});
       }
     } catch (error) {
       const message = String(error?.message || error || '通信エラー').slice(0,160);
@@ -101,9 +118,8 @@
     const hits = Number(root.dataset.hits || 6);
     const eager = location.pathname === '/factory-items' || location.pathname === '/factory-items.html' || root.dataset.eager === '1';
 
-    if (eager) {
-      load(root, category, hits);
-    } else if ('IntersectionObserver' in window) {
+    if (eager) load(root, category, hits);
+    else if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver(entries => {
         if (entries.some(x => x.isIntersecting)) {
           io.disconnect();
@@ -111,9 +127,7 @@
         }
       }, {rootMargin:'300px'});
       io.observe(root);
-    } else {
-      load(root, category, hits);
-    }
+    } else load(root, category, hits);
   });
 
   if (location.pathname === '/' && !document.querySelector('[data-rakuten-home]')) {
@@ -138,10 +152,10 @@
       section.dataset.category = articleCategory;
       section.dataset.hits = '4';
       section.innerHTML = `
-        <div class="rakuten-widget-head"><div><span class="eyebrow">仕事を整えるアイテム</span><h2>この記事に関連する楽天市場の商品</h2><p>職場のルール・指定品を優先し、必要なものだけ比較してください。</p></div><a href="/factory-items">工場勤務の便利アイテム一覧 →</a></div>
+        <div class="rakuten-widget-head"><div><span class="eyebrow">仕事を整えるアイテム</span><h2>この記事に関連する楽天市場の商品</h2><p>記事テーマと直接関係する用品だけを表示しています。職場のルール・指定品を優先してください。</p></div><a href="/factory-items">工場勤務の便利アイテム一覧 →</a></div>
         <p class="rakuten-status" data-rakuten-status>商品を準備しています…</p>
         <div class="rakuten-grid compact" data-rakuten-grid></div>
-        <p class="rakuten-disclaimer">PR：楽天アフィリエイトを利用しています。価格・在庫・送料・仕様は販売ページの最新情報をご確認ください。安全保護具は勤務先の規定・指定品を優先してください。</p>`;
+        <p class="rakuten-disclaimer">楽天アフィリエイトを利用する場合があります。価格・在庫・送料・仕様は販売ページの最新情報をご確認ください。安全保護具は勤務先の規定・指定品を優先してください。</p>`;
       const faq = article.querySelector('#faq');
       if (faq) faq.before(section); else article.appendChild(section);
       load(section, articleCategory, 4);
