@@ -5,6 +5,14 @@
   const money = n => Number(n || 0).toLocaleString('ja-JP');
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
+  const nav = document.querySelector('.site-header nav');
+  if (nav && !nav.querySelector('a[href="/factory-items"]')) {
+    const a = document.createElement('a');
+    a.href = '/factory-items';
+    a.textContent = '仕事グッズ';
+    nav.appendChild(a);
+  }
+
   const articleCategory = (() => {
     const slug = location.pathname.split('/').filter(Boolean).pop() || '';
     const map = {
@@ -96,6 +104,18 @@
       io.observe(root);
     } else load(root, category, Number(root.dataset.hits || 6));
   });
+
+  if (location.pathname === '/' && !document.querySelector('[data-rakuten-home]')) {
+    const main = document.querySelector('main');
+    if (main) {
+      const section = document.createElement('section');
+      section.className = 'section rakuten-home-section';
+      section.dataset.rakutenHome = '';
+      section.innerHTML = `<div class="container"><div class="rakuten-home-box"><span class="eyebrow">仕事を整える</span><h2>工場勤務の便利アイテムも比較できます</h2><p>安全靴、暑さ対策、夜勤の睡眠環境、通勤用品などを楽天市場の商品情報から確認できます。職場の指定品・安全基準を優先してください。</p><div class="category-links"><a href="/factory-items">仕事グッズ一覧 →</a><a href="/factory-items#shoes">安全靴</a><a href="/factory-items#night">夜勤・睡眠</a><a href="/factory-items#summer">暑さ対策</a></div></div></div>`;
+      const target = main.querySelector('#prep') || main.children[Math.min(4, main.children.length - 1)];
+      if (target) target.before(section); else main.appendChild(section);
+    }
+  }
 
   if (articleCategory && location.pathname.startsWith('/articles/')) {
     const article = document.querySelector('article.article-main, article');
