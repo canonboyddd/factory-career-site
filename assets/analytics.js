@@ -68,15 +68,8 @@
   }
 
   const d1Events = new Set([
-    'scroll_depth',
-    'engaged_30s',
-    'affiliate_click_unified',
-    'comparison_page_click',
-    'diagnosis_entry_click',
-    'tool_entry_click',
-    'internal_navigation',
-    'external_link_click',
-    'affiliate_offer_view'
+    'scroll_depth','engaged_30s','affiliate_click_unified','comparison_page_click',
+    'diagnosis_entry_click','tool_entry_click','internal_navigation','external_link_click','affiliate_offer_view'
   ]);
 
   function collect(eventName, detail={}) {
@@ -142,10 +135,7 @@
   };
 
   collect('page_view', {});
-  window.trackSiteEvent('site_page_context', {
-    referrer_type: safeReferrer || 'direct',
-    title: document.title
-  });
+  window.trackSiteEvent('site_page_context', {referrer_type:safeReferrer || 'direct',title:document.title});
 
   const sentDepths = new Set();
   function trackDepth() {
@@ -155,7 +145,7 @@
     [25,50,75,90].forEach(mark => {
       if (pct >= mark && !sentDepths.has(mark)) {
         sentDepths.add(mark);
-        window.trackSiteEvent('scroll_depth', { percent: mark });
+        window.trackSiteEvent('scroll_depth', {percent:mark});
       }
     });
   }
@@ -167,12 +157,14 @@
   }, 30000);
 
   function affiliateProgram(link) {
+    if (link.matches('[data-rakuten-link]') || link.closest('[data-rakuten-card]')) return 'rakuten';
     const card = link.closest('[data-program-card],[data-review-program]');
     const fromData = card?.dataset?.programCard || card?.dataset?.reviewProgram || '';
     if (fromData) return fromData;
     const href = link.href || '';
+    if (href.includes('0100q5')) return 'zen';
+    if (href.includes('0100q6np') || href.includes('samuraijob')) return 'samuraiJob';
     if (href.includes('a8.net') || href.includes('makers-job')) return 'makersJob';
-    if (href.includes('accesstrade.net') || href.includes('samuraijob')) return 'samuraiJob';
     return 'other';
   }
 
@@ -184,14 +176,17 @@
 
     const placement = link.dataset.placement
       || link.closest('[data-program-card]')?.dataset?.programCard
+      || link.closest('[data-rakuten-card]')?.dataset?.rakutenCard
       || link.closest('section')?.className
       || 'link';
 
-    if (
-      link.matches('[data-program-link],[data-review-affiliate],[data-affiliate-link]') ||
-      target.hostname.includes('a8.net') ||
-      target.hostname.includes('accesstrade.net')
-    ) {
+    const rakutenAffiliate = link.matches('[data-rakuten-link]') && link.dataset.affiliateActive === '1';
+    const knownAffiliate = link.matches('[data-program-link],[data-review-affiliate],[data-affiliate-link]')
+      || target.hostname.includes('a8.net')
+      || target.hostname.includes('accesstrade.net')
+      || rakutenAffiliate;
+
+    if (knownAffiliate) {
       window.trackSiteEvent('affiliate_click_unified', {
         program: affiliateProgram(link),
         placement: String(placement).slice(0,100),
@@ -202,21 +197,12 @@
 
     if (target.origin === location.origin) {
       const to = target.pathname;
-      window.trackSiteEvent('internal_navigation', {
-        to_path: to,
-        placement: String(placement).slice(0,100)
-      });
-      if (to.includes('/articles/manufacturing-agent-guide')) {
-        window.trackSiteEvent('comparison_page_click', { to_path: to });
-      }
-      if (to.includes('/diagnosis')) {
-        window.trackSiteEvent('diagnosis_entry_click', { to_path: to });
-      }
-      if (to.includes('/tools/')) {
-        window.trackSiteEvent('tool_entry_click', { to_path: to });
-      }
+      window.trackSiteEvent('internal_navigation', {to_path:to,placement:String(placement).slice(0,100)});
+      if (to.includes('/articles/manufacturing-agent-guide')) window.trackSiteEvent('comparison_page_click', {to_path:to});
+      if (to.includes('/diagnosis')) window.trackSiteEvent('diagnosis_entry_click', {to_path:to});
+      if (to.includes('/tools/')) window.trackSiteEvent('tool_entry_click', {to_path:to});
     } else {
-      window.trackSiteEvent('external_link_click', { outbound_domain: target.hostname });
+      window.trackSiteEvent('external_link_click', {outbound_domain:target.hostname});
     }
   }, true);
 
@@ -230,7 +216,7 @@
         const id = key + ':' + path + ':' + (el.dataset.placement || el.className);
         if (!key || seen.has(id)) return;
         seen.add(id);
-        window.trackSiteEvent('affiliate_offer_view', { program:key, placement: el.dataset.placement || 'offer' });
+        window.trackSiteEvent('affiliate_offer_view', {program:key,placement:el.dataset.placement || 'offer'});
       });
     }, {threshold:[0.35]});
     document.querySelectorAll('[data-program-card]:not([hidden]), [data-review-affiliate]').forEach(el => io.observe(el));
