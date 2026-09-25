@@ -14,7 +14,7 @@ function json(data, status = 200, extra = {}) {
     status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'public, max-age=900, s-maxage=21600',
+      'cache-control': 'no-store',
       ...extra
     }
   });
@@ -36,18 +36,30 @@ function safeNumber(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
+function redact(text, secrets = []) {
+  let out = String(text || '');
+  for (const secret of secrets) {
+    if (secret) out = out.split(secret).join('[redacted]');
+  }
+  return out.slice(0, 1000);
+}
+
 export async function onRequestGet({ request, env }) {
   const appId = String(env.RAKUTEN_APP_ID || '').trim();
   const accessKey = String(env.RAKUTEN_ACCESS_KEY || '').trim();
   const affiliateId = String(env.RAKUTEN_AFFILIATE_ID || '').trim();
+  const url = new URL(request.url);
+  const diag = url.searchParams.get('diag') === '1';
 
   const missing = [];
   if (!appId) missing.push('RAKUTEN_APP_ID');
   if (!accessKey) missing.push('RAKUTEN_ACCESS_KEY');
   if (!affiliateId) missing.push('RAKUTEN_AFFILIATE_ID');
-  if (missing.length) return json({ ok:false, setup_required:true, missing }, 503);
+  if (missing.length) {
+    const payload = { ok:false, setup_required:true, missing };
+    return json(payload, diag ? 200 : 503);
+  }
 
-  const url = new URL(request.url);
   const key = String(url.searchParams.get('category') || 'work');
   const category = CATEGORIES[key] || CATEGORIES.work;
   const hits = Math.min(8, Math.max(3, Number(url.searchParams.get('hits') || 6)));
@@ -67,18 +79,29 @@ export async function onRequestGet({ request, env }) {
   const endpoint = `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701?${params}`;
 
   try {
-    const res = await fetch(endpoint, {
-      cf: { cacheEverything: true, cacheTtl: 21600 }
-    });
-    const body = await res.json().catch(() => ({}));
+    const res = await fetch(endpoint, { cf: { cacheEverything: false } });
+    const raw = await res.text();
+    let body = {};
+    try { body = raw ? JSON.parse(raw) : {}; } catch (_) {}
 
     if (!res.ok) {
-      return json({
+      const detail = body?.error_description || body?.error || redact(raw, [appId, accessKey, affiliateId]) || 'Rakuten API error';
+      const payload = {
         ok:false,
         error:'rakuten_api_error',
         status:res.status,
-        detail:String(body?.error_description || body?.error || 'Rakuten API error').slice(0,240)
-      }, res.status === 429 ? 429 : 502);
+        detail:String(detail).slice(0,500)
+      };
+      if (diag) {
+        payload.diagnostics = {
+          app_id_present:true,
+          access_key_present:true,
+          affiliate_id_present:true,
+          content_type:res.headers.get('content-type') || '',
+          body_preview:redact(raw, [appId, accessKey, affiliateId])
+        };
+      }
+      return json(payload, diag ? 200 : (res.status === 429 ? 429 : 502));
     }
 
     const rawItems = body.items || body.Items || [];
@@ -99,13 +122,15 @@ export async function onRequestGet({ request, env }) {
       category:key,
       label:category.label,
       updated_at:new Date().toISOString(),
-      items
-    });
+      items,
+      ...(diag ? { diagnostics:{ item_count:items.length, content_type:res.headers.get('content-type') || '' } } : {})
+    }, 200, { 'cache-control': diag ? 'no-store' : 'public, max-age=900, s-maxage=21600' });
   } catch (error) {
-    return json({
+    const payload = {
       ok:false,
       error:'rakuten_fetch_failed',
-      detail:String(error?.message || error).slice(0,240)
-    }, 502);
+      detail:String(error?.message || error).slice(0,500)
+    };
+    return json(payload, diag ? 200 : 502);
   }
 }
