@@ -16,7 +16,17 @@ window.SITE_CONFIG = {
       referrerPolicy: "no-referrer-when-downgrade"
     },
     magicari: { name: "マジキャリ", url: "" },
-    zen: { name: "ZENの退職代行", url: "" }
+    zen: {
+      name: "ZENの退職代行",
+      url: "https://h.accesstrade.net/sp/cc?rk=0100q5pa00oyrf",
+      impressionPixel: "https://h.accesstrade.net/sp/rr?rk=0100q5pa00oyrf",
+      referrerPolicy: "no-referrer-when-downgrade",
+      banners: {
+        small: { url: "https://h.accesstrade.net/sp/cc?rk=0100q5nd00oyrf", image: "https://h.accesstrade.net/sp/rr?rk=0100q5nd00oyrf", width: 120, height: 60 },
+        large: { url: "https://h.accesstrade.net/sp/cc?rk=0100q5ne00oyrf", image: "https://h.accesstrade.net/sp/rr?rk=0100q5ne00oyrf", width: 300, height: 250 },
+        square: { url: "https://h.accesstrade.net/sp/cc?rk=0100q5nf00oyrf", image: "https://h.accesstrade.net/sp/rr?rk=0100q5nf00oyrf", width: 250, height: 250 }
+      }
+    }
   },
   articleProgramPriority: {
     "factory-quit.html": ["makersJob", "zen"], "night-shift-hard.html": ["makersJob", "zen"],
@@ -29,15 +39,16 @@ window.SITE_CONFIG = {
     "maintenance-career.html": ["makersJob", "samuraiJob"], "machine-design-career.html": ["samuraiJob", "makersJob"],
     "electrical-design-career.html": ["samuraiJob", "makersJob"], "production-control-career.html": ["makersJob", "samuraiJob"],
     "quality-assurance-career.html": ["samuraiJob", "makersJob"], "inspection-career.html": ["makersJob"],
-    "operator-quit.html": ["makersJob", "magicari"], "line-work-quit.html": ["makersJob", "magicari"],
-    "factory-overtime.html": ["makersJob"], "factory-holidays.html": ["makersJob"], "factory-body-hard.html": ["makersJob", "magicari"],
-    "factory-no-future.html": ["makersJob", "magicari"], "factory-resignation-reasons.html": ["makersJob", "zen"],
+    "operator-quit.html": ["makersJob", "zen"], "line-work-quit.html": ["makersJob", "zen"],
+    "factory-overtime.html": ["makersJob"], "factory-holidays.html": ["makersJob"], "factory-body-hard.html": ["makersJob", "zen"],
+    "factory-no-future.html": ["makersJob", "zen"], "factory-resignation-reasons.html": ["makersJob", "zen"],
     "factory-shift-change.html": ["makersJob"], "factory-commute-long.html": ["makersJob"], "factory-small-company.html": ["makersJob", "samuraiJob"],
     "assembly-career.html": ["makersJob"], "automotive-parts-career.html": ["makersJob", "samuraiJob"],
     "manufacturing-20s.html": ["makersJob", "magicari"], "manufacturing-50s.html": ["makersJob"],
     "factory-night-to-day.html": ["makersJob"], "factory-bonus-low.html": ["makersJob", "samuraiJob"],
     "factory-resume.html": ["samuraiJob", "makersJob"], "factory-interview.html": ["samuraiJob", "makersJob"],
     "factory-job-offer-check.html": ["samuraiJob", "makersJob"],
+    "factory-human-relations.html": ["makersJob", "zen"], "factory-short-tenure-job-change.html": ["makersJob", "zen"],
     "plc-career.html": ["samuraiJob", "makersJob"], "maintenance-qualification.html": ["samuraiJob", "makersJob"],
     "production-tech-overseas-travel.html": ["samuraiJob", "makersJob"], "quality-claim-hard.html": ["samuraiJob", "makersJob"],
     "quality-audit-hard.html": ["samuraiJob", "makersJob"], "production-control-overtime.html": ["samuraiJob", "makersJob"],
@@ -62,6 +73,16 @@ Object.entries(window.SITE_CONFIG.articleProgramPriority || {}).forEach(([key, v
   link.rel = 'stylesheet';
   link.href = '/assets/colorful.css';
   link.dataset.colorfulTheme = '';
+  document.head.appendChild(link);
+})();
+
+// Load Rakuten widgets style once. The JS stays harmless on pages without a product slot.
+(() => {
+  if (document.querySelector('link[data-rakuten-theme]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = '/assets/rakuten.css';
+  link.dataset.rakutenTheme = '';
   document.head.appendChild(link);
 })();
 
@@ -113,6 +134,7 @@ function loadSiteScript(src, marker) {
 
 async function bootstrapSiteEnhancements() {
   await loadSiteScript('/assets/analytics.js', 'data-auto-analytics-script');
+  await loadSiteScript('/assets/rakuten-products.js', 'data-rakuten-products-script');
   const path = window.location.pathname;
   const isArticleDetail = path.includes('/articles/') && !path.endsWith('/articles/') && !/\/articles\/index(?:\.html)?$/i.test(path);
 
