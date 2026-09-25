@@ -44,6 +44,10 @@ function redact(text, secrets = []) {
   return out.slice(0, 1000);
 }
 
+function parseBody(raw) {
+  try { return raw ? JSON.parse(raw) : {}; } catch (_) { return {}; }
+}
+
 export async function onRequestGet({ request, env }) {
   const appId = String(env.RAKUTEN_APP_ID || '').trim();
   const accessKey = String(env.RAKUTEN_ACCESS_KEY || '').trim();
@@ -54,36 +58,63 @@ export async function onRequestGet({ request, env }) {
   const missing = [];
   if (!appId) missing.push('RAKUTEN_APP_ID');
   if (!accessKey) missing.push('RAKUTEN_ACCESS_KEY');
-  if (!affiliateId) missing.push('RAKUTEN_AFFILIATE_ID');
   if (missing.length) {
-    const payload = { ok:false, setup_required:true, missing };
-    return json(payload, diag ? 200 : 503);
+    return json({ ok:false, setup_required:true, missing }, diag ? 200 : 503);
   }
 
   const key = String(url.searchParams.get('category') || 'work');
   const category = CATEGORIES[key] || CATEGORIES.work;
   const hits = Math.min(8, Math.max(3, Number(url.searchParams.get('hits') || 6)));
 
-  const params = new URLSearchParams({
-    applicationId: appId,
-    accessKey,
-    affiliateId,
-    keyword: category.keyword,
-    hits: String(hits),
-    sort: category.sort,
-    format: 'json',
-    formatVersion: '2',
-    elements: 'itemName,itemPrice,itemUrl,affiliateUrl,mediumImageUrls,shopName,reviewAverage,reviewCount,itemCaption,postageFlag'
-  });
+  async function callRakuten(useAffiliate) {
+    const params = new URLSearchParams({
+      applicationId: appId,
+      accessKey,
+      keyword: category.keyword,
+      hits: String(hits),
+      sort: category.sort,
+      format: 'json',
+      formatVersion: '2',
+      elements: 'itemName,itemPrice,itemUrl,affiliateUrl,mediumImageUrls,shopName,reviewAverage,reviewCount,itemCaption,postageFlag'
+    });
+    if (useAffiliate && affiliateId) params.set('affiliateId', affiliateId);
 
-  const endpoint = `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701?${params}`;
-
-  try {
+    const endpoint = `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701?${params}`;
     const res = await fetch(endpoint, { cf: { cacheEverything: false } });
     const raw = await res.text();
-    let body = {};
-    try { body = raw ? JSON.parse(raw) : {}; } catch (_) {}
+    return { res, raw, body: parseBody(raw) };
+  }
 
+  try {
+    let first = await callRakuten(Boolean(affiliateId));
+
+    if (!first.res.ok && affiliateId) {
+      const withoutAffiliate = await callRakuten(false);
+
+      if (withoutAffiliate.res.ok) {
+        const payload = {
+          ok:false,
+          error:'affiliate_id_rejected',
+          status:first.res.status,
+          detail:'楽天API本体の認証は成功しましたが、RAKUTEN_AFFILIATE_IDを付けると楽天側で拒否されています。楽天アフィリエイトIDの値を確認してください。'
+        };
+        if (diag) {
+          payload.diagnostics = {
+            app_id_access_key_ok:true,
+            affiliate_id_present:true,
+            request_with_affiliate_status:first.res.status,
+            request_without_affiliate_status:withoutAffiliate.res.status,
+            affiliate_error:first.body?.error_description || first.body?.error || redact(first.raw, [appId, accessKey, affiliateId]),
+            affiliate_error_body:redact(first.raw, [appId, accessKey, affiliateId])
+          };
+        }
+        return json(payload, diag ? 200 : 502);
+      }
+
+      first = withoutAffiliate;
+    }
+
+    const { res, raw, body } = first;
     if (!res.ok) {
       const detail = body?.error_description || body?.error || redact(raw, [appId, accessKey, affiliateId]) || 'Rakuten API error';
       const payload = {
@@ -96,7 +127,8 @@ export async function onRequestGet({ request, env }) {
         payload.diagnostics = {
           app_id_present:true,
           access_key_present:true,
-          affiliate_id_present:true,
+          affiliate_id_present:Boolean(affiliateId),
+          authentication_test_without_affiliate:true,
           content_type:res.headers.get('content-type') || '',
           body_preview:redact(raw, [appId, accessKey, affiliateId])
         };
@@ -122,6 +154,7 @@ export async function onRequestGet({ request, env }) {
       category:key,
       label:category.label,
       updated_at:new Date().toISOString(),
+      affiliate_active:Boolean(affiliateId),
       items,
       ...(diag ? { diagnostics:{ item_count:items.length, content_type:res.headers.get('content-type') || '' } } : {})
     }, 200, { 'cache-control': diag ? 'no-store' : 'public, max-age=900, s-maxage=21600' });
