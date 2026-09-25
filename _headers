@@ -21,6 +21,18 @@
 /robots.txt
   Content-Type: text/plain; charset=UTF-8
 
+/assets/central-tracker.js
+  Cache-Control: no-cache, must-revalidate
+
+/assets/ops-dashboard.js
+  Cache-Control: no-cache, must-revalidate
+
+/assets/ops-dashboard.css
+  Cache-Control: no-cache, must-revalidate
+
+/ops-dashboard
+  Cache-Control: no-cache, must-revalidate
+
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
