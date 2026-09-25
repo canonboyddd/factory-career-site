@@ -38,7 +38,7 @@
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) {
         if (data.setup_required) {
-          container.hidden = true;
+          if (status) status.textContent = '楽天APIの設定を確認中です。';
           return;
         }
         throw new Error(data.detail || data.error || '商品を取得できませんでした');
@@ -46,7 +46,7 @@
 
       const items = Array.isArray(data.items) ? data.items : [];
       if (!items.length) {
-        container.hidden = true;
+        if (status) status.textContent = '現在表示できる商品がありません。';
         return;
       }
 
@@ -94,15 +94,22 @@
   document.querySelectorAll('[data-rakuten-widget]').forEach(root => {
     bindCategoryButtons(root);
     const category = root.dataset.category || 'work';
-    if ('IntersectionObserver' in window) {
+    const hits = Number(root.dataset.hits || 6);
+    const eager = location.pathname === '/factory-items' || location.pathname === '/factory-items.html' || root.dataset.eager === '1';
+
+    if (eager) {
+      load(root, category, hits);
+    } else if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver(entries => {
         if (entries.some(x => x.isIntersecting)) {
           io.disconnect();
-          load(root, category, Number(root.dataset.hits || 6));
+          load(root, category, hits);
         }
       }, {rootMargin:'300px'});
       io.observe(root);
-    } else load(root, category, Number(root.dataset.hits || 6));
+    } else {
+      load(root, category, hits);
+    }
   });
 
   if (location.pathname === '/' && !document.querySelector('[data-rakuten-home]')) {
