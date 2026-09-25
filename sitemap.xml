@@ -2,9 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://factory-career-site.pages.dev/</loc><lastmod>2026-09-25</lastmod></url>
   <url><loc>https://factory-career-site.pages.dev/diagnosis</loc></url>
-  <url><loc>https://factory-career-site.pages.dev/articles/</loc><lastmod>2026-09-25</lastmod></url>
+  <url><loc>https://factory-career-site.pages.dev/articles/</loc><lastmod>2026-09-26</lastmod></url>
   <url><loc>https://factory-career-site.pages.dev/tools/</loc></url>
-  <url><loc>https://factory-career-site.pages.dev/factory-items</loc><lastmod>2026-09-25</lastmod></url>
+  <url><loc>https://factory-career-site.pages.dev/factory-items</loc><lastmod>2026-09-26</lastmod></url>
   <url><loc>https://factory-career-site.pages.dev/workstyle-guide</loc><lastmod>2026-09-22</lastmod></url>
   <url><loc>https://factory-career-site.pages.dev/salary-guide</loc><lastmod>2026-09-22</lastmod></url>
   <url><loc>https://factory-career-site.pages.dev/career-guide</loc><lastmod>2026-09-22</lastmod></url>
@@ -20,7 +20,8 @@
   <url><loc>https://factory-career-site.pages.dev/articles/cleanroom-career</loc></url>
   <url><loc>https://factory-career-site.pages.dev/articles/electrical-design-career</loc></url>
   <url><loc>https://factory-career-site.pages.dev/articles/factory-basic-salary-low</loc></url>
-  <url><loc>https://factory-career-site.pages.dev/articles/factory-body-hard</loc></url>
+  <url><loc>https://factory-career-site.pages.dev/articles/factory-body-hard</loc><lastmod>2026-09-26</lastmod></url>
+  <url><loc>https://factory-career-site.pages.dev/articles/factory-heat-hard</loc><lastmod>2026-09-26</lastmod></url>
   <url><loc>https://factory-career-site.pages.dev/articles/factory-bonus-low</loc></url>
   <url><loc>https://factory-career-site.pages.dev/articles/factory-commute-long</loc></url>
   <url><loc>https://factory-career-site.pages.dev/articles/factory-contract-worker-permanent</loc></url>
