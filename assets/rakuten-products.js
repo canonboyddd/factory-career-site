@@ -41,7 +41,10 @@
           if (status) status.textContent = '楽天APIの設定を確認中です。';
           return;
         }
-        throw new Error(data.detail || data.error || '商品を取得できませんでした');
+        const message = String(data.detail || data.error || `HTTP ${res.status}`).slice(0,160);
+        if (status) status.textContent = `楽天APIエラー: ${message}`;
+        grid.innerHTML = '';
+        return;
       }
 
       const items = Array.isArray(data.items) ? data.items : [];
@@ -74,7 +77,8 @@
         window.trackSiteEvent('affiliate_offer_view', {program:'rakuten', placement:`rakuten_${category}`});
       }
     } catch (error) {
-      if (status) status.textContent = '現在、商品情報を取得できません。時間をおいて再度ご確認ください。';
+      const message = String(error?.message || error || '通信エラー').slice(0,160);
+      if (status) status.textContent = `楽天API通信エラー: ${message}`;
       grid.innerHTML = '';
     }
   }
