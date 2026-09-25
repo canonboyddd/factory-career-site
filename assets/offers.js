@@ -62,6 +62,16 @@
       });
       card.querySelectorAll('[data-program-name]').forEach(el=>{if(program.name)el.textContent=program.name;});
 
+      if(key==='zen' && !card.querySelector('[data-zen-guide]')){
+        const guide=document.createElement('a');
+        guide.href='/resignation-support';
+        guide.dataset.zenGuide='';
+        guide.textContent='退職代行を使う前に確認すること →';
+        guide.style.cssText='display:inline-block;margin:2px 0 10px;font-weight:800;color:#0f766e;';
+        const button=card.querySelector('[data-program-link]');
+        if(button) button.before(guide); else card.appendChild(guide);
+      }
+
       if(key==='zen' && program.banners?.large && !card.querySelector('[data-zen-banner]')){
         const banner=program.banners.large;
         const wrap=document.createElement('a');
@@ -94,6 +104,11 @@
         img.dataset.affiliateImpression='';
         img.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;';
         card.appendChild(img);
+      }
+
+      if(!card.dataset.offerViewSent){
+        card.dataset.offerViewSent='1';
+        window.trackSiteEvent?.('affiliate_offer_view',{program:key,placement:'offer_card'});
       }
     });
 
