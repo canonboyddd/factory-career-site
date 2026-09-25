@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Rakuten API diagnostics</title>
+</head>
+<body>
+  <main>
+    <h1>Rakuten API diagnostics</h1>
+    <pre id="out">checking...</pre>
+  </main>
+  <script>
+    (async()=>{
+      const out=document.getElementById('out');
+      try{
+        const r=await fetch('/api/rakuten/items?category=work&hits=3&diag=1',{cache:'no-store'});
+        const t=await r.text();
+        out.textContent='HTTP '+r.status+'\n'+t;
+      }catch(e){
+        out.textContent='fetch_failed: '+String(e&&e.message||e);
+      }
+    })();
+  </script>
+</body>
+</html>
