@@ -20,6 +20,14 @@ function json(data, status = 200, extra = {}) {
   });
 }
 
+function debugHtml(data) {
+  const safe = JSON.stringify(data).replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]));
+  return new Response(`<!doctype html><meta charset="utf-8"><title>Rakuten diagnostic</title><pre>${safe}</pre>`, {
+    status: 200,
+    headers: { 'content-type':'text/html; charset=utf-8', 'cache-control':'no-store' }
+  });
+}
+
 function imageOf(item) {
   const list = item.mediumImageUrls || item.smallImageUrls || item.imageUrls || [];
   const first = Array.isArray(list) ? list[0] : '';
@@ -47,7 +55,10 @@ export async function onRequestGet({ request, env }) {
   if (!appId) missing.push('RAKUTEN_APP_ID');
   if (!accessKey) missing.push('RAKUTEN_ACCESS_KEY');
   if (!affiliateId) missing.push('RAKUTEN_AFFILIATE_ID');
-  if (missing.length) return json({ ok:false, setup_required:true, missing }, debug ? 200 : 503);
+  if (missing.length) {
+    const payload = { ok:false, setup_required:true, missing };
+    return debug ? debugHtml(payload) : json(payload, 503);
+  }
 
   const key = String(url.searchParams.get('category') || 'work');
   const category = CATEGORIES[key] || CATEGORIES.work;
@@ -78,9 +89,9 @@ export async function onRequestGet({ request, env }) {
         error:'rakuten_api_error',
         status:res.status,
         detail:String(body?.error_description || body?.error || 'Rakuten API error').slice(0,240),
-        diagnostics: debug ? { app_id_present:!!appId, access_key_present:!!accessKey, affiliate_id_present:!!affiliateId } : undefined
+        diagnostics:{ app_id_present:!!appId, access_key_present:!!accessKey, affiliate_id_present:!!affiliateId }
       };
-      return json(payload, debug ? 200 : (res.status === 429 ? 429 : 502));
+      return debug ? debugHtml(payload) : json(payload, res.status === 429 ? 429 : 502);
     }
 
     const rawItems = body.items || body.Items || [];
@@ -96,14 +107,16 @@ export async function onRequestGet({ request, env }) {
       postageFlag: safeNumber(item.postageFlag)
     })).filter(item => item.name && item.url);
 
-    return json({
+    const payload = {
       ok:true,
       category:key,
       label:category.label,
       updated_at:new Date().toISOString(),
       items
-    });
+    };
+    return debug ? debugHtml({ ...payload, diagnostics:{ app_id_present:!!appId, access_key_present:!!accessKey, affiliate_id_present:!!affiliateId } }) : json(payload);
   } catch (error) {
-    return json({ ok:false, error:'rakuten_fetch_failed', detail:String(error?.message || error).slice(0,240), diagnostics: debug ? { app_id_present:!!appId, access_key_present:!!accessKey, affiliate_id_present:!!affiliateId } : undefined }, debug ? 200 : 502);
+    const payload = { ok:false, error:'rakuten_fetch_failed', detail:String(error?.message || error).slice(0,240), diagnostics:{ app_id_present:!!appId, access_key_present:!!accessKey, affiliate_id_present:!!affiliateId } };
+    return debug ? debugHtml(payload) : json(payload, 502);
   }
 }
