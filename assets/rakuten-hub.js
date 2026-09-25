@@ -9,33 +9,26 @@
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   let requestSeq = 0;
 
-  function setStatus(text) {
-    if (status) status.textContent = text;
-  }
+  function setStatus(text) { if (status) status.textContent = text; }
 
   async function fetchJson(url, timeoutMs = 12000) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort('timeout'), timeoutMs);
     try {
-      const res = await fetch(url, {
-        cache: 'no-store',
-        headers: { 'Accept': 'application/json' },
-        signal: controller.signal
-      });
+      const res = await fetch(url, {cache:'no-store',headers:{'Accept':'application/json'},signal:controller.signal});
       const text = await res.text();
       let data = {};
       try { data = text ? JSON.parse(text) : {}; } catch (_) {}
       return { res, data };
-    } finally {
-      clearTimeout(timer);
-    }
+    } finally { clearTimeout(timer); }
   }
 
   function render(items, category, affiliateActive) {
     if (!grid) return;
+    const affiliateFlag = affiliateActive ? '1' : '0';
     grid.innerHTML = items.map((item, index) => `
       <article class="rakuten-product" data-rakuten-card="${esc(category)}_${index + 1}">
-        <a class="rakuten-product-image" href="${esc(item.url)}" target="_blank" rel="nofollow ${affiliateActive ? 'sponsored ' : ''}noopener" data-rakuten-link data-placement="product_image">
+        <a class="rakuten-product-image" href="${esc(item.url)}" target="_blank" rel="nofollow ${affiliateActive ? 'sponsored ' : ''}noopener" data-rakuten-link data-affiliate-active="${affiliateFlag}" data-placement="rakuten_${esc(category)}_image">
           ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" decoding="async">` : '<span class="rakuten-no-image">画像準備中</span>'}
         </a>
         <div class="rakuten-product-body">
@@ -46,24 +39,13 @@
             ${item.reviewCount ? `<span>★ ${Number(item.reviewAverage || 0).toFixed(1)} / ${money(item.reviewCount)}件</span>` : ''}
           </div>
           ${item.shop ? `<p class="rakuten-shop">${esc(item.shop)}</p>` : ''}
-          <a class="btn btn-primary rakuten-buy" href="${esc(item.url)}" target="_blank" rel="nofollow ${affiliateActive ? 'sponsored ' : ''}noopener" data-rakuten-link data-placement="product_button">楽天市場で詳細を見る ↗</a>
+          <a class="btn btn-primary rakuten-buy" href="${esc(item.url)}" target="_blank" rel="nofollow ${affiliateActive ? 'sponsored ' : ''}noopener" data-rakuten-link data-affiliate-active="${affiliateFlag}" data-placement="rakuten_${esc(category)}_button">楽天市場で詳細を見る ↗</a>
         </div>
       </article>`).join('');
 
     grid.style.display = 'grid';
     grid.style.visibility = 'visible';
     grid.style.opacity = '1';
-
-    grid.querySelectorAll('[data-rakuten-link]').forEach(link => {
-      link.addEventListener('click', () => {
-        window.trackSiteEvent?.('affiliate_click', {
-          program: 'rakuten',
-          page: location.pathname,
-          placement: link.dataset.placement || 'product',
-          affiliate_active: affiliateActive
-        });
-      });
-    });
   }
 
   async function load(category = 'work', hits = 8) {
@@ -106,7 +88,9 @@
     const affiliateActive = data.affiliate_active === true;
     render(items, category, affiliateActive);
     setStatus(`${data.label || '楽天市場の商品'}を${items.length}件表示中。価格・在庫は楽天市場で最新情報をご確認ください。`);
-    window.trackSiteEvent?.('affiliate_offer_view', { program: 'rakuten', placement: `rakuten_${category}`, items: items.length, affiliate_active: affiliateActive });
+    if (affiliateActive) {
+      window.trackSiteEvent?.('affiliate_offer_view', {program:'rakuten',placement:`rakuten_${category}`,items:items.length});
+    }
   }
 
   buttons.forEach(button => {
