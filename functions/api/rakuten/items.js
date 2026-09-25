@@ -54,6 +54,7 @@ export async function onRequestGet({ request, env }) {
 
   const params = new URLSearchParams({
     applicationId: appId,
+    accessKey,
     affiliateId,
     keyword: category.keyword,
     hits: String(hits),
@@ -67,7 +68,6 @@ export async function onRequestGet({ request, env }) {
 
   try {
     const res = await fetch(endpoint, {
-      headers: { accessKey },
       cf: { cacheEverything: true, cacheTtl: 21600 }
     });
     const body = await res.json().catch(() => ({}));
