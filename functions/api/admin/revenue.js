@@ -43,9 +43,41 @@ async function ensureSchema(db) {
       browser_id TEXT PRIMARY KEY,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS affiliate_results (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      provider TEXT NOT NULL,
+      source_key TEXT NOT NULL,
+      source_id TEXT,
+      occurred_on TEXT,
+      confirmed_on TEXT,
+      status TEXT NOT NULL DEFAULT 'unknown',
+      program_key TEXT,
+      program_id TEXT,
+      program_name TEXT,
+      site_name TEXT,
+      page_url TEXT,
+      sales_amount REAL NOT NULL DEFAULT 0,
+      reward_amount REAL NOT NULL DEFAULT 0,
+      currency TEXT NOT NULL DEFAULT 'JPY',
+      imported_at TEXT NOT NULL DEFAULT (datetime('now')),
+      raw_json TEXT,
+      UNIQUE(provider, source_key)
+    )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS affiliate_imports (
+      import_id TEXT PRIMARY KEY,
+      provider TEXT NOT NULL,
+      file_name TEXT,
+      row_count INTEGER NOT NULL DEFAULT 0,
+      imported_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
     db.prepare('CREATE INDEX IF NOT EXISTS idx_analytics_time ON analytics_events(occurred_at)'),
     db.prepare('CREATE INDEX IF NOT EXISTS idx_analytics_event ON analytics_events(event_name)'),
-    db.prepare('CREATE INDEX IF NOT EXISTS idx_analytics_program ON analytics_events(program)')
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_analytics_program ON analytics_events(program)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_aff_results_provider ON affiliate_results(provider)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_aff_results_occurred ON affiliate_results(occurred_on)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_aff_results_confirmed ON affiliate_results(confirmed_on)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_aff_results_program ON affiliate_results(program_key, program_name)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_aff_results_status ON affiliate_results(status)')
   ]);
 }
 
@@ -195,6 +227,74 @@ export async function onRequestGet({ request, env }) {
       AND ${external}
       AND program IN ('rakuten','zen','makersJob','samuraiJob')`, [modifier]);
 
+  const actualProviders = await qAll('actual_providers', `WITH p(provider) AS (
+      VALUES ('rakuten'),('a8'),('accesstrade')
+    ), cutoff_day(day) AS (
+      SELECT date('now','+9 hours', ?)
+    ), a AS (
+      SELECT provider,
+        SUM(CASE WHEN occurred_on >= (SELECT day FROM cutoff_day) THEN reward_amount ELSE 0 END) AS generated_reward,
+        COUNT(CASE WHEN occurred_on >= (SELECT day FROM cutoff_day) THEN 1 END) AS generated_count,
+        SUM(CASE WHEN occurred_on >= (SELECT day FROM cutoff_day) THEN sales_amount ELSE 0 END) AS sales_amount,
+        SUM(CASE WHEN status='confirmed' AND COALESCE(NULLIF(confirmed_on,''),occurred_on) >= (SELECT day FROM cutoff_day) THEN reward_amount ELSE 0 END) AS confirmed_reward,
+        COUNT(CASE WHEN status='confirmed' AND COALESCE(NULLIF(confirmed_on,''),occurred_on) >= (SELECT day FROM cutoff_day) THEN 1 END) AS confirmed_count,
+        SUM(CASE WHEN status='cancelled' AND occurred_on >= (SELECT day FROM cutoff_day) THEN reward_amount ELSE 0 END) AS cancelled_reward,
+        COUNT(CASE WHEN status='cancelled' AND occurred_on >= (SELECT day FROM cutoff_day) THEN 1 END) AS cancelled_count
+      FROM affiliate_results
+      GROUP BY provider
+    )
+    SELECT p.provider,
+      COALESCE(a.generated_reward,0) AS generated_reward,
+      COALESCE(a.generated_count,0) AS generated_count,
+      COALESCE(a.sales_amount,0) AS sales_amount,
+      COALESCE(a.confirmed_reward,0) AS confirmed_reward,
+      COALESCE(a.confirmed_count,0) AS confirmed_count,
+      COALESCE(a.cancelled_reward,0) AS cancelled_reward,
+      COALESCE(a.cancelled_count,0) AS cancelled_count
+    FROM p LEFT JOIN a ON a.provider=p.provider
+    ORDER BY confirmed_reward DESC, generated_reward DESC`, [modifier]);
+
+  const actualPrograms = await qAll('actual_programs', `WITH cutoff_day(day) AS (
+      SELECT date('now','+9 hours', ?)
+    )
+    SELECT provider,
+      COALESCE(NULLIF(program_key,''),provider) AS program_key,
+      COALESCE(NULLIF(program_name,''),COALESCE(NULLIF(program_key,''),provider)) AS program_name,
+      SUM(CASE WHEN occurred_on >= (SELECT day FROM cutoff_day) THEN reward_amount ELSE 0 END) AS generated_reward,
+      COUNT(CASE WHEN occurred_on >= (SELECT day FROM cutoff_day) THEN 1 END) AS generated_count,
+      SUM(CASE WHEN occurred_on >= (SELECT day FROM cutoff_day) THEN sales_amount ELSE 0 END) AS sales_amount,
+      SUM(CASE WHEN status='confirmed' AND COALESCE(NULLIF(confirmed_on,''),occurred_on) >= (SELECT day FROM cutoff_day) THEN reward_amount ELSE 0 END) AS confirmed_reward,
+      COUNT(CASE WHEN status='confirmed' AND COALESCE(NULLIF(confirmed_on,''),occurred_on) >= (SELECT day FROM cutoff_day) THEN 1 END) AS confirmed_count,
+      SUM(CASE WHEN status='cancelled' AND occurred_on >= (SELECT day FROM cutoff_day) THEN reward_amount ELSE 0 END) AS cancelled_reward
+    FROM affiliate_results
+    GROUP BY provider,COALESCE(NULLIF(program_key,''),provider),COALESCE(NULLIF(program_name,''),COALESCE(NULLIF(program_key,''),provider))
+    HAVING generated_count>0 OR confirmed_count>0
+    ORDER BY confirmed_reward DESC, generated_reward DESC, generated_count DESC
+    LIMIT 100`, [modifier]);
+
+  const actualDaily = await qAll('actual_daily', `WITH cutoff_day(day) AS (
+      SELECT date('now','+9 hours', ?)
+    ), x AS (
+      SELECT occurred_on AS day,provider,'generated' AS kind,reward_amount AS reward
+      FROM affiliate_results
+      WHERE occurred_on >= (SELECT day FROM cutoff_day)
+      UNION ALL
+      SELECT COALESCE(NULLIF(confirmed_on,''),occurred_on) AS day,provider,'confirmed' AS kind,reward_amount AS reward
+      FROM affiliate_results
+      WHERE status='confirmed'
+        AND COALESCE(NULLIF(confirmed_on,''),occurred_on) >= (SELECT day FROM cutoff_day)
+    )
+    SELECT day,provider,kind,COUNT(*) AS count,SUM(reward) AS reward
+    FROM x
+    WHERE COALESCE(day,'')<>''
+    GROUP BY day,provider,kind
+    ORDER BY day ASC,provider ASC,kind ASC`, [modifier]);
+
+  const latestImports = await qAll('latest_imports', `SELECT import_id,provider,file_name,row_count,imported_at
+    FROM affiliate_imports
+    ORDER BY imported_at DESC
+    LIMIT 12`);
+
   return json({
     ok:true,
     days,
@@ -204,6 +304,10 @@ export async function onRequestGet({ request, env }) {
     page_program:rows(pageProgram),
     rakuten_placement:rows(rakutenPlacement),
     daily:rows(daily),
+    actual_providers:rows(actualProviders),
+    actual_programs:rows(actualPrograms),
+    actual_daily:rows(actualDaily),
+    latest_imports:rows(latestImports),
     query_errors:queryErrors
   });
 }
