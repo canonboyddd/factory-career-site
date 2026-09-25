@@ -51,6 +51,12 @@
     grid.style.display = 'grid';
     grid.style.visibility = 'visible';
     grid.style.opacity = '1';
+
+    if (affiliateActive && typeof window.trackSiteEvent === 'function') {
+      items.forEach((_, index) => window.trackSiteEvent('affiliate_offer_view', {
+        program:'rakuten', placement:`rakuten_${category}_card_${index + 1}`
+      }));
+    }
   }
 
   async function load(category = 'work', hits = 8) {
@@ -86,7 +92,6 @@
     const affiliateActive = data.affiliate_verified === true || data.affiliate_active === true;
     render(items, category, affiliateActive);
     setStatus(`${data.label || '楽天市場の商品'}を${items.length}件表示中。価格・在庫は楽天市場で最新情報をご確認ください。`);
-    if (affiliateActive) window.trackSiteEvent?.('affiliate_offer_view', {program:'rakuten',placement:`rakuten_${category}`,items:items.length});
   }
 
   buttons.forEach(button => {
