@@ -7,13 +7,14 @@
   <title>運営分析｜工場キャリア診断</title>
   <meta name="description" content="工場キャリア診断の運営者専用アクセス・行動・収益導線分析画面">
   <link rel="stylesheet" href="/assets/admin-analytics.css">
+  <link rel="stylesheet" href="/assets/admin-revenue.css">
 </head>
 <body>
   <header class="admin-header">
     <div>
       <span class="admin-kicker">PRIVATE DASHBOARD</span>
       <h1>工場キャリア診断｜運営分析</h1>
-      <p>流入 → 回遊 → 読了 → 転職サービスCTAまで、サイト内行動を詳しく確認します。</p>
+      <p>流入 → 回遊 → 読了 → 楽天・転職・退職支援CTAまで、サイト内行動を詳しく確認します。</p>
     </div>
     <a class="public-link" href="/" target="_blank" rel="noopener">公開サイトを見る ↗</a>
   </header>
@@ -52,6 +53,46 @@
 
       <section class="metric-grid" id="metricGrid"></section>
 
+      <section class="panel revenue-intelligence is-hidden" id="revenueIntelligence">
+        <div class="panel-heading">
+          <div><span class="eyebrow">AFFILIATE INTELLIGENCE</span><h2>アフィリエイト収益導線</h2><p id="revenueSummaryNote" class="muted"></p></div>
+          <span id="revenueStatus" class="muted">収益導線を集計中…</span>
+        </div>
+        <div id="revenueMetricGrid" class="revenue-metric-grid"></div>
+
+        <div class="revenue-subgrid">
+          <div class="revenue-box">
+            <h3>日別：表示 / クリック</h3>
+            <div id="revenueDaily" class="revenue-daily"></div>
+          </div>
+          <div class="revenue-box">
+            <h3>楽天カテゴリ別</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>カテゴリ</th><th>表示</th><th>クリック</th><th>クリック訪問</th><th>CTR</th></tr></thead>
+                <tbody id="rakutenCategoryBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>案件</th><th>表示</th><th>表示訪問</th><th>クリック</th><th>クリック訪問</th><th>発生ページ</th><th>CTR</th></tr></thead>
+            <tbody id="programRevenueBody"></tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:22px">どの記事から、どの案件がクリックされたか</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>記事 / ページ</th><th>案件</th><th>表示</th><th>クリック</th><th>クリック訪問</th><th>CTR</th></tr></thead>
+            <tbody id="programPageBody"></tbody>
+          </table>
+        </div>
+        <p class="muted" style="margin-top:12px">※ ここで分かるのはサイト内の表示・クリック・CTRです。購入・申込・確定報酬は楽天/A8.net/AccessTrade各管理画面の成果データで確認してください。</p>
+      </section>
+
       <div class="dashboard-grid">
         <section class="panel span-2">
           <div class="panel-heading">
@@ -74,7 +115,7 @@
         <section class="panel span-2">
           <div class="panel-heading">
             <div><span class="eyebrow">ACQUISITION</span><h2>流入元ごとのCTA到達</h2></div>
-            <span class="muted">流入セッション → 転職サービスCTA</span>
+            <span class="muted">流入セッション → アフィリエイトCTA</span>
           </div>
           <div class="table-wrap">
             <table>
@@ -132,7 +173,7 @@
 
         <section class="panel span-2">
           <div class="panel-heading">
-            <div><span class="eyebrow">REVENUE PATH</span><h2>転職サービスへの収益導線</h2></div>
+            <div><span class="eyebrow">REVENUE PATH</span><h2>案件別の詳細クリック</h2></div>
             <span class="muted">表示 → クリック → CTR</span>
           </div>
           <div class="funnel" id="funnel"></div>
@@ -171,11 +212,12 @@
       <section class="panel info-panel">
         <h2>見るポイント</h2>
         <p><strong>新規/再訪</strong>でリピーターの有無、<strong>平均PV/訪問</strong>で回遊、<strong>流入元CTA率</strong>で集客の質、<strong>30秒率・90%率</strong>で記事の読まれ方、<strong>ページ間の移動</strong>で内部リンク導線を確認できます。</p>
-        <p>メーカーズジョブ / Samurai Jobのクリックは <code>affiliate_click_unified</code> を集計します。診断入力内容、氏名、電話番号、メールアドレスは分析DBへ保存しません。</p>
+        <p>楽天 / ZEN / メーカーズジョブ / Samurai Jobの表示・クリックは匿名のサイト内イベントとして集計します。診断入力内容、氏名、電話番号、メールアドレスは分析DBへ保存しません。</p>
       </section>
     </section>
   </main>
 
   <script src="/assets/admin-analytics.js"></script>
+  <script src="/assets/admin-revenue.js"></script>
 </body>
 </html>
