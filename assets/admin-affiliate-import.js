@@ -68,8 +68,8 @@
     const v = String(value ?? '').trim().toLowerCase();
     if (!v) return 'unknown';
     if (/(キャンセル|否認|却下|破棄|無効|cancel|rejected|denied)/i.test(v)) return 'cancelled';
+    if (/(未確定|未承認|発生|保留|審査|pending)/i.test(v)) return 'pending';
     if (/(確定|承認|approved|confirmed|確定済)/i.test(v)) return 'confirmed';
-    if (/(未確定|発生|保留|審査|pending|未承認)/i.test(v)) return 'pending';
     return 'unknown';
   }
 
