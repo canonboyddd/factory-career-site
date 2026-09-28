@@ -7,6 +7,16 @@
   const browserKey = 'fc_browser_id';
   const sessionKey = 'fc_session_id';
   const ownerExcludedKey = 'fc_owner_excluded';
+  try {
+    const ownerParams = new URLSearchParams(location.search);
+    if (ownerParams.get('ops_owner') === '1') {
+      localStorage.setItem(ownerExcludedKey, '1');
+      localStorage.setItem('ops_owner_excluded', '1');
+      ownerParams.delete('ops_owner');
+      const q = ownerParams.toString();
+      history.replaceState(null, '', location.pathname + (q ? '?' + q : '') + location.hash);
+    }
+  } catch (_) {}
 
   function randomId(prefix) {
     const id = crypto.randomUUID ? crypto.randomUUID() :
@@ -73,7 +83,7 @@
   ]);
 
   function collect(eventName, detail={}) {
-    if (localStorage.getItem(ownerExcludedKey) === '1') return;
+    if (localStorage.getItem(ownerExcludedKey) === '1' || localStorage.getItem('ops_owner_excluded') === '1') return;
     const payload = {
       event_name: eventName,
       browser_id: browserId,
