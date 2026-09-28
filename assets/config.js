@@ -119,6 +119,7 @@ async function bootstrapSiteEnhancements() {
     await loadSiteScript('/assets/offers.js', 'data-auto-offers-script');
     await loadSiteScript('/assets/pillar-content.js', 'data-auto-pillar-content-script');
     await loadSiteScript('/assets/core-intent-upgrade.js', 'data-core-intent-upgrade-script');
+    await loadSiteScript('/assets/application-funnel-upgrade.js', 'data-application-funnel-upgrade-script');
   }
   await loadSiteScript('/assets/clean-url-seo.js', 'data-auto-clean-url-seo-script');
   await loadSiteScript('/assets/seo-enhance.js', 'data-auto-seo-enhance-script');
