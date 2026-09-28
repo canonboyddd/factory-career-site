@@ -8,7 +8,7 @@
   block.className = 'actual-revenue-block';
   block.innerHTML = `
     <div class="actual-revenue-heading">
-      <div><span class="eyebrow">ACTUAL EARNINGS</span><h3>ASP実績金額</h3><p class="muted">楽天 / A8.net / AccessTradeの成果CSVをD1へ取り込み、発生報酬と確定報酬を集計します。</p></div>
+      <div><span class="eyebrow">ACTUAL EARNINGS</span><h3>ASP実績金額</h3><p class="muted">楽天 / A8.net / AccessTrade / afb / DMM・FANZA / FC2 の成果CSVをD1へ取り込み、発生報酬と確定報酬を集計します。</p></div>
       <span class="actual-badge">CSV取込</span>
     </div>
 
@@ -43,16 +43,19 @@
         <div><span class="eyebrow">IMPORT</span><h3>成果CSVを取り込む</h3><p>同じ成果を再度取り込むと更新されるため、発生→確定へ変わった後も二重計上しません。</p></div>
       </div>
       <div class="affiliate-import-controls">
-        <label><span>ASP</span><select id="affiliateImportProvider"><option value="rakuten">楽天アフィリエイト</option><option value="a8">A8.net</option><option value="accesstrade">AccessTrade</option></select></label>
+        <label><span>ASP</span><select id="affiliateImportProvider"><option value="rakuten">楽天アフィリエイト</option><option value="a8">A8.net</option><option value="accesstrade">AccessTrade</option><option value="afb">afb</option><option value="dmm-fanza">DMM / FANZA</option><option value="fc2">FC2アフィリエイト</option></select></label>
         <label class="file-field"><span>成果CSV</span><input id="affiliateImportFile" type="file" accept=".csv,.txt,text/csv"></label>
         <button id="affiliateImportBtn" class="primary-btn" type="button">D1へ取り込む</button>
       </div>
       <div id="affiliateImportPreview" class="affiliate-import-preview"><div class="empty">CSVを選ぶと取込内容を確認できます。</div></div>
       <p id="affiliateImportStatus" class="affiliate-import-status"></p>
       <div class="affiliate-import-help">
-        <div><strong>楽天</strong><span>アフィリエイトレポート → 成果レポート → CSV</span></div>
-        <div><strong>A8.net</strong><span>レポート → 成果報酬 → 表示データをダウンロード → CSV</span></div>
-        <div><strong>AccessTrade</strong><span>レポート → 成果別 → 成果分析レポート → ダウンロード</span></div>
+        <div><strong>楽天</strong><span>成果レポートCSV</span></div>
+        <div><strong>A8.net</strong><span>成果別CSV</span></div>
+        <div><strong>AccessTrade</strong><span>成果分析CSV</span></div>
+        <div><strong>afb</strong><span>成果状況確認CSV</span></div>
+        <div><strong>DMM/FANZA</strong><span>成果レポートCSV</span></div>
+        <div><strong>FC2</strong><span>売上レポートCSV</span></div>
       </div>
       <h4>最近の取込</h4>
       <div class="table-wrap">
