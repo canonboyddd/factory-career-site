@@ -1,0 +1,43 @@
+name: Norimono production QA
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/norimono-production-qa.yml"
+      - "qa/norimono-production.spec.cjs"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: norimono-production-qa
+  cancel-in-progress: true
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Run live production QA
+        run: npx playwright test qa/norimono-production.spec.cjs --reporter=line
+      - name: Upload QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: norimono-production-qa
+          path: test-results
+          if-no-files-found: ignore
+          retention-days: 3
