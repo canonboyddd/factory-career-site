@@ -1,3 +1,4 @@
+// Production QA rerun after result-monetization pre-calculation visibility fix.
 const {test,expect}=require('@playwright/test');
 const base='https://norimono-cost.com';
 test.setTimeout(90000);
