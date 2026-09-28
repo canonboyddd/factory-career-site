@@ -22,16 +22,21 @@
   Content-Type: text/plain; charset=UTF-8
 
 /assets/central-tracker.js
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-store, no-cache, must-revalidate
 
 /assets/ops-dashboard.js
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-store, no-cache, must-revalidate
 
 /assets/ops-dashboard.css
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-store, no-cache, must-revalidate
 
 /ops-dashboard
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-store, no-cache, must-revalidate
+  Pragma: no-cache
+
+/ops-dashboard.html
+  Cache-Control: no-store, no-cache, must-revalidate
+  Pragma: no-cache
 
 /*
   X-Content-Type-Options: nosniff
