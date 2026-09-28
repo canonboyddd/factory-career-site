@@ -1,5 +1,6 @@
 name: Norimono production QA
 
+# Production browser QA for norimono-cost.com; rerun after v116 dedupe fix.
 on:
   workflow_dispatch:
   schedule:
