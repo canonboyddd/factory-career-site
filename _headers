@@ -27,6 +27,9 @@
 /assets/core-intent-upgrade.js
   Cache-Control: no-store, no-cache, must-revalidate
 
+/assets/application-funnel-upgrade.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
 /assets/job-change-hub.js
   Cache-Control: no-store, no-cache, must-revalidate
 
