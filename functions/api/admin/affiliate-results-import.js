@@ -36,7 +36,7 @@ function validStatus(value) {
 
 function validProvider(value) {
   const v = text(value, 30).toLowerCase();
-  return ['rakuten','a8','accesstrade'].includes(v) ? v : '';
+  return ['rakuten','a8','accesstrade','afb','dmm-fanza','fc2'].includes(v) ? v : '';
 }
 
 async function ensureSchema(db) {
