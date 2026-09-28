@@ -2,13 +2,14 @@ function json(data,status=200){return new Response(JSON.stringify(data),{status,
 function auth(request,env){const x=request.headers.get('authorization')||'';return Boolean(env.ADMIN_TOKEN&&x===`Bearer ${env.ADMIN_TOKEN}`);}
 function rows(x){return x?.results||[];}
 const CONFIGURED_SITES=['factory','sugutsucool','car-bike','okazu','clipmade'];
-const CAR_URL='https://norimono-cost.com/api/admin/analytics';
+const CAR_URL='https://norimono-cost.com/api/admin/central-export';
 async function schema(db){await db.batch([
   db.prepare(`CREATE TABLE IF NOT EXISTS central_events (id INTEGER PRIMARY KEY AUTOINCREMENT, occurred_at TEXT NOT NULL DEFAULT (datetime('now')), site_key TEXT NOT NULL, event_name TEXT NOT NULL, browser_id TEXT NOT NULL, session_id TEXT NOT NULL, page_path TEXT NOT NULL, page_title TEXT, referrer TEXT, program TEXT, placement TEXT, outbound_domain TEXT, device_type TEXT)`),
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_time ON central_events(occurred_at)`),
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_site ON central_events(site_key)`)
 ]);}
 function affiliateProgram(row){
+  if(row?.program)return String(row.program);
   const ev=String(row?.event||'');const target=String(row?.target||'');
   if(ev==='rakuten_click')return'rakuten';
   if(ev==='affiliate_slot_click'){
@@ -27,16 +28,12 @@ export async function onRequestGet({request,env}){
   const q=(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return s.all();};
   const q1=(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return s.first();};
 
-  // Prefer the vehicle site's existing D1 when the same admin token is valid.
-  // If it cannot be read, fall back to car-bike events forwarded into central_events.
   let car=null,carError='';
   try{
     const r=await fetch(`${CAR_URL}?days=${days}`,{headers:{authorization:request.headers.get('authorization')||''},cf:{cacheTtl:0}});
     if(r.ok)car=await r.json();else carError=`HTTP ${r.status}`;
   }catch(e){carError=String(e?.message||e||'fetch failed');}
 
-  // Exclude obvious automated crawl sessions from central_events without deleting raw data.
-  // Pattern: one browser opens many distinct pages in many brand-new sessions on the same day.
   const suspicious=`SELECT site_key,browser_id,date(occurred_at,'+9 hours') day
     FROM central_events
     WHERE event_name='page_view'
