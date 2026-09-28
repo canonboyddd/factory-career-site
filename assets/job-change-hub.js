@@ -42,10 +42,10 @@
     const section = document.createElement('section');
     section.className = 'inline-cta';
     section.dataset.jobChangeIndexHub = '';
-    section.innerHTML = '<span class="eyebrow">START HERE</span><h2>工場転職を最初から順番に進める</h2><p>記事を探す前に、進路・求人比較・経験整理・応募準備の全体像を確認できます。</p><a class="btn btn-primary" href="/job-change-guide">工場・製造業の転職完全ガイド →</a>';
+    section.innerHTML = '<span class="eyebrow">START HERE</span><h2>工場転職を最初から順番に進める</h2><p>進路・求人比較・経験整理・応募準備の全体像と、未経験・年代別の難易度を確認できます。</p><a class="btn btn-primary" href="/job-change-guide">工場・製造業の転職完全ガイド →</a> <a class="btn btn-secondary" href="/articles/factory-job-change-difficulty">工場転職は難しい？ →</a>';
     if (target) container.insertBefore(section, target);
     else container.prepend(section);
-    section.querySelector('a')?.addEventListener('click', () => track('article_index'));
+    section.querySelectorAll('a').forEach((a, i) => a.addEventListener('click', () => track(i === 0 ? 'article_index' : 'article_index_difficulty')));
   }
 
   function addHomepageShortcut() {
@@ -55,9 +55,9 @@
     const section = document.createElement('section');
     section.className = 'section-compact';
     section.dataset.jobChangeHomeShortcut = '';
-    section.innerHTML = '<div class="container"><div class="inline-cta"><span class="eyebrow">転職の進め方</span><h2>工場転職の全体像を先に確認</h2><p>辞める判断から求人比較、年収、職種、職務経歴書、面接までを順番にまとめています。</p><a class="btn btn-secondary" href="/job-change-guide">工場・製造業の転職完全ガイド →</a></div></div>';
+    section.innerHTML = '<div class="container"><div class="inline-cta"><span class="eyebrow">転職の進め方</span><h2>工場転職の全体像を先に確認</h2><p>辞める判断から求人比較、年収、職種、未経験・年代別、職務経歴書、面接までを順番にまとめています。</p><a class="btn btn-secondary" href="/job-change-guide">工場・製造業の転職完全ガイド →</a> <a class="btn btn-secondary" href="/articles/factory-job-change-difficulty">工場転職は難しい？ →</a></div></div>';
     entry.insertAdjacentElement('afterend', section);
-    section.querySelector('a')?.addEventListener('click', () => track('home_shortcut'));
+    section.querySelectorAll('a').forEach((a, i) => a.addEventListener('click', () => track(i === 0 ? 'home_shortcut' : 'home_difficulty')));
   }
 
   function run() {
