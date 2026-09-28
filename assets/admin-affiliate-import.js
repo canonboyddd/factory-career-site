@@ -2,16 +2,16 @@
   const tokenKey = 'factory_admin_token';
   const $ = id => document.getElementById(id);
   const aliases = {
-    source_id:['成果id','成果番号','注文番号','注文id','オーダーid','orderid','transactionid','トランザクションid','識別id'],
-    occurred_on:['成果発生日','成果発生日時','発生日','発生日時','注文日','注文日時','売上日','売上日時','成果日'],
-    confirmed_on:['成果確定日','確定日','承認日','確定日時','承認日時'],
-    status:['成果状況','成果ステータス','ステータス','状態','確定状況','成果確定状況','承認状況'],
-    program_id:['プログラムid','広告プログラムid','案件id','広告主id','ショップid','merchantid'],
-    program_name:['プログラム名','広告プログラム名','案件名','広告主名','ショップ名','店舗名','サービス名','成果種別'],
-    site_name:['サイト名','掲載サイト名','媒体名','メディア名'],
-    page_url:['掲載サイトurl','掲載url','サイトurl','媒体url','ページurl','referer','referrer'],
-    sales_amount:['売上金額','売上額','購入金額','注文金額','商品金額','売上','sales','amount'],
-    reward_amount:['成果報酬','成果報酬額','報酬','報酬額','確定報酬額','発生報酬額','アフィリエイト報酬','commission','reward'],
+    source_id:['成果id','成果番号','売上番号','受注番号','注文番号','注文id','オーダーid','orderid','transactionid','トランザクションid','識別id'],
+    occurred_on:['成果発生日','成果発生日付','成果発生日時','発生日','発生日時','売上発生日','注文日','注文日付','注文日時','購入日','売上日','売上日時','成果日'],
+    confirmed_on:['成果確定日','確定日','確定日付','承認日','成果承認日','確定日時','承認日時'],
+    status:['成果状況','成果ステータス','ステータス','状態','確定状況','成果確定状況','承認状況','確定フラグ'],
+    program_id:['プログラムid','広告プログラムid','案件id','広告主id','ショップid','merchantid','商品id','コンテンツid'],
+    program_name:['プログラム名','広告プログラム名','案件名','広告主名','広告名','ショップ名','店舗名','サービス名','成果種別','商品名','コンテンツ名'],
+    site_name:['サイト名','掲載サイト名','媒体名','メディア名','掲載メディア'],
+    page_url:['掲載サイトurl','掲載url','サイトurl','媒体url','ページurl','referer','referrer','掲載ページ'],
+    sales_amount:['売上金額','売上額','売上高','購入金額','注文金額','商品金額','商品代金','売上','sales','amount'],
+    reward_amount:['成果報酬','成果報酬額','報酬','報酬額','報酬金額','確定報酬','確定報酬額','発生報酬額','アフィリエイト報酬','紹介料','commission','reward'],
     click_on:['クリック日時','クリック日','広告クリック日時','clickdate','clickedat'],
     material_id:['広告素材id','素材id','バナーid'],
     site_id:['サイトid','媒体id'],
@@ -67,15 +67,18 @@
   function statusOf(value) {
     const v = String(value ?? '').trim().toLowerCase();
     if (!v) return 'unknown';
-    if (/(キャンセル|否認|却下|破棄|無効|cancel|rejected|denied)/i.test(v)) return 'cancelled';
+    if (/(キャンセル|否認|却下|破棄|無効|非承認|cancel|rejected|denied)/i.test(v)) return 'cancelled';
     if (/(未確定|未承認|発生|保留|審査|pending)/i.test(v)) return 'pending';
-    if (/(確定|承認|approved|confirmed|確定済)/i.test(v)) return 'confirmed';
+    if (/(確定済|承認済|確定|承認|approved|confirmed)/i.test(v)) return 'confirmed';
     return 'unknown';
   }
 
   function programKey(provider, programName) {
     const name = String(programName || '').toLowerCase();
     if (provider === 'rakuten') return 'rakuten';
+    if (provider === 'afb') return 'afb';
+    if (provider === 'dmm-fanza') return 'dmm-fanza';
+    if (provider === 'fc2') return 'fc2';
     if (/メーカーズジョブ|makers.?job/i.test(name)) return 'makersJob';
     if (/samurai|サムライ/i.test(name)) return 'samuraiJob';
     if (/\bzen\b|退職代行.*zen|zen.*退職代行/i.test(name)) return 'zen';
@@ -155,7 +158,7 @@
       status,
       program_key:programKey(provider,programName),
       program_id:programId,
-      program_name:programName || (provider==='rakuten' ? '楽天アフィリエイト' : ''),
+      program_name:programName || ({rakuten:'楽天アフィリエイト',a8:'A8.net',accesstrade:'AccessTrade',afb:'afb','dmm-fanza':'DMM/FANZA',fc2:'FC2アフィリエイト'}[provider]||provider),
       site_name:siteName,
       page_url:pageUrl,
       sales_amount:sales,
