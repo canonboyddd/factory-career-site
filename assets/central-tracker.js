@@ -6,7 +6,7 @@ let site='';for(const [re,key] of map){if(re.test(host)){site=key;break;}}
 site=document.currentScript?.dataset?.site||site||host.replace(/[^a-z0-9]+/gi,'-').slice(0,40);
 const endpoint=site==='factory'?direct:'/api/ops-collect';
 const ownerKey='ops_owner_excluded';
-try{const p=new URLSearchParams(location.search);if(p.get('ops_owner')==='1'){localStorage.setItem(ownerKey,'1');if(site==='factory')localStorage.setItem('fc_owner_excluded','1');if(site==='car-bike')localStorage.setItem('site_analytics_owner_excluded_v1','1');p.delete('ops_owner');const q=p.toString();history.replaceState(null,'',location.pathname+(q?'?'+q:'')+location.hash)}}catch{}
+try{const p=new URLSearchParams(location.search);if(p.get('ops_owner')==='1'){localStorage.setItem(ownerKey,'1');document.cookie='ops_owner_excluded=1; Max-Age=31536000; Path=/; SameSite=Lax';if(site==='factory')localStorage.setItem('fc_owner_excluded','1');if(site==='car-bike')localStorage.setItem('site_analytics_owner_excluded_v1','1');p.delete('ops_owner');const q=p.toString();history.replaceState(null,'',location.pathname+(q?'?'+q:'')+location.hash)}}catch{}
 const cookieOwner=document.cookie.split(';').some(v=>v.trim().startsWith('ops_owner_excluded=1'));
 if(cookieOwner){try{localStorage.setItem(ownerKey,'1');if(site==='factory')localStorage.setItem('fc_owner_excluded','1');if(site==='car-bike')localStorage.setItem('site_analytics_owner_excluded_v1','1')}catch{}}
 const ownerExcluded=()=>{try{return cookieOwner||localStorage.getItem(ownerKey)==='1'||localStorage.getItem('fc_owner_excluded')==='1'||localStorage.getItem('site_analytics_owner_excluded_v1')==='1'}catch{return cookieOwner}};
