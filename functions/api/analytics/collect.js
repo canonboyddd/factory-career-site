@@ -24,6 +24,10 @@ function clean(value, max = 200) {
   return String(value ?? '').trim().slice(0, max);
 }
 
+function ownerCookie(request) {
+  return /(?:^|;\s*)ops_owner_excluded=1(?:;|$)/.test(request.headers.get('cookie') || '');
+}
+
 async function ensureSchema(db) {
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS analytics_events (
@@ -63,6 +67,10 @@ async function ensureSchema(db) {
 export async function onRequestPost({ request, env }) {
   if (!env.ANALYTICS_DB) {
     return json({ ok: false, setup_required: true, missing: 'ANALYTICS_DB' }, 503);
+  }
+
+  if (ownerCookie(request)) {
+    return json({ ok: true, excluded: true });
   }
 
   const requestUrl = new URL(request.url);
