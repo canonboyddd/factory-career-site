@@ -21,6 +21,18 @@
 /robots.txt
   Content-Type: text/plain; charset=UTF-8
 
+/assets/config.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/assets/core-intent-upgrade.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/assets/job-change-hub.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/assets/job-change-serp-upgrade.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
 /assets/central-tracker.js
   Cache-Control: no-store, no-cache, must-revalidate
 
