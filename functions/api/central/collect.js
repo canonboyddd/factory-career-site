@@ -1,15 +1,66 @@
 function cors(request){const origin=request.headers.get('origin')||'';return {'content-type':'application/json; charset=utf-8','cache-control':'no-store, no-cache, must-revalidate','access-control-allow-origin':origin||'*','access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'content-type','vary':'Origin'};}
 function json(request,data,status=200){return new Response(JSON.stringify(data),{status,headers:cors(request)});}
 function automated(request){const ua=String(request.headers.get('user-agent')||'');return /bot|crawler|spider|slurp|bingpreview|google-inspectiontool|lighthouse|pagespeed|headless|phantom|selenium|puppeteer|playwright|facebookexternalhit|twitterbot|linkedinbot|discordbot|uptimerobot|pingdom|monitor/i.test(ua);}
-async function schema(db){await db.batch([
- db.prepare(`CREATE TABLE IF NOT EXISTS central_events (id INTEGER PRIMARY KEY AUTOINCREMENT, occurred_at TEXT NOT NULL DEFAULT (datetime('now')), site_key TEXT NOT NULL, event_name TEXT NOT NULL, browser_id TEXT NOT NULL, session_id TEXT NOT NULL, page_path TEXT NOT NULL, page_title TEXT, referrer TEXT, program TEXT, placement TEXT, outbound_domain TEXT, device_type TEXT)`),
- db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_time ON central_events(occurred_at)`),
- db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_site ON central_events(site_key)`),
- db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_event ON central_events(event_name)`)
-]);}
+async function schema(db){
+  await db.prepare(`CREATE TABLE IF NOT EXISTS central_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    occurred_at TEXT NOT NULL DEFAULT (datetime('now')),
+    site_key TEXT NOT NULL,
+    event_name TEXT NOT NULL,
+    browser_id TEXT NOT NULL,
+    session_id TEXT NOT NULL,
+    page_path TEXT NOT NULL,
+    page_title TEXT,
+    referrer TEXT,
+    provider TEXT,
+    program TEXT,
+    placement TEXT,
+    outbound_domain TEXT,
+    device_type TEXT,
+    page_type TEXT,
+    vehicle TEXT
+  )`).run();
+  const info=await db.prepare('PRAGMA table_info(central_events)').all();
+  const columns=new Set((info?.results||[]).map(x=>String(x.name||'')));
+  for(const [name,type] of [['provider','TEXT'],['page_type','TEXT'],['vehicle','TEXT']]){
+    if(!columns.has(name))await db.prepare(`ALTER TABLE central_events ADD COLUMN ${name} ${type}`).run();
+  }
+  await db.batch([
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_time ON central_events(occurred_at)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_site ON central_events(site_key)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_event ON central_events(event_name)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_program ON central_events(program)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_provider ON central_events(provider)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_page ON central_events(site_key,page_path)`)
+  ]);
+}
 const validSite=/^[a-z0-9_-]{2,40}$/i;
-function cleanBody(body){return{site_key:String(body.site_key||'').trim(),event_name:String(body.event_name||'page_view').slice(0,80),browser_id:String(body.browser_id||'').slice(0,120),session_id:String(body.session_id||'').slice(0,120),page_path:String(body.page_path||'/').slice(0,500),page_title:String(body.page_title||'').slice(0,300),referrer:String(body.referrer||'').slice(0,500),program:String(body.program||'').slice(0,100),placement:String(body.placement||'').slice(0,160),outbound_domain:String(body.outbound_domain||'').slice(0,180),device_type:String(body.device_type||'').slice(0,40)};}
-async function save(request,env,raw){if(automated(request))return json(request,{ok:true,filtered:'automated'});if(!env.ANALYTICS_DB)return json(request,{ok:false,error:'ANALYTICS_DB missing'},503);const body=cleanBody(raw||{});if(!validSite.test(body.site_key))return json(request,{ok:false,error:'invalid_site_key'},400);if(!body.browser_id||!body.session_id)return json(request,{ok:false,error:'missing_ids'},400);await schema(env.ANALYTICS_DB);await env.ANALYTICS_DB.prepare(`INSERT INTO central_events(site_key,event_name,browser_id,session_id,page_path,page_title,referrer,program,placement,outbound_domain,device_type) VALUES(?,?,?,?,?,?,?,?,?,?,?)`).bind(body.site_key,body.event_name,body.browser_id,body.session_id,body.page_path,body.page_title,body.referrer,body.program,body.placement,body.outbound_domain,body.device_type).run();return json(request,{ok:true});}
+function cleanBody(body){return{
+  site_key:String(body.site_key||'').trim(),
+  event_name:String(body.event_name||'page_view').slice(0,80),
+  browser_id:String(body.browser_id||'').slice(0,120),
+  session_id:String(body.session_id||'').slice(0,120),
+  page_path:String(body.page_path||'/').slice(0,500),
+  page_title:String(body.page_title||'').slice(0,300),
+  referrer:String(body.referrer||'').slice(0,500),
+  provider:String(body.provider||'').slice(0,80),
+  program:String(body.program||'').slice(0,100),
+  placement:String(body.placement||'').slice(0,160),
+  outbound_domain:String(body.outbound_domain||'').slice(0,180),
+  device_type:String(body.device_type||'').slice(0,40),
+  page_type:String(body.page_type||'').slice(0,80),
+  vehicle:String(body.vehicle||'').slice(0,180)
+};}
+async function save(request,env,raw){
+  if(automated(request))return json(request,{ok:true,filtered:'automated'});
+  if(!env.ANALYTICS_DB)return json(request,{ok:false,error:'ANALYTICS_DB missing'},503);
+  const body=cleanBody(raw||{});
+  if(!validSite.test(body.site_key))return json(request,{ok:false,error:'invalid_site_key'},400);
+  if(!body.browser_id||!body.session_id)return json(request,{ok:false,error:'missing_ids'},400);
+  await schema(env.ANALYTICS_DB);
+  await env.ANALYTICS_DB.prepare(`INSERT INTO central_events(site_key,event_name,browser_id,session_id,page_path,page_title,referrer,provider,program,placement,outbound_domain,device_type,page_type,vehicle) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(body.site_key,body.event_name,body.browser_id,body.session_id,body.page_path,body.page_title,body.referrer,body.provider,body.program,body.placement,body.outbound_domain,body.device_type,body.page_type,body.vehicle).run();
+  return json(request,{ok:true});
+}
 export async function onRequestOptions({request}){return new Response(null,{status:204,headers:cors(request)});}
 export async function onRequestGet({request,env}){const u=new URL(request.url);return save(request,env,Object.fromEntries(u.searchParams.entries()));}
 export async function onRequestPost({request,env}){let body={};try{const text=await request.text();body=text?JSON.parse(text):{};}catch{return json(request,{ok:false,error:'invalid_json'},400);}return save(request,env,body);}
