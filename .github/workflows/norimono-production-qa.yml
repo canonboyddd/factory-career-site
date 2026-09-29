@@ -1,6 +1,6 @@
 name: Norimono production QA
 
-# Production browser QA for norimono-cost.com; rerun after v116 dedupe fix.
+# Production browser QA for norimono-cost.com including monetization and indexability.
 on:
   workflow_dispatch:
   schedule:
@@ -10,6 +10,7 @@ on:
     paths:
       - ".github/workflows/norimono-production-qa.yml"
       - "qa/norimono-production.spec.cjs"
+      - "qa/norimono-indexability.spec.cjs"
 
 permissions:
   contents: read
@@ -33,7 +34,7 @@ jobs:
           npm install --no-save @playwright/test
           npx playwright install --with-deps chromium
       - name: Run live production QA
-        run: npx playwright test qa/norimono-production.spec.cjs --reporter=line
+        run: npx playwright test qa/norimono-production.spec.cjs qa/norimono-indexability.spec.cjs --reporter=line
       - name: Upload QA artifacts
         if: always()
         uses: actions/upload-artifact@v4
