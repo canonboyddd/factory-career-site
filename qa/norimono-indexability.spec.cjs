@@ -1,5 +1,6 @@
 const {test,expect}=require('@playwright/test');
 const base='https://norimono-cost.com';
+// Production indexability QA rerun after preserving the exact Google verification URL.
 
 test.setTimeout(90000);
 
