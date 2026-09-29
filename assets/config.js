@@ -31,6 +31,8 @@ window.SITE_CONFIG = {
   articleProgramPriority: {
     "factory-quit.html": ["makersJob", "zen"], "night-shift-hard.html": ["makersJob", "zen"],
     "manufacturing-30s.html": ["makersJob", "samuraiJob"], "production-tech-career.html": ["makersJob", "samuraiJob"],
+    "production-tech-salary.html": ["samuraiJob", "makersJob"], "maintenance-salary.html": ["samuraiJob", "makersJob"],
+    "quality-salary.html": ["samuraiJob", "makersJob"], "production-control-salary.html": ["samuraiJob", "makersJob"],
     "quality-quit.html": ["makersJob", "zen", "samuraiJob"], "manufacturing-500-income.html": ["samuraiJob", "makersJob"],
     "manufacturing-other-industry.html": ["magicari", "makersJob"], "period-worker-next.html": ["makersJob", "magicari"],
     "manufacturing-agent-guide.html": ["makersJob", "samuraiJob", "magicari"], "production-tech-agent.html": ["samuraiJob", "makersJob"],
