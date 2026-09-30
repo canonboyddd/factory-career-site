@@ -1,7 +1,12 @@
 User-agent: *
 Allow: /
 Disallow: /admin-analytics
+Disallow: /admin-seo
+Disallow: /ops-dashboard
+Disallow: /rakuten-check
 Disallow: /api/admin/
+Disallow: /shorts-content-factory/
+Disallow: /shorts-content-factory-audit/
 Sitemap: https://factory-career-site.pages.dev/sitemap.xml
 Sitemap: https://factory-career-site.pages.dev/sitemap-core.xml
 Sitemap: https://factory-career-site.pages.dev/feed.xml
