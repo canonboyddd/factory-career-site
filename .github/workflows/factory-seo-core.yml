@@ -10,6 +10,10 @@ on:
       - 'sitemap-core.xml'
       - 'salary-guide.html'
       - 'articles/*salary*.html'
+      - 'articles/production-tech-hard.html'
+      - 'articles/maintenance-hard.html'
+      - 'articles/quality-quit.html'
+      - 'articles/production-control-overtime.html'
       - 'qa/factory-seo-core.spec.cjs'
       - '.github/workflows/factory-seo-core.yml'
   workflow_dispatch:
