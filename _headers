@@ -45,6 +45,9 @@
 /assets/ops-intelligence.js
   Cache-Control: no-store, no-cache, must-revalidate
 
+/assets/ops-okazu.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
 /assets/admin-seo-data.js
   Cache-Control: no-store, no-cache, must-revalidate
 
