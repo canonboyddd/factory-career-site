@@ -57,13 +57,41 @@
 /assets/ops-dashboard.css
   Cache-Control: no-store, no-cache, must-revalidate
 
+/admin-analytics
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/admin-analytics.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/admin-seo
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/admin-seo.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store, no-cache, must-revalidate
+
 /ops-dashboard
+  X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: no-store, no-cache, must-revalidate
   Pragma: no-cache
 
 /ops-dashboard.html
+  X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: no-store, no-cache, must-revalidate
   Pragma: no-cache
+
+/rakuten-check.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/shorts-content-factory/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/shorts-content-factory-audit/*
+  X-Robots-Tag: noindex, nofollow, noarchive
 
 /*
   X-Content-Type-Options: nosniff
