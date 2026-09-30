@@ -1,6 +1,6 @@
 name: Norimono production QA
 
-# Production browser QA for norimono-cost.com including monetization and indexability.
+# Production browser QA for norimono-cost.com including monetization and indexability; rerun after UcarPAC insertion fix.
 on:
   workflow_dispatch:
   schedule:
