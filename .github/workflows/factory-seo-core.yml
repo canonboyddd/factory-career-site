@@ -1,0 +1,31 @@
+name: Factory SEO Core QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'robots.txt'
+      - '_headers'
+      - 'sitemap.xml'
+      - 'sitemap-core.xml'
+      - 'salary-guide.html'
+      - 'articles/*salary*.html'
+      - 'qa/factory-seo-core.spec.cjs'
+      - '.github/workflows/factory-seo-core.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seo-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run SEO core QA
+        run: node qa/factory-seo-core.spec.cjs
