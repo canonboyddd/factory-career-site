@@ -52,16 +52,20 @@ for (const p of headerNoindexPaths) {
   }
 }
 
-const salaryPages = [
+const priorityPages = [
   ['salary-guide.html', 'https://factory-career-site.pages.dev/salary-guide'],
   ['articles/manufacturing-role-salary-comparison.html', 'https://factory-career-site.pages.dev/articles/manufacturing-role-salary-comparison'],
   ['articles/production-tech-salary.html', 'https://factory-career-site.pages.dev/articles/production-tech-salary'],
   ['articles/maintenance-salary.html', 'https://factory-career-site.pages.dev/articles/maintenance-salary'],
   ['articles/quality-salary.html', 'https://factory-career-site.pages.dev/articles/quality-salary'],
-  ['articles/production-control-salary.html', 'https://factory-career-site.pages.dev/articles/production-control-salary']
+  ['articles/production-control-salary.html', 'https://factory-career-site.pages.dev/articles/production-control-salary'],
+  ['articles/production-tech-hard.html', 'https://factory-career-site.pages.dev/articles/production-tech-hard'],
+  ['articles/maintenance-hard.html', 'https://factory-career-site.pages.dev/articles/maintenance-hard'],
+  ['articles/quality-quit.html', 'https://factory-career-site.pages.dev/articles/quality-quit'],
+  ['articles/production-control-overtime.html', 'https://factory-career-site.pages.dev/articles/production-control-overtime']
 ];
 
-for (const [file, canonical] of salaryPages) {
+for (const [file, canonical] of priorityPages) {
   const html = read(file);
   check(html.includes(`rel=\"canonical\" href=\"${canonical}\"`) || html.includes(`rel="canonical" href="${canonical}"`), `${file} canonical is correct`);
   check(!/name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html), `${file} is not noindex`);
@@ -80,6 +84,12 @@ const salaryLinks = [
 for (const href of salaryLinks) {
   check(salaryGuide.includes(`href=\"${href}\"`) || salaryGuide.includes(`href="${href}"`), `salary-guide links to ${href}`);
 }
+
+const productionControlOvertime = read('articles/production-control-overtime.html');
+check(productionControlOvertime.includes('生産管理は残業が多い？'), 'production-control-overtime targets the main residual-work query');
+check(productionControlOvertime.includes('/articles/production-control-salary'), 'production-control-overtime links to salary page');
+check(productionControlOvertime.includes('/articles/production-control-career'), 'production-control-overtime links to career page');
+check(productionControlOvertime.includes('shigoto.mhlw.go.jp/User/Occupation/Detail/437'), 'production-control-overtime cites job tag');
 
 const forbiddenInSitemap = [
   '/admin-analytics',
