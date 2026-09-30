@@ -1,122 +1,50 @@
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}})}
 function auth(request,env){const x=request.headers.get('authorization')||'';return Boolean(env.ADMIN_TOKEN&&x===`Bearer ${env.ADMIN_TOKEN}`)}
 function rows(x){return x?.results||[]}
-const PROGRAMS=[
-  ['zubatto','ズバット'],['ucarpac','UcarPAC'],['carnext','カーネクスト'],['bikeland','バイクランド'],
-  ['bikeking','バイク王'],['insurance_bang','保険スクエアbang！'],['niconori','ニコノリ'],['rakuten','楽天']
-];
+const PROGRAMS=[['zubatto','ズバット'],['ucarpac','UcarPAC'],['carnext','カーネクスト'],['bikeland','バイクランド'],['bikeking','バイク王'],['insurance_bang','保険スクエアbang！'],['niconori','ニコノリ'],['rakuten','楽天']];
 const PROVIDER_LABEL={afb:'AFB',accesstrade:'AccessTrade',rakuten:'楽天',a8:'A8.net','dmm-fanza':'DMM/FANZA',fc2:'FC2'};
 async function schema(db){
-  await db.prepare(`CREATE TABLE IF NOT EXISTS central_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, occurred_at TEXT NOT NULL DEFAULT (datetime('now')),
-    site_key TEXT NOT NULL,event_name TEXT NOT NULL,browser_id TEXT NOT NULL,session_id TEXT NOT NULL,
-    page_path TEXT NOT NULL,page_title TEXT,referrer TEXT,provider TEXT,program TEXT,placement TEXT,
-    outbound_domain TEXT,device_type TEXT,page_type TEXT,vehicle TEXT
-  )`).run();
-  const info=await db.prepare('PRAGMA table_info(central_events)').all();
-  const cols=new Set(rows(info).map(x=>String(x.name||'')));
-  for(const [name,type] of [['provider','TEXT'],['page_type','TEXT'],['vehicle','TEXT']])if(!cols.has(name))await db.prepare(`ALTER TABLE central_events ADD COLUMN ${name} ${type}`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS central_events (id INTEGER PRIMARY KEY AUTOINCREMENT,occurred_at TEXT NOT NULL DEFAULT (datetime('now')),site_key TEXT NOT NULL,event_name TEXT NOT NULL,browser_id TEXT NOT NULL,session_id TEXT NOT NULL,page_path TEXT NOT NULL,page_title TEXT,referrer TEXT,provider TEXT,program TEXT,placement TEXT,variant TEXT,outbound_domain TEXT,device_type TEXT,page_type TEXT,vehicle TEXT)`).run();
+  const info=await db.prepare('PRAGMA table_info(central_events)').all();const cols=new Set(rows(info).map(x=>String(x.name||'')));
+  for(const [name,type] of [['provider','TEXT'],['page_type','TEXT'],['vehicle','TEXT'],['variant','TEXT']])if(!cols.has(name)){try{await db.prepare(`ALTER TABLE central_events ADD COLUMN ${name} ${type}`).run()}catch(e){if(!/duplicate column/i.test(String(e?.message||e)))throw e}}
+  await db.prepare(`CREATE TABLE IF NOT EXISTS affiliate_results (id INTEGER PRIMARY KEY AUTOINCREMENT,provider TEXT NOT NULL,source_key TEXT NOT NULL UNIQUE,source_id TEXT,occurred_on TEXT,confirmed_on TEXT,status TEXT,program_key TEXT,program_id TEXT,program_name TEXT,site_name TEXT,page_url TEXT,sales_amount REAL NOT NULL DEFAULT 0,reward_amount REAL NOT NULL DEFAULT 0,currency TEXT NOT NULL DEFAULT 'JPY',imported_at TEXT NOT NULL DEFAULT (datetime('now')),raw_json TEXT)`).run();
 }
 function pct(n,d){return d?Math.round((Number(n||0)/Number(d||0))*10000)/100:0}
+function money(n){return Math.round(Number(n||0)*100)/100}
 function number(v){return Number(v||0)}
+function normalizeProgram(row){const t=`${row?.program_key||''} ${row?.program_name||''} ${row?.provider||''}`.toLowerCase();if(/ズバット|zubatto/.test(t))return'zubatto';if(/ucarpac|ユーカーパック/.test(t))return'ucarpac';if(/carnext|カーネクスト/.test(t))return'carnext';if(/バイクランド|bikeland/.test(t))return'bikeland';if(/バイク王|bikeking|bike king/.test(t))return'bikeking';if(/保険スクエア|保険.*bang|insurance.*bang|bang！|bang!/.test(t))return'insurance_bang';if(/ニコノリ|niconori/.test(t))return'niconori';if(/楽天|rakuten/.test(t))return'rakuten';return String(row?.program_key||'').trim().toLowerCase()||'unknown'}
+function pagePath(value){const s=String(value||'').trim();if(!s)return'';try{return s.startsWith('http')?new URL(s).pathname:(s.startsWith('/')?s:'')}catch{return''}}
 export async function onRequestGet({request,env}){
-  if(!auth(request,env))return json({ok:false,error:'unauthorized'},401);
-  if(!env.ANALYTICS_DB)return json({ok:false,error:'ANALYTICS_DB missing'},503);
-  const u=new URL(request.url);const requested=Number(u.searchParams.get('days')||7);const days=[1,7,30,90].includes(requested)?requested:7;
-  const mod=`-${Math.max(days-1,0)} days`;const cutoff=`datetime(date('now','+9 hours',?),'-9 hours')`;
-  const db=env.ANALYTICS_DB;await schema(db);
-  const q=async(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return rows(await s.all())};
-  const q1=async(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return await s.first()||{}};
+  if(!auth(request,env))return json({ok:false,error:'unauthorized'},401);if(!env.ANALYTICS_DB)return json({ok:false,error:'ANALYTICS_DB missing'},503);
+  const u=new URL(request.url),requested=Number(u.searchParams.get('days')||7),days=[1,7,30,90].includes(requested)?requested:7,mod=`-${Math.max(days-1,0)} days`,cutoff=`datetime(date('now','+9 hours',?),'-9 hours')`,resultCutoff=`date('now','+9 hours',?)`,db=env.ANALYTICS_DB;await schema(db);
+  const q=async(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return rows(await s.all())},q1=async(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return await s.first()||{}};
 
-  const executive=await q1(`WITH period AS (
-      SELECT * FROM central_events WHERE occurred_at>=${cutoff}
-    ), first_seen AS (
-      SELECT site_key,browser_id,MIN(occurred_at) first_seen FROM central_events WHERE event_name='page_view' GROUP BY site_key,browser_id
-    ), period_browsers AS (
-      SELECT DISTINCT site_key,browser_id FROM period WHERE event_name='page_view'
-    ), visitor_mix AS (
-      SELECT SUM(CASE WHEN f.first_seen>=${cutoff} THEN 1 ELSE 0 END) new_visitors,
-             SUM(CASE WHEN f.first_seen<${cutoff} THEN 1 ELSE 0 END) returning_visitors
-      FROM period_browsers p JOIN first_seen f ON f.site_key=p.site_key AND f.browser_id=p.browser_id
-    ), search_sessions AS (
-      SELECT COUNT(DISTINCT site_key||'|'||session_id) n FROM period WHERE event_name='page_view' AND lower(COALESCE(referrer,'')) GLOB '*google*' OR 0
-    ), search_sessions2 AS (
-      SELECT COUNT(DISTINCT site_key||'|'||session_id) n FROM period WHERE event_name='page_view' AND (
-        lower(COALESCE(referrer,'')) LIKE '%google.%' OR lower(COALESCE(referrer,'')) LIKE '%yahoo.%' OR
-        lower(COALESCE(referrer,'')) LIKE '%bing.%' OR lower(COALESCE(referrer,'')) LIKE '%duckduckgo.%'
-      )
-    ), cta AS (
-      SELECT COUNT(DISTINCT CASE WHEN event_name IN ('cta_impression','affiliate_impression') THEN site_key||'|'||session_id END) reached,
-             SUM(CASE WHEN event_name='affiliate_impression' THEN 1 ELSE 0 END) affiliate_impressions,
-             SUM(CASE WHEN event_name='affiliate_click' THEN 1 ELSE 0 END) affiliate_clicks,
-             SUM(CASE WHEN event_name='cta_click' THEN 1 ELSE 0 END) cta_clicks
-      FROM period
-    )
-    SELECT
-      (SELECT COUNT(*) FROM period WHERE event_name='page_view') pv,
-      (SELECT COUNT(DISTINCT site_key||'|'||session_id) FROM period WHERE event_name='page_view') sessions,
-      (SELECT COUNT(DISTINCT site_key||'|'||browser_id) FROM period WHERE event_name='page_view') visitors,
-      COALESCE((SELECT new_visitors FROM visitor_mix),0) new_visitors,
-      COALESCE((SELECT returning_visitors FROM visitor_mix),0) returning_visitors,
-      COALESCE((SELECT n FROM search_sessions2),0) search_sessions,
-      COALESCE((SELECT reached FROM cta),0) cta_reached_sessions,
-      COALESCE((SELECT affiliate_impressions FROM cta),0) affiliate_impressions,
-      COALESCE((SELECT affiliate_clicks FROM cta),0) affiliate_clicks,
-      COALESCE((SELECT cta_clicks FROM cta),0) cta_clicks`,[mod,mod]);
-  executive.search_share=pct(executive.search_sessions,executive.sessions);
-  executive.cta_reach_rate=pct(executive.cta_reached_sessions,executive.sessions);
-  executive.affiliate_ctr=pct(executive.affiliate_clicks,executive.affiliate_impressions);
+  const executive=await q1(`WITH period AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}),first_seen AS (SELECT site_key,browser_id,MIN(occurred_at) first_seen FROM central_events WHERE event_name='page_view' GROUP BY site_key,browser_id),period_browsers AS (SELECT DISTINCT site_key,browser_id FROM period WHERE event_name='page_view'),visitor_mix AS (SELECT SUM(CASE WHEN f.first_seen>=${cutoff} THEN 1 ELSE 0 END) new_visitors,SUM(CASE WHEN f.first_seen<${cutoff} THEN 1 ELSE 0 END) returning_visitors FROM period_browsers p JOIN first_seen f ON f.site_key=p.site_key AND f.browser_id=p.browser_id),search_sessions AS (SELECT COUNT(DISTINCT site_key||'|'||session_id) n FROM period WHERE event_name='page_view' AND (lower(COALESCE(referrer,'')) LIKE '%google.%' OR lower(COALESCE(referrer,'')) LIKE '%yahoo.%' OR lower(COALESCE(referrer,'')) LIKE '%bing.%' OR lower(COALESCE(referrer,'')) LIKE '%duckduckgo.%')),cta AS (SELECT COUNT(DISTINCT CASE WHEN event_name IN ('cta_impression','affiliate_impression') THEN site_key||'|'||session_id END) reached,SUM(CASE WHEN event_name='affiliate_impression' THEN 1 ELSE 0 END) affiliate_impressions,SUM(CASE WHEN event_name='affiliate_click' THEN 1 ELSE 0 END) affiliate_clicks,SUM(CASE WHEN event_name='cta_click' THEN 1 ELSE 0 END) cta_clicks FROM period) SELECT (SELECT COUNT(*) FROM period WHERE event_name='page_view') pv,(SELECT COUNT(DISTINCT site_key||'|'||session_id) FROM period WHERE event_name='page_view') sessions,(SELECT COUNT(DISTINCT site_key||'|'||browser_id) FROM period WHERE event_name='page_view') visitors,COALESCE((SELECT new_visitors FROM visitor_mix),0) new_visitors,COALESCE((SELECT returning_visitors FROM visitor_mix),0) returning_visitors,COALESCE((SELECT n FROM search_sessions),0) search_sessions,COALESCE((SELECT reached FROM cta),0) cta_reached_sessions,COALESCE((SELECT affiliate_impressions FROM cta),0) affiliate_impressions,COALESCE((SELECT affiliate_clicks FROM cta),0) affiliate_clicks,COALESCE((SELECT cta_clicks FROM cta),0) cta_clicks`,[mod,mod,mod]);
+  executive.search_share=pct(executive.search_sessions,executive.sessions);executive.cta_reach_rate=pct(executive.cta_reached_sessions,executive.sessions);executive.affiliate_ctr=pct(executive.affiliate_clicks,executive.affiliate_impressions);
 
-  const programRaw=await q(`WITH e AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}) SELECT
-      COALESCE(NULLIF(program,''),'unknown') program,
-      MAX(COALESCE(NULLIF(provider,''),'')) provider,
-      SUM(CASE WHEN event_name='affiliate_impression' THEN 1 ELSE 0 END) impressions,
-      SUM(CASE WHEN event_name='affiliate_click' THEN 1 ELSE 0 END) clicks,
-      COUNT(DISTINCT CASE WHEN event_name='affiliate_click' THEN site_key||'|'||session_id END) click_sessions
-    FROM e WHERE event_name IN ('affiliate_impression','affiliate_click') GROUP BY COALESCE(NULLIF(program,''),'unknown')`,[mod]);
+  const resultRaw=await q(`SELECT provider,COALESCE(program_key,'') program_key,COALESCE(program_name,'') program_name,COUNT(CASE WHEN occurred_on>=${resultCutoff} THEN 1 END) generated_count,SUM(CASE WHEN occurred_on>=${resultCutoff} THEN reward_amount ELSE 0 END) generated_reward,COUNT(CASE WHEN status IN ('confirmed','approved','確定','承認') AND COALESCE(confirmed_on,occurred_on)>=${resultCutoff} THEN 1 END) confirmed_count,SUM(CASE WHEN status IN ('confirmed','approved','確定','承認') AND COALESCE(confirmed_on,occurred_on)>=${resultCutoff} THEN reward_amount ELSE 0 END) confirmed_reward FROM affiliate_results WHERE occurred_on>=${resultCutoff} OR COALESCE(confirmed_on,'')>=${resultCutoff} GROUP BY provider,COALESCE(program_key,''),COALESCE(program_name,'')`,[mod,mod,mod,mod,mod,mod]);
+  const resultMap=new Map();for(const r of resultRaw){const key=normalizeProgram(r),cur=resultMap.get(key)||{generated_count:0,generated_reward:0,confirmed_count:0,confirmed_reward:0};cur.generated_count+=number(r.generated_count);cur.generated_reward+=number(r.generated_reward);cur.confirmed_count+=number(r.confirmed_count);cur.confirmed_reward+=number(r.confirmed_reward);resultMap.set(key,cur)}
+  const revenueTotals=[...resultMap.values()].reduce((a,x)=>({generated_count:a.generated_count+x.generated_count,generated_reward:a.generated_reward+x.generated_reward,confirmed_count:a.confirmed_count+x.confirmed_count,confirmed_reward:a.confirmed_reward+x.confirmed_reward}),{generated_count:0,generated_reward:0,confirmed_count:0,confirmed_reward:0});
+  executive.generated_results=revenueTotals.generated_count;executive.confirmed_results=revenueTotals.confirmed_count;executive.generated_reward=money(revenueTotals.generated_reward);executive.confirmed_reward=money(revenueTotals.confirmed_reward);executive.generated_epc=money(executive.affiliate_clicks?revenueTotals.generated_reward/executive.affiliate_clicks:0);executive.confirmed_epc=money(executive.affiliate_clicks?revenueTotals.confirmed_reward/executive.affiliate_clicks:0);executive.generated_result_per_click=pct(revenueTotals.generated_count,executive.affiliate_clicks);executive.confirmed_rpm=money(executive.pv?revenueTotals.confirmed_reward/executive.pv*1000:0);
+
+  const programRaw=await q(`WITH e AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}) SELECT COALESCE(NULLIF(program,''),'unknown') program,MAX(COALESCE(NULLIF(provider,''),'')) provider,SUM(CASE WHEN event_name='affiliate_impression' THEN 1 ELSE 0 END) impressions,SUM(CASE WHEN event_name='affiliate_click' THEN 1 ELSE 0 END) clicks,COUNT(DISTINCT CASE WHEN event_name='affiliate_click' THEN site_key||'|'||session_id END) click_sessions FROM e WHERE event_name IN ('affiliate_impression','affiliate_click') GROUP BY COALESCE(NULLIF(program,''),'unknown')`,[mod]);
   const programMap=new Map(programRaw.map(x=>[x.program,x]));
-  const programs=PROGRAMS.map(([key,label])=>{const x=programMap.get(key)||{};const impressions=number(x.impressions),clicks=number(x.clicks);return{program:key,label,provider:x.provider||'',impressions,clicks,click_sessions:number(x.click_sessions),ctr:pct(clicks,impressions)}});
+  const programs=PROGRAMS.map(([key,label])=>{const x=programMap.get(key)||{},r=resultMap.get(key)||{},impressions=number(x.impressions),clicks=number(x.clicks),generated_reward=number(r.generated_reward),confirmed_reward=number(r.confirmed_reward);return{program:key,label,provider:x.provider||'',impressions,clicks,click_sessions:number(x.click_sessions),ctr:pct(clicks,impressions),generated_count:number(r.generated_count),confirmed_count:number(r.confirmed_count),generated_reward:money(generated_reward),confirmed_reward:money(confirmed_reward),generated_epc:money(clicks?generated_reward/clicks:0),confirmed_epc:money(clicks?confirmed_reward/clicks:0),result_per_click:pct(r.generated_count,clicks)}});
 
-  const providerRaw=await q(`WITH e AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}) SELECT
-      COALESCE(NULLIF(provider,''),'unknown') provider,
-      SUM(CASE WHEN event_name='affiliate_impression' THEN 1 ELSE 0 END) impressions,
-      SUM(CASE WHEN event_name='affiliate_click' THEN 1 ELSE 0 END) clicks
-    FROM e WHERE event_name IN ('affiliate_impression','affiliate_click') GROUP BY COALESCE(NULLIF(provider,''),'unknown') ORDER BY clicks DESC`,[mod]);
+  const providerRaw=await q(`WITH e AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}) SELECT COALESCE(NULLIF(provider,''),'unknown') provider,SUM(CASE WHEN event_name='affiliate_impression' THEN 1 ELSE 0 END) impressions,SUM(CASE WHEN event_name='affiliate_click' THEN 1 ELSE 0 END) clicks FROM e WHERE event_name IN ('affiliate_impression','affiliate_click') GROUP BY COALESCE(NULLIF(provider,''),'unknown') ORDER BY clicks DESC`,[mod]);
   const providers=providerRaw.map(x=>({provider:x.provider,label:PROVIDER_LABEL[x.provider]||x.provider,impressions:number(x.impressions),clicks:number(x.clicks),ctr:pct(x.clicks,x.impressions)}));
+  const placements=await q(`WITH e AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}) SELECT site_key,COALESCE(NULLIF(program,''),'unknown') program,COALESCE(NULLIF(placement,''),'unknown') placement,SUM(CASE WHEN event_name='affiliate_impression' THEN 1 ELSE 0 END) impressions,SUM(CASE WHEN event_name='affiliate_click' THEN 1 ELSE 0 END) clicks FROM e WHERE event_name IN ('affiliate_impression','affiliate_click') GROUP BY site_key,COALESCE(NULLIF(program,''),'unknown'),COALESCE(NULLIF(placement,''),'unknown') ORDER BY impressions DESC LIMIT 100`,[mod]);placements.forEach(x=>x.ctr=pct(x.clicks,x.impressions));
+  const variants=await q(`WITH e AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}) SELECT site_key,COALESCE(NULLIF(program,''),'unknown') program,COALESCE(NULLIF(placement,''),'unknown') placement,variant,SUM(CASE WHEN event_name='affiliate_impression' THEN 1 ELSE 0 END) impressions,SUM(CASE WHEN event_name='affiliate_click' THEN 1 ELSE 0 END) clicks FROM e WHERE event_name IN ('affiliate_impression','affiliate_click') AND variant IN ('A','B') GROUP BY site_key,COALESCE(NULLIF(program,''),'unknown'),COALESCE(NULLIF(placement,''),'unknown'),variant ORDER BY program,placement,variant`,[mod]);variants.forEach(x=>x.ctr=pct(x.clicks,x.impressions));
 
-  const placements=await q(`WITH e AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}) SELECT site_key,
-      COALESCE(NULLIF(program,''),'unknown') program,COALESCE(NULLIF(placement,''),'unknown') placement,
-      SUM(CASE WHEN event_name='affiliate_impression' THEN 1 ELSE 0 END) impressions,
-      SUM(CASE WHEN event_name='affiliate_click' THEN 1 ELSE 0 END) clicks
-    FROM e WHERE event_name IN ('affiliate_impression','affiliate_click')
-    GROUP BY site_key,COALESCE(NULLIF(program,''),'unknown'),COALESCE(NULLIF(placement,''),'unknown')
-    ORDER BY impressions DESC LIMIT 100`,[mod]);
-  placements.forEach(x=>x.ctr=pct(x.clicks,x.impressions));
+  const pageRevenueRaw=await q(`SELECT page_url,COUNT(CASE WHEN occurred_on>=${resultCutoff} THEN 1 END) generated_count,SUM(CASE WHEN occurred_on>=${resultCutoff} THEN reward_amount ELSE 0 END) generated_reward,COUNT(CASE WHEN status IN ('confirmed','approved','確定','承認') AND COALESCE(confirmed_on,occurred_on)>=${resultCutoff} THEN 1 END) confirmed_count,SUM(CASE WHEN status IN ('confirmed','approved','確定','承認') AND COALESCE(confirmed_on,occurred_on)>=${resultCutoff} THEN reward_amount ELSE 0 END) confirmed_reward FROM affiliate_results WHERE COALESCE(page_url,'')<>'' AND (occurred_on>=${resultCutoff} OR COALESCE(confirmed_on,'')>=${resultCutoff}) GROUP BY page_url`,[mod,mod,mod,mod,mod,mod]);
+  const pageRevenue=new Map();for(const r of pageRevenueRaw){const p=pagePath(r.page_url);if(!p)continue;const cur=pageRevenue.get(p)||{generated_count:0,generated_reward:0,confirmed_count:0,confirmed_reward:0};cur.generated_count+=number(r.generated_count);cur.generated_reward+=number(r.generated_reward);cur.confirmed_count+=number(r.confirmed_count);cur.confirmed_reward+=number(r.confirmed_reward);pageRevenue.set(p,cur)}
 
-  const pageRows=await q(`WITH e AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}),
-    pv AS (SELECT site_key,page_path,MAX(COALESCE(page_title,'')) title,MAX(COALESCE(page_type,'')) page_type,MAX(COALESCE(vehicle,'')) vehicle,COUNT(*) pv,COUNT(DISTINCT session_id) sessions FROM e WHERE event_name='page_view' GROUP BY site_key,page_path),
-    ai AS (SELECT site_key,page_path,COUNT(*) impressions FROM e WHERE event_name='affiliate_impression' GROUP BY site_key,page_path),
-    ac AS (SELECT site_key,page_path,COUNT(*) clicks FROM e WHERE event_name='affiliate_click' GROUP BY site_key,page_path),
-    ci AS (SELECT site_key,page_path,COUNT(*) cta_impressions FROM e WHERE event_name='cta_impression' GROUP BY site_key,page_path),
-    cc AS (SELECT site_key,page_path,COUNT(*) cta_clicks FROM e WHERE event_name='cta_click' GROUP BY site_key,page_path)
-    SELECT pv.*,COALESCE(ai.impressions,0) impressions,COALESCE(ac.clicks,0) clicks,COALESCE(ci.cta_impressions,0) cta_impressions,COALESCE(cc.cta_clicks,0) cta_clicks
-    FROM pv LEFT JOIN ai USING(site_key,page_path) LEFT JOIN ac USING(site_key,page_path) LEFT JOIN ci USING(site_key,page_path) LEFT JOIN cc USING(site_key,page_path)
-    ORDER BY pv.pv DESC LIMIT 300`,[mod]);
-  for(const x of pageRows){x.pv=number(x.pv);x.sessions=number(x.sessions);x.impressions=number(x.impressions);x.clicks=number(x.clicks);x.cta_impressions=number(x.cta_impressions);x.cta_clicks=number(x.cta_clicks);x.ctr=pct(x.clicks,x.impressions);x.cta_ctr=pct(x.cta_clicks,x.cta_impressions)}
+  const pageRows=await q(`WITH e AS (SELECT * FROM central_events WHERE occurred_at>=${cutoff}),pv AS (SELECT site_key,page_path,MAX(COALESCE(page_title,'')) title,MAX(COALESCE(page_type,'')) page_type,MAX(COALESCE(vehicle,'')) vehicle,COUNT(*) pv,COUNT(DISTINCT session_id) sessions FROM e WHERE event_name='page_view' GROUP BY site_key,page_path),ai AS (SELECT site_key,page_path,COUNT(*) impressions FROM e WHERE event_name='affiliate_impression' GROUP BY site_key,page_path),ac AS (SELECT site_key,page_path,COUNT(*) clicks FROM e WHERE event_name='affiliate_click' GROUP BY site_key,page_path),ci AS (SELECT site_key,page_path,COUNT(*) cta_impressions FROM e WHERE event_name='cta_impression' GROUP BY site_key,page_path),cc AS (SELECT site_key,page_path,COUNT(*) cta_clicks FROM e WHERE event_name='cta_click' GROUP BY site_key,page_path) SELECT pv.*,COALESCE(ai.impressions,0) impressions,COALESCE(ac.clicks,0) clicks,COALESCE(ci.cta_impressions,0) cta_impressions,COALESCE(cc.cta_clicks,0) cta_clicks FROM pv LEFT JOIN ai USING(site_key,page_path) LEFT JOIN ac USING(site_key,page_path) LEFT JOIN ci USING(site_key,page_path) LEFT JOIN cc USING(site_key,page_path) ORDER BY pv.pv DESC LIMIT 300`,[mod]);
+  for(const x of pageRows){x.pv=number(x.pv);x.sessions=number(x.sessions);x.impressions=number(x.impressions);x.clicks=number(x.clicks);x.cta_impressions=number(x.cta_impressions);x.cta_clicks=number(x.cta_clicks);x.ctr=pct(x.clicks,x.impressions);x.cta_ctr=pct(x.cta_clicks,x.cta_impressions);const r=pageRevenue.get(x.page_path);x.revenue_attributed=Boolean(r);x.generated_results=number(r?.generated_count);x.confirmed_results=number(r?.confirmed_count);x.generated_reward=money(r?.generated_reward);x.confirmed_reward=money(r?.confirmed_reward);x.rpm=x.revenue_attributed&&x.pv?money(x.confirmed_reward/x.pv*1000):null}
 
-  const popularVehicles=pageRows.filter(x=>/^vehicle_/.test(x.page_type||'')||/^\/(cars|bikes)\//.test(x.page_path||'')).slice(0,50);
-  const topCtr=pageRows.filter(x=>x.impressions>=3).sort((a,b)=>b.ctr-a.ctr||b.impressions-a.impressions).slice(0,20);
-  const lowCtr=pageRows.filter(x=>x.impressions>=3).sort((a,b)=>a.ctr-b.ctr||b.impressions-a.impressions).slice(0,20);
-  const priority=pageRows.map(x=>{
-    let score=0,reason='改善候補';
-    if(x.pv>=5&&x.clicks===0){score=x.pv*10+x.impressions*4;reason='高PV・クリック0'}
-    else if(x.impressions>=3&&x.ctr<1){score=x.pv*6+x.impressions*5;reason='表示ありCTR低'}
-    else if(x.pv>=5&&x.cta_impressions===0&&x.impressions===0){score=x.pv*5;reason='CTA未到達'}
-    else score=x.pv+x.impressions;
-    return{...x,score,reason};
-  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,30);
-
-  const highAds=programs.filter(x=>x.impressions>=3).slice().sort((a,b)=>b.ctr-a.ctr).slice(0,10);
-  const lowAds=programs.filter(x=>x.impressions>=3).slice().sort((a,b)=>a.ctr-b.ctr).slice(0,10);
-  return json({ok:true,days,generated_at:new Date().toISOString(),executive,programs,providers,placements,pages:pageRows.slice(0,100),popular_vehicles:popularVehicles,top_ctr_pages:topCtr,low_ctr_pages:lowCtr,priority,high_ads:highAds,low_ads:lowAds});
+  const popularVehicles=pageRows.filter(x=>/^vehicle_/.test(x.page_type||'')||/^\/(cars|bikes)\//.test(x.page_path||'')).slice(0,50),topCtr=pageRows.filter(x=>x.impressions>=3).sort((a,b)=>b.ctr-a.ctr||b.impressions-a.impressions).slice(0,20),lowCtr=pageRows.filter(x=>x.impressions>=3).sort((a,b)=>a.ctr-b.ctr||b.impressions-a.impressions).slice(0,20);
+  const priority=pageRows.map(x=>{let score=0,reason='改善候補';if(x.revenue_attributed&&x.clicks>=3&&x.generated_results===0){score=x.pv*8+x.clicks*20;reason='クリックあり・成果0'}else if(x.pv>=5&&x.clicks===0){score=x.pv*10+x.impressions*4;reason='高PV・クリック0'}else if(x.impressions>=3&&x.ctr<1){score=x.pv*6+x.impressions*5;reason='表示ありCTR低'}else if(x.pv>=5&&x.cta_impressions===0&&x.impressions===0){score=x.pv*5;reason='CTA未到達'}else score=x.pv+x.impressions;return{...x,score,reason}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,30);
+  const highAds=programs.filter(x=>x.impressions>=3).slice().sort((a,b)=>b.ctr-a.ctr).slice(0,10),lowAds=programs.filter(x=>x.impressions>=3).slice().sort((a,b)=>a.ctr-b.ctr).slice(0,10);
+  const attributedPages=pageRows.filter(x=>x.revenue_attributed).sort((a,b)=>number(b.confirmed_reward)-number(a.confirmed_reward)||number(b.generated_reward)-number(a.generated_reward)).slice(0,50);
+  return json({ok:true,days,generated_at:new Date().toISOString(),executive,programs,providers,placements,variants,pages:pageRows.slice(0,100),attributed_pages:attributedPages,popular_vehicles:popularVehicles,top_ctr_pages:topCtr,low_ctr_pages:lowCtr,priority,high_ads:highAds,low_ads:lowAds,revenue_note:'成果/クリック・EPCは同一期間のクリック数とASP成果CSVを比較した指標です。ASP側にページURLがない成果はページ別収益へ推測配分しません。'});
 }
