@@ -59,6 +59,8 @@ const priorityPages = [
   ['articles/maintenance-salary.html', 'https://factory-career-site.pages.dev/articles/maintenance-salary'],
   ['articles/quality-salary.html', 'https://factory-career-site.pages.dev/articles/quality-salary'],
   ['articles/production-control-salary.html', 'https://factory-career-site.pages.dev/articles/production-control-salary'],
+  ['articles/factory-quit.html', 'https://factory-career-site.pages.dev/articles/factory-quit'],
+  ['articles/night-shift-hard.html', 'https://factory-career-site.pages.dev/articles/night-shift-hard'],
   ['articles/production-tech-hard.html', 'https://factory-career-site.pages.dev/articles/production-tech-hard'],
   ['articles/maintenance-hard.html', 'https://factory-career-site.pages.dev/articles/maintenance-hard'],
   ['articles/quality-quit.html', 'https://factory-career-site.pages.dev/articles/quality-quit'],
@@ -84,6 +86,16 @@ const salaryLinks = [
 for (const href of salaryLinks) {
   check(salaryGuide.includes(`href=\"${href}\"`) || salaryGuide.includes(`href="${href}"`), `salary-guide links to ${href}`);
 }
+
+const factoryQuit = read('articles/factory-quit.html');
+check(factoryQuit.includes('工場勤務を辞めたい人へ【2026年】'), 'factory-quit carries 2026 search freshness');
+check(factoryQuit.includes('/articles/night-shift-hard'), 'factory-quit links to night-shift guide');
+check(factoryQuit.includes('令和７年　雇用動向調査結果の概要'), 'factory-quit cites official employment trends');
+
+const nightShiftHard = read('articles/night-shift-hard.html');
+check(nightShiftHard.includes('夜勤がきつい・辞めたい人へ【2026年】'), 'night-shift-hard carries 2026 search freshness');
+check(nightShiftHard.includes('健康づくりのための睡眠ガイド2023'), 'night-shift-hard cites official sleep guidance');
+check(nightShiftHard.includes('/articles/factory-night-to-day'), 'night-shift-hard links to day-shift transition guide');
 
 const productionControlOvertime = read('articles/production-control-overtime.html');
 check(productionControlOvertime.includes('生産管理は残業が多い？'), 'production-control-overtime targets the main residual-work query');
