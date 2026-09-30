@@ -42,6 +42,18 @@
 /assets/ops-dashboard.js
   Cache-Control: no-store, no-cache, must-revalidate
 
+/assets/ops-intelligence.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/assets/admin-seo-data.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/assets/admin-affiliate-import.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/assets/ops-health.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
 /assets/ops-dashboard.css
   Cache-Control: no-store, no-cache, must-revalidate
 
