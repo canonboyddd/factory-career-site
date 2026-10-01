@@ -9,6 +9,8 @@ on:
       - 'functions/api/admin/okazu-analytics.js'
       - 'functions/api/admin/seo-data.js'
       - 'assets/admin-seo-data.js'
+      - 'ops-dashboard.html'
+      - 'qa/ops-dashboard-contract.spec.cjs'
       - '.github/workflows/ops-dashboard-qa.yml'
   workflow_dispatch:
 
@@ -32,3 +34,5 @@ jobs:
           node --check functions/api/admin/okazu-analytics.js
           node --check functions/api/admin/seo-data.js
           node --check assets/admin-seo-data.js
+      - name: Check dashboard contracts
+        run: node qa/ops-dashboard-contract.spec.cjs
