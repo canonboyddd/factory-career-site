@@ -47,7 +47,8 @@ for (const p of headerNoindexPaths) {
   const start = headers.indexOf(`\n${p}\n`) >= 0 ? headers.indexOf(`\n${p}\n`) : headers.indexOf(`${p}\n`);
   check(start >= 0, `_headers has rule for ${p}`);
   if (start >= 0) {
-    const block = headers.slice(start, headers.indexOf('\n\n', start) >= 0 ? headers.indexOf('\n\n', start) : headers.length);
+    const end = headers.indexOf('\n\n', start) >= 0 ? headers.indexOf('\n\n', start) : headers.length;
+    const block = headers.slice(start, end);
     check(block.includes('X-Robots-Tag: noindex'), `${p} sends X-Robots-Tag noindex`);
   }
 }
@@ -61,6 +62,9 @@ const priorityPages = [
   ['articles/production-control-salary.html', 'https://factory-career-site.pages.dev/articles/production-control-salary'],
   ['articles/factory-quit.html', 'https://factory-career-site.pages.dev/articles/factory-quit'],
   ['articles/night-shift-hard.html', 'https://factory-career-site.pages.dev/articles/night-shift-hard'],
+  ['articles/factory-two-shift-hard.html', 'https://factory-career-site.pages.dev/articles/factory-two-shift-hard'],
+  ['articles/factory-three-shift-hard.html', 'https://factory-career-site.pages.dev/articles/factory-three-shift-hard'],
+  ['articles/factory-night-to-day.html', 'https://factory-career-site.pages.dev/articles/factory-night-to-day'],
   ['articles/production-tech-hard.html', 'https://factory-career-site.pages.dev/articles/production-tech-hard'],
   ['articles/maintenance-hard.html', 'https://factory-career-site.pages.dev/articles/maintenance-hard'],
   ['articles/quality-quit.html', 'https://factory-career-site.pages.dev/articles/quality-quit'],
@@ -96,6 +100,28 @@ const nightShiftHard = read('articles/night-shift-hard.html');
 check(nightShiftHard.includes('夜勤がきつい・辞めたい人へ【2026年】'), 'night-shift-hard carries 2026 search freshness');
 check(nightShiftHard.includes('健康づくりのための睡眠ガイド2023'), 'night-shift-hard cites official sleep guidance');
 check(nightShiftHard.includes('/articles/factory-night-to-day'), 'night-shift-hard links to day-shift transition guide');
+
+const nightCluster = [
+  ['articles/factory-two-shift-hard.html', '2交替勤務がきつい人へ【2026年】'],
+  ['articles/factory-three-shift-hard.html', '3交替勤務がきつい人へ【2026年】'],
+  ['articles/factory-night-to-day.html', '夜勤から日勤へ転職する方法【2026年】']
+];
+for (const [file, target] of nightCluster) {
+  const html = read(file);
+  check(html.includes(target), `${file} carries 2026 night-shift search intent`);
+  check(html.includes('/articles/night-shift-hard'), `${file} links back to night-shift hub`);
+  check(html.includes('mhlw.go.jp') || html.includes('check-roudou.mhlw.go.jp'), `${file} cites official MHLW guidance`);
+}
+
+const twoShift = read('articles/factory-two-shift-hard.html');
+const threeShift = read('articles/factory-three-shift-hard.html');
+const nightToDay = read('articles/factory-night-to-day.html');
+check(twoShift.includes('/articles/factory-three-shift-hard'), 'two-shift guide links to three-shift guide');
+check(twoShift.includes('/articles/factory-night-to-day'), 'two-shift guide links to day-shift transition');
+check(threeShift.includes('/articles/factory-two-shift-hard'), 'three-shift guide links to two-shift guide');
+check(threeShift.includes('/articles/factory-night-to-day'), 'three-shift guide links to day-shift transition');
+check(nightToDay.includes('/articles/factory-two-shift-hard'), 'day-shift transition links to two-shift guide');
+check(nightToDay.includes('/articles/factory-three-shift-hard'), 'day-shift transition links to three-shift guide');
 
 const productionControlOvertime = read('articles/production-control-overtime.html');
 check(productionControlOvertime.includes('生産管理は残業が多い？'), 'production-control-overtime targets the main residual-work query');
