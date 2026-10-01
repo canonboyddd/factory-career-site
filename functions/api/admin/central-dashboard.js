@@ -8,11 +8,22 @@ async function schema(db){await db.batch([
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_time ON central_events(occurred_at)`),
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_site ON central_events(site_key)`)
 ]);}
+function isAffiliateClickRow(row){
+  return ['affiliate_slot_click','car_valuation_click','bike_buyback_click','rakuten_click','affiliate_click','affiliate_click_unified'].includes(String(row?.event||row?.event_name||''));
+}
 function affiliateProgram(row){
   if(row?.program)return String(row.program);
   const ev=String(row?.event||'');const target=String(row?.target||'');
   if(ev==='rakuten_click')return'rakuten';
   if(ev==='affiliate_slot_click'){
+    const text=target.toLowerCase();
+    if(/ズバット|zubatto/.test(text))return'zubatto';
+    if(/ucarpac|ユーカーパック/.test(text))return'ucarpac';
+    if(/carnext|カーネクスト/.test(text))return'carnext';
+    if(/バイクランド|bikeland/.test(text))return'bikeland';
+    if(/バイク王|bikeking|bike king/.test(text))return'bikeking';
+    if(/保険スクエア|保険.*bang|insurance.*bang|bang！|bang!/.test(text))return'insurance_bang';
+    if(/ニコノリ|niconori/.test(text))return'niconori';
     const parts=target.split('|');return parts[1]||'affiliate';
   }
   if(ev==='car_valuation_click')return'car-valuation';
@@ -70,6 +81,7 @@ export async function onRequestGet({request,env}){
     const cRows=Array.isArray(car.rows)?car.rows:[];
     const affMap=new Map();
     for(const r of cRows){
+      if(!isAffiliateClickRow(r))continue;
       const p=affiliateProgram(r);if(!p)continue;
       const count=Number(r.count||0);carAffiliateClicks+=count;
       affMap.set(p,(affMap.get(p)||0)+count);
@@ -80,8 +92,7 @@ export async function onRequestGet({request,env}){
     const carPages=Array.isArray(car.pages)?car.pages:[];
     for(const x of carPages)pages.push({site_key:'car-bike',page_path:x.page,title:'',pv:Number(x.views||0),sessions:Number(x.visitors||0)});
     for(const [program,clicks] of affMap)affiliates.push({site_key:'car-bike',program,clicks,sessions:0});
-    const last=carDaily.length?carDaily[carDaily.length-1].day:null;
-    seenMap.set('car-bike',last?`${last} 23:59:59`:'connected');
+    seenMap.set('car-bike',car.last_seen||new Date().toISOString().replace('T',' ').replace(/\.\d{3}Z$/,''));
   }
 
   const sites=CONFIGURED_SITES.map(site_key=>{const x=periodMap.get(site_key)||{};return{site_key,pv:Number(x.pv||0),browsers:Number(x.browsers||0),sessions:Number(x.sessions||0),affiliate_clicks:Number(x.affiliate_clicks||0),connected:seenMap.has(site_key),last_seen:seenMap.get(site_key)||null,source:site_key==='car-bike'?(car?'vehicle-d1':'central-fallback'):'central'};});
