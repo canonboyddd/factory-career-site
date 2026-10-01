@@ -7,6 +7,8 @@ on:
       - 'functions/api/admin/central-dashboard.js'
       - 'functions/api/admin/ops-intelligence.js'
       - 'functions/api/admin/okazu-analytics.js'
+      - 'functions/api/admin/seo-data.js'
+      - 'assets/admin-seo-data.js'
       - '.github/workflows/ops-dashboard-qa.yml'
   workflow_dispatch:
 
@@ -23,8 +25,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Check analytics API syntax
+      - name: Check dashboard analytics syntax
         run: |
           node --check functions/api/admin/central-dashboard.js
           node --check functions/api/admin/ops-intelligence.js
           node --check functions/api/admin/okazu-analytics.js
+          node --check functions/api/admin/seo-data.js
+          node --check assets/admin-seo-data.js
