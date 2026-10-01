@@ -33,7 +33,9 @@ has(intelApi,'表示ありCTR低','low affiliate CTR rule missing');
 has(intelApi,'CTA未到達','CTA reach rule missing');
 has(intelApi,"c.site_key<>'car-bike'",'vehicle D1 de-duplication missing');
 
-has(okazuApi,'safeQuery','Okazu resilient query helper missing');
+has(okazuApi,'const safe=async','Okazu resilient query wrapper missing');
+has(okazuApi,'partial:warnings.length>0','Okazu partial-result reporting missing');
+has(okazuApi,"event_name IN ('affiliate_click','affiliate_click_unified')",'Okazu normalized affiliate clicks missing');
 has(dashApi,'filtered_automated_pv','automated traffic exclusion summary missing');
 has(dashHtml,'全ASP 実収益','actual earnings panel missing');
 has(dashHtml,'SEO成果・インデックス管理','SEO panel missing');
