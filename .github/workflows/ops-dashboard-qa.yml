@@ -10,6 +10,7 @@ on:
       - 'functions/api/admin/seo-data.js'
       - 'functions/api/central/collect.js'
       - 'assets/admin-seo-data.js'
+      - 'assets/ops-intelligence.js'
       - 'ops-dashboard.html'
       - 'qa/ops-dashboard-contract.spec.cjs'
       - '.github/workflows/ops-dashboard-qa.yml'
@@ -36,5 +37,6 @@ jobs:
           node --check functions/api/admin/seo-data.js
           node --check functions/api/central/collect.js
           node --check assets/admin-seo-data.js
+          node --check assets/ops-intelligence.js
       - name: Check dashboard contracts
         run: node qa/ops-dashboard-contract.spec.cjs
