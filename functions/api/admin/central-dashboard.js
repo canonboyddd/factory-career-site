@@ -3,6 +3,8 @@ function auth(request,env){const x=request.headers.get('authorization')||'';retu
 function rows(x){return x?.results||[];}
 const CONFIGURED_SITES=['factory','sugutsucool','car-bike','okazu','clipmade'];
 const CAR_URL='https://norimono-cost.com/api/admin/central-export';
+const PROBE_PATHS=["/.git/","/.ssh/","/actuator/","/.env","/wp-admin","/wp-login","/phpmyadmin","/server-status","/vendor/phpunit","/.aws/","/.docker/","/config/","/boaform/","/cgi-bin/"];
+function probeSql(alias){return `(${PROBE_PATHS.map(p=>`lower(${alias}.page_path) LIKE '${p.replace(/'/g,"''")}%'`).join(' OR ')})`;}
 async function schema(db){await db.batch([
   db.prepare(`CREATE TABLE IF NOT EXISTS central_events (id INTEGER PRIMARY KEY AUTOINCREMENT, occurred_at TEXT NOT NULL DEFAULT (datetime('now')), site_key TEXT NOT NULL, event_name TEXT NOT NULL, browser_id TEXT NOT NULL, session_id TEXT NOT NULL, page_path TEXT NOT NULL, page_title TEXT, referrer TEXT, program TEXT, placement TEXT, outbound_domain TEXT, device_type TEXT)`),
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_time ON central_events(occurred_at)`),
@@ -20,7 +22,7 @@ function affiliateProgram(row){
     if(/ズバット|zubatto/.test(text))return'zubatto';
     if(/ucarpac|ユーカーパック/.test(text))return'ucarpac';
     if(/carnext|カーネクスト/.test(text))return'carnext';
-    if(/バイクランド|bikeland/.test(text))return'bikeland';
+    if(/バイクランド|bikeland|bike land/.test(text))return'bikeland';
     if(/バイク王|bikeking|bike king/.test(text))return'bikeking';
     if(/保険スクエア|保険.*bang|insurance.*bang|bang！|bang!/.test(text))return'insurance_bang';
     if(/ニコノリ|niconori/.test(text))return'niconori';
@@ -57,7 +59,7 @@ export async function onRequestGet({request,env}){
   const centralClean=`SELECT c.* FROM central_events c
     LEFT JOIN (${suspicious}) b
       ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours')
-    WHERE b.browser_id IS NULL ${carClause}`;
+    WHERE b.browser_id IS NULL ${carClause} AND NOT ${probeSql('c')}`;
   const union=`SELECT 'factory' site_key,event_name,browser_id,session_id,page_path,page_title,occurred_at,program,placement,device_type FROM analytics_events
     UNION ALL
     SELECT site_key,event_name,browser_id,session_id,page_path,page_title,occurred_at,program,placement,device_type FROM (${centralClean})`;
@@ -68,7 +70,7 @@ export async function onRequestGet({request,env}){
   const dailyResult=await q(`WITH e AS (${union}) SELECT date(occurred_at,'+9 hours') day,site_key,SUM(CASE WHEN event_name='page_view' THEN 1 ELSE 0 END) pv,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN session_id END) sessions FROM e WHERE occurred_at>=${cutoff} GROUP BY day,site_key ORDER BY day,site_key`,[mod]);
   const pagesResult=await q(`WITH e AS (${union}) SELECT site_key,page_path,MAX(COALESCE(page_title,'')) title,COUNT(*) pv,COUNT(DISTINCT session_id) sessions FROM e WHERE event_name='page_view' AND occurred_at>=${cutoff} GROUP BY site_key,page_path ORDER BY pv DESC LIMIT 100`,[mod]);
   const affiliatesResult=await q(`WITH e AS (${union}) SELECT site_key,COALESCE(NULLIF(program,''),'unknown') program,COUNT(*) clicks,COUNT(DISTINCT session_id) sessions FROM e WHERE event_name IN ('affiliate_click','affiliate_click_unified') AND occurred_at>=${cutoff} GROUP BY site_key,program ORDER BY clicks DESC LIMIT 100`,[mod]);
-  const filteredRow=await q1(`SELECT COUNT(*) filtered FROM central_events c INNER JOIN (${suspicious}) b ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours') WHERE c.event_name='page_view' AND c.occurred_at>=${cutoff}`,[mod]);
+  const filteredRow=await q1(`SELECT COUNT(*) filtered FROM central_events c LEFT JOIN (${suspicious}) b ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours') WHERE c.event_name='page_view' AND c.occurred_at>=${cutoff} AND (b.browser_id IS NOT NULL OR ${probeSql('c')})`,[mod]);
 
   const periodMap=new Map(rows(liveSites).map(x=>[x.site_key,x]));
   const seenMap=new Map(rows(seen).map(x=>[x.site_key,x.last_seen]));
