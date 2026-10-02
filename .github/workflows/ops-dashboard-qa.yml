@@ -8,6 +8,7 @@ on:
       - 'functions/api/admin/ops-intelligence.js'
       - 'functions/api/admin/okazu-analytics.js'
       - 'functions/api/admin/seo-data.js'
+      - 'functions/api/central/collect.js'
       - 'assets/admin-seo-data.js'
       - 'ops-dashboard.html'
       - 'qa/ops-dashboard-contract.spec.cjs'
@@ -33,6 +34,7 @@ jobs:
           node --check functions/api/admin/ops-intelligence.js
           node --check functions/api/admin/okazu-analytics.js
           node --check functions/api/admin/seo-data.js
+          node --check functions/api/central/collect.js
           node --check assets/admin-seo-data.js
       - name: Check dashboard contracts
         run: node qa/ops-dashboard-contract.spec.cjs
