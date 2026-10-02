@@ -5,6 +5,7 @@ const CONFIGURED_SITES=['factory','sugutsucool','car-bike','okazu','clipmade'];
 const CAR_URL='https://norimono-cost.com/api/admin/central-export';
 const PROBE_PATHS=["/.git/","/.ssh/","/actuator/","/.env","/wp-admin","/wp-login","/phpmyadmin","/server-status","/vendor/phpunit","/.aws/","/.docker/","/config/","/boaform/","/cgi-bin/"];
 function probeSql(alias){return `(${PROBE_PATHS.map(p=>`lower(${alias}.page_path) LIKE '${p.replace(/'/g,"''")}%'`).join(' OR ')})`;}
+function canonicalPage(value){let p=String(value||'/').split('?')[0].split('#')[0]||'/';if(p==='/index.html')return'/';return p.endsWith('.html')?(p.slice(0,-5)||'/'):p;}
 async function schema(db){await db.batch([
   db.prepare(`CREATE TABLE IF NOT EXISTS central_events (id INTEGER PRIMARY KEY AUTOINCREMENT, occurred_at TEXT NOT NULL DEFAULT (datetime('now')), site_key TEXT NOT NULL, event_name TEXT NOT NULL, browser_id TEXT NOT NULL, session_id TEXT NOT NULL, page_path TEXT NOT NULL, page_title TEXT, referrer TEXT, program TEXT, placement TEXT, outbound_domain TEXT, device_type TEXT)`),
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_time ON central_events(occurred_at)`),
@@ -75,7 +76,7 @@ export async function onRequestGet({request,env}){
   const periodMap=new Map(rows(liveSites).map(x=>[x.site_key,x]));
   const seenMap=new Map(rows(seen).map(x=>[x.site_key,x.last_seen]));
   const daily=rows(dailyResult).slice();
-  const pages=rows(pagesResult).slice();
+  let pages=rows(pagesResult).slice();
   const affiliates=rows(affiliatesResult).slice();
   let carAffiliateClicks=0;
 
@@ -96,6 +97,13 @@ export async function onRequestGet({request,env}){
     for(const [program,clicks] of affMap)affiliates.push({site_key:'car-bike',program,clicks,sessions:0});
     seenMap.set('car-bike',car.last_seen||new Date().toISOString().replace('T',' ').replace(/\.\d{3}Z$/,''));
   }
+
+  const mergedPages=new Map();
+  for(const x of pages){
+    const page_path=canonicalPage(x.page_path),key=`${x.site_key}|${page_path}`,cur=mergedPages.get(key)||{site_key:x.site_key,page_path,title:'',pv:0,sessions:0};
+    cur.pv+=Number(x.pv||0);cur.sessions+=Number(x.sessions||0);if(!cur.title&&x.title)cur.title=x.title;mergedPages.set(key,cur);
+  }
+  pages=[...mergedPages.values()];
 
   const sites=CONFIGURED_SITES.map(site_key=>{const x=periodMap.get(site_key)||{};return{site_key,pv:Number(x.pv||0),browsers:Number(x.browsers||0),sessions:Number(x.sessions||0),affiliate_clicks:Number(x.affiliate_clicks||0),connected:seenMap.has(site_key),last_seen:seenMap.get(site_key)||null,source:site_key==='car-bike'?(car?'vehicle-d1':'central-fallback'):'central'};});
 
