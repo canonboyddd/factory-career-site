@@ -14,7 +14,7 @@ export async function onRequestGet({request,env}){
   ]);
   checks.push(check('robots → sitemap-index','seo','/robots.txt',robots,/sitemap-index\.xml/i.test(robots.text)&&!/Sitemap:\s*https?:\/\/[^\s]+\/sitemap-(?:cars|bikes|guides)/i.test(robots.text),'sitemap-index.xml を正規入口にする'));
   checks.push(check('サイトマップ index','seo','/sitemap-index.xml',sitemap,/<sitemapindex/i.test(sitemap.text)&&/sitemap/i.test(sitemap.text),'分割サイトマップのindex'));
-  checks.push(check('中央計測トラッカー接続','analytics','/page-loader-v50.js',loader,/central-tracker\.js\?v=20260928-6/.test(loader.text)&&/data\.site|dataset\.site/.test(loader.text),'car-bike → 統合管理計測'));
+  checks.push(check('中央計測トラッカー接続','analytics','/page-loader-v50.js',loader,/central-tracker\.js\?v=20261001-1/.test(loader.text)&&/data\.site|dataset\.site/.test(loader.text),'car-bike → 統合管理計測'));
   checks.push(check('AFB ズバット設定','affiliate','/affiliate-afb-v84.js',afb,/Z209o-31470S/.test(afb.text)&&/affiliate-b\.com/.test(afb.text),'AFB ID 1470'));
   checks.push(check('収益導線CRO','affiliate','/affiliate-cro-v114.js',cro,/sell_diagnosis_result|car_value_post_estimate|car_insurance_post_estimate/.test(cro.text),'主要配置ID'));
   checks.push(check('デプロイマーカー','deploy','/deploy-marker.txt',marker,/v115-github-production-qa/.test(marker.text),'GitHub本番QAマーカー'));
