@@ -32,6 +32,9 @@ has(intelApi,"'affiliate_impression','affiliate_slot_view'",'affiliate impressio
 has(intelApi,"'affiliate_click','affiliate_click_unified'",'affiliate click normalization missing');
 has(intelApi,'クリックあり・成果0','revenue no-conversion rule missing');
 has(intelApi,'高PV・クリック0','high-PV zero-click rule missing');
+has(intelApi,'広告到達不足','low affiliate reach rule missing');
+has(intelApi,'x.impressions>=3','high-PV zero-click sample threshold missing');
+has(intelApi,'x.impressions/x.pv<0.5','low affiliate reach ratio missing');
 has(intelApi,'表示ありCTR低','low affiliate CTR rule missing');
 has(intelApi,'CTA未到達','CTA reach rule missing');
 has(intelApi,"c.site_key<>'car-bike'",'vehicle D1 de-duplication missing');
