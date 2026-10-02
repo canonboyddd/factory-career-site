@@ -1,6 +1,7 @@
 function cors(request){const origin=request.headers.get('origin')||'';return {'content-type':'application/json; charset=utf-8','cache-control':'no-store, no-cache, must-revalidate','access-control-allow-origin':origin||'*','access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'content-type','vary':'Origin'};}
 function json(request,data,status=200){return new Response(JSON.stringify(data),{status,headers:cors(request)});}
 function automated(request){const ua=String(request.headers.get('user-agent')||'');return /bot|crawler|spider|slurp|bingpreview|google-inspectiontool|lighthouse|pagespeed|headless|phantom|selenium|puppeteer|playwright|facebookexternalhit|twitterbot|linkedinbot|discordbot|uptimerobot|pingdom|monitor/i.test(ua);}
+function securityProbe(path){const p=String(path||'').toLowerCase();return /^\/(?:\.git\/|\.ssh\/|actuator\/|\.env(?:\.|$)|wp-admin(?:\/|$)|wp-login(?:\.php)?|phpmyadmin(?:\/|$)|server-status(?:\/|$)|vendor\/phpunit\/|\.aws\/|\.docker\/|config\/|boaform\/|cgi-bin\/)/.test(p);}
 async function schema(db){
   await db.prepare(`CREATE TABLE IF NOT EXISTS central_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -97,6 +98,7 @@ async function save(request,env,raw){
   const body=cleanBody(raw||{});
   if(!validSite.test(body.site_key))return json(request,{ok:false,error:'invalid_site_key'},400);
   if(!body.browser_id||!body.session_id)return json(request,{ok:false,error:'missing_ids'},400);
+  if(securityProbe(body.page_path))return json(request,{ok:true,filtered:'security_probe'});
   await schema(env.ANALYTICS_DB);
   await env.ANALYTICS_DB.prepare(`INSERT INTO central_events(site_key,event_name,browser_id,session_id,page_path,page_title,referrer,provider,program,placement,variant,outbound_domain,device_type,page_type,vehicle,actress,genre,maker,product_id,cta_position,search_query,result_count,origin_page_path,origin_page_type,origin_actress,origin_genre,origin_maker) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(
     body.site_key,body.event_name,body.browser_id,body.session_id,body.page_path,body.page_title,body.referrer,
