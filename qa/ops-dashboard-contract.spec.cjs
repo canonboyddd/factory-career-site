@@ -9,6 +9,7 @@ const seoUi=read('assets/admin-seo-data.js');
 const intelApi=read('functions/api/admin/ops-intelligence.js');
 const okazuApi=read('functions/api/admin/okazu-analytics.js');
 const dashApi=read('functions/api/admin/central-dashboard.js');
+const centralCollect=read('functions/api/central/collect.js');
 const dashHtml=read('ops-dashboard.html');
 
 for(const key of ['factory','sugutsucool','okazu','car-bike','clipmade']){
@@ -32,11 +33,16 @@ has(intelApi,'高PV・クリック0','high-PV zero-click rule missing');
 has(intelApi,'表示ありCTR低','low affiliate CTR rule missing');
 has(intelApi,'CTA未到達','CTA reach rule missing');
 has(intelApi,"c.site_key<>'car-bike'",'vehicle D1 de-duplication missing');
+has(intelApi,'[mod,mod,mod,mod]);','executive analytics bind count regression');
+has(intelApi,'PROBE_PATHS','executive security-probe filtering missing');
 
 has(okazuApi,'const safe=async','Okazu resilient query wrapper missing');
 has(okazuApi,'partial:warnings.length>0','Okazu partial-result reporting missing');
 has(okazuApi,"event_name IN ('affiliate_click','affiliate_click_unified')",'Okazu normalized affiliate clicks missing');
 has(dashApi,'filtered_automated_pv','automated traffic exclusion summary missing');
+has(dashApi,'PROBE_PATHS','central dashboard security-probe filtering missing');
+has(centralCollect,'function securityProbe','central collector security-probe filter missing');
+has(centralCollect,"filtered:'security_probe'",'central collector probe rejection response missing');
 has(dashHtml,'全ASP 実収益','actual earnings panel missing');
 has(dashHtml,'SEO成果・インデックス管理','SEO panel missing');
 has(dashHtml,'収益改善の自動ランキング','automatic revenue ranking panel missing');
