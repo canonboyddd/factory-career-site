@@ -10,6 +10,7 @@ const intelApi=read('functions/api/admin/ops-intelligence.js');
 const intelUi=read('assets/ops-intelligence.js');
 const okazuApi=read('functions/api/admin/okazu-analytics.js');
 const dashApi=read('functions/api/admin/central-dashboard.js');
+const healthApi=read('functions/api/admin/production-health.js');
 const centralCollect=read('functions/api/central/collect.js');
 const dashHtml=read('ops-dashboard.html');
 
@@ -52,6 +53,7 @@ has(okazuApi,'partial:warnings.length>0','Okazu partial-result reporting missing
 has(okazuApi,"event_name IN ('affiliate_click','affiliate_click_unified')",'Okazu normalized affiliate clicks missing');
 has(dashApi,'filtered_automated_pv','automated traffic exclusion summary missing');
 has(dashApi,'PROBE_PATHS','central dashboard security-probe filtering missing');
+has(healthApi,'central-tracker\\.js\\?v=20261001-1','production health tracker version is stale');
 has(centralCollect,'function securityProbe','central collector security-probe filter missing');
 has(centralCollect,"filtered:'security_probe'",'central collector probe rejection response missing');
 has(dashHtml,'全ASP 実収益','actual earnings panel missing');
