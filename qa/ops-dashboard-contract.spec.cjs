@@ -7,6 +7,7 @@ function has(text,needle,msg){assert(text.includes(needle),msg||`Missing: ${need
 const seoApi=read('functions/api/admin/seo-data.js');
 const seoUi=read('assets/admin-seo-data.js');
 const intelApi=read('functions/api/admin/ops-intelligence.js');
+const intelUi=read('assets/ops-intelligence.js');
 const okazuApi=read('functions/api/admin/okazu-analytics.js');
 const dashApi=read('functions/api/admin/central-dashboard.js');
 const centralCollect=read('functions/api/central/collect.js');
@@ -35,6 +36,12 @@ has(intelApi,'CTA未到達','CTA reach rule missing');
 has(intelApi,"c.site_key<>'car-bike'",'vehicle D1 de-duplication missing');
 has(intelApi,'[mod,mod,mod,mod]);','executive analytics bind count regression');
 has(intelApi,'PROBE_PATHS','executive security-probe filtering missing');
+has(intelApi,'car?.summary?.cta_reached_sessions','vehicle CTA reach merge missing');
+has(intelApi,"x.site_key!=='clipmade'",'ClipMade revenue-priority exclusion missing');
+has(intelApi,'x.impressions>=3&&x.ctr>0','zero CTR must not be a high-CTR leader');
+has(intelApi,"WHEN c.page_path='/index.html'",'canonical path merge missing');
+has(intelApi,"x.provider&&x.provider!=='unknown'",'unknown ASP rows must be filtered');
+has(intelUi,"startsWith('/bikes/')?'バイク':'車'",'bike vehicle label fallback missing');
 
 has(okazuApi,'const safe=async','Okazu resilient query wrapper missing');
 has(okazuApi,'partial:warnings.length>0','Okazu partial-result reporting missing');
