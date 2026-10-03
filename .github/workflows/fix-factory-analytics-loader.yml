@@ -1,0 +1,55 @@
+name: Fix factory analytics loader
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-factory-analytics-loader.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Patch shared main loader
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='assets/main.js';
+          let s=fs.readFileSync(p,'utf8');
+          const old='  ensureConfig(initAnalytics);';
+          const replacement=`  function initD1Analytics(){
+    if(window.__factoryD1AnalyticsLoader||document.querySelector('[data-factory-d1-analytics]'))return;
+    window.__factoryD1AnalyticsLoader=true;
+    const s=document.createElement('script');
+    s.src=root+'assets/analytics.js?v=20261003-1';
+    s.dataset.factoryD1Analytics='';
+    s.async=false;
+    document.head.appendChild(s);
+  }
+  ensureConfig(()=>{initAnalytics();initD1Analytics();});`;
+          if(!s.includes(old)){
+            if(s.includes('initD1Analytics'))process.exit(0);
+            throw new Error('analytics loader insertion point missing');
+          }
+          s=s.replace(old,replacement);
+          fs.writeFileSync(p,s);
+          NODE
+      - name: Validate syntax
+        run: node --check assets/main.js && node --check assets/analytics.js
+      - name: Commit repair
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/main.js
+          git commit -m 'Load factory D1 analytics on all shared pages'
+          git push origin HEAD:main
