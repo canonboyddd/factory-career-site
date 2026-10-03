@@ -3,7 +3,7 @@ const {test,expect}=require('@playwright/test');
 const HUMAN_UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36';
 const sites=[
   {key:'factory',url:'https://factory-career-site.pages.dev/',must:[/factory-career-site\.pages\.dev\/api\/analytics\/collect/]},
-  {key:'sugutsucool',url:'https://sugutsucool.pages.dev/',must:[/sugutsucool-analytics\.super-canon-boy\.workers\.dev\/collect/,/factory-career-site\.pages\.dev\/api\/central\/collect.*site_key=sugutsucool/]},
+  {key:'sugutsucool',url:'https://sugutsucool.pages.dev/',must:[/sugutsucool-analytics\.super-canon-boy\.workers\.dev\/collect/,/sugutsucool\.pages\.dev\/api\/ops-collect/],mustNot:[/factory-career-site\.pages\.dev\/api\/central\/collect.*site_key=sugutsucool/]},
   {key:'car-bike',url:'https://norimono-cost.com/',must:[/norimono-cost\.com\/api\/analytics/,/factory-career-site\.pages\.dev\/api\/central\/collect.*site_key=car-bike/]},
   {key:'okazu',url:'https://okazu-yoridori-midori.pages.dev/',must:[/okazu-yoridori-midori\.pages\.dev\/api\/ops-collect/]},
   {key:'clipmade',url:'https://clipmade-site.pages.dev/',must:[/clipmade-site\.pages\.dev\/api\/ops-collect/]}
@@ -19,6 +19,16 @@ async function waitForFactoryDeploy(request){
     await new Promise(resolve=>setTimeout(resolve,3000));
   }
   throw new Error('Factory production did not deploy the D1 analytics loader');
+}
+
+async function waitForSuguDeploy(request){
+  for(let i=0;i<40;i++){
+    const r=await request.get('https://sugutsucool.pages.dev/assets/analytics-track.js?live-analytics-qa=1',{failOnStatusCode:false});
+    const text=await r.text();
+    if(r.ok()&&text.includes('function send(eventType,extra,opts){return post(payload(eventType,extra)'))return;
+    await new Promise(resolve=>setTimeout(resolve,3000));
+  }
+  throw new Error('Sugu production did not deploy the central deduplication fix');
 }
 
 async function waitForVerificationApi(request){
@@ -37,6 +47,7 @@ async function waitForVerificationApi(request){
 
 test('all five production sites emit access analytics',async({browser,request})=>{
   await waitForFactoryDeploy(request);
+  await waitForSuguDeploy(request);
   for(const site of sites){
     const context=await browser.newContext({userAgent:HUMAN_UA});
     await context.addInitScript(()=>{try{Object.defineProperty(navigator,'webdriver',{get:()=>undefined});}catch{}});
@@ -54,6 +65,7 @@ test('all five production sites emit access analytics',async({browser,request})=
     console.log(`\n[${site.key}] analytics requests`);
     for(const x of seen)console.log(x);
     for(const re of site.must)expect(seen.some(x=>re.test(x)),`${site.key} did not emit expected analytics request: ${re}`).toBeTruthy();
+    for(const re of site.mustNot||[])expect(seen.some(x=>re.test(x)),`${site.key} emitted forbidden duplicate analytics request: ${re}`).toBeFalsy();
     await context.close();
   }
 });
