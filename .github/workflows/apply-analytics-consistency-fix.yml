@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'scripts/apply-analytics-consistency-fix.cjs'
+      - 'scripts/analytics-consistency-trigger.txt'
 
 permissions:
   contents: write
@@ -20,6 +21,24 @@ jobs:
           node-version: '20'
       - name: Apply consistency patch
         run: node scripts/apply-analytics-consistency-fix.cjs
+      - name: Update legacy contract assertions
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='qa/ops-dashboard-contract.spec.cjs';
+          let s=fs.readFileSync(p,'utf8');
+          if(!s.includes("const sharedApi=read('functions/shared/ops-analytics-contract.js');")){
+            s=s.replace("const dashHtml=read('ops-dashboard.html');","const dashHtml=read('ops-dashboard.html');\nconst sharedApi=read('functions/shared/ops-analytics-contract.js');");
+          }
+          s=s.replace("has(intelApi,\"'affiliate_click','affiliate_click_unified'\",'affiliate click normalization missing');","has(sharedApi,\"CENTRAL_CLICK_SQL=\\\"('affiliate_click','affiliate_click_unified')\\\"\",'affiliate click normalization missing');");
+          s=s.replace("has(intelApi,'COUNT(DISTINCT page_path)>=18','executive behavioral crawler filtering missing');","has(sharedApi,'COUNT(DISTINCT page_path)>=18','executive behavioral crawler filtering missing');");
+          s=s.replace("has(intelApi,'\"/openid_connect/\"','executive scanner path filtering missing');","has(sharedApi,'\"/openid_connect/\"','executive scanner path filtering missing');");
+          s=s.replace("has(okazuApi,\"event_name IN ('affiliate_click','affiliate_click_unified')\",'Okazu normalized affiliate clicks missing');","has(okazuApi,'CENTRAL_CLICK_SQL','Okazu normalized affiliate clicks missing');");
+          s=s.replace("has(dashApi,'COUNT(DISTINCT page_path)>=18','central dashboard behavioral crawler filtering missing');","has(sharedApi,'COUNT(DISTINCT page_path)>=18','central dashboard behavioral crawler filtering missing');");
+          s=s.replace("has(dashApi,'\"/openid_connect/\"','central dashboard scanner path filtering missing');","has(sharedApi,'\"/openid_connect/\"','central dashboard scanner path filtering missing');");
+          if(!s.includes("require('./analytics-consistency.spec.cjs');"))s += "\nrequire('./analytics-consistency.spec.cjs');\n";
+          fs.writeFileSync(p,s);
+          NODE
       - name: Commit generated fixes
         run: |
           git checkout -- .github/workflows/ops-dashboard-qa.yml || true
