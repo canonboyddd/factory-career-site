@@ -7,7 +7,7 @@ const PROVIDER_LABEL={afb:'AFB',accesstrade:'AccessTrade',rakuten:'楽天',a8:'A
 const CAR_URL='https://norimono-cost.com/api/admin/central-export';
 const CLICK_EVENTS=new Set(['affiliate_click','affiliate_click_unified','affiliate_slot_click','car_valuation_click','bike_buyback_click','rakuten_click']);
 const IMPRESSION_EVENTS=new Set(['affiliate_impression','affiliate_slot_view']);
-const PROBE_PATHS=["/.git/","/.ssh/","/actuator/","/.env","/wp-admin","/wp-login","/phpmyadmin","/server-status","/vendor/phpunit","/.aws/","/.docker/","/config/","/boaform/","/cgi-bin/"];
+const PROBE_PATHS=["//","/.git/","/.ssh/","/actuator/","/.env","/wp-admin","/wp-login","/wordpress/","/wp/","/wp-content/","/wp-includes/","/xmlrpc.php","/openid_connect/","/cpanel/","/phpmyadmin","/server-status","/vendor/phpunit","/.aws/","/.docker/","/config/","/boaform/","/cgi-bin/"];
 async function schema(db){
   await db.prepare(`CREATE TABLE IF NOT EXISTS central_events (id INTEGER PRIMARY KEY AUTOINCREMENT,occurred_at TEXT NOT NULL DEFAULT (datetime('now')),site_key TEXT NOT NULL,event_name TEXT NOT NULL,browser_id TEXT NOT NULL,session_id TEXT NOT NULL,page_path TEXT NOT NULL,page_title TEXT,referrer TEXT,provider TEXT,program TEXT,placement TEXT,variant TEXT,outbound_domain TEXT,device_type TEXT,page_type TEXT,vehicle TEXT)`).run();
   const info=await db.prepare('PRAGMA table_info(central_events)').all();const cols=new Set(rows(info).map(x=>String(x.name||'')));
@@ -25,12 +25,13 @@ function programFromCar(row){
   if(KNOWN_PROGRAMS.has(declared))return declared;
   const t=String(row?.target||'').toLowerCase();
   if(/car_value_post_estimate|sell_post_diagnosis_primary|sell_final_cta|home_valuation_banner/.test(t))return'zubatto';
-  if(/bike_home_alt_appraisal/.test(t))return'bikeking';
+  if(/bike_value_post_estimate_alt|bike_home_alt_appraisal/.test(t))return'bikeking';
+  if(/bike_value_post_estimate/.test(t))return'bikeland';
   if(/sell_post_diagnosis_alternate/.test(t))return'ucarpac';
   if(/sell_oldcar_secondary/.test(t))return'carnext';
   if(/ズバット|zubatto/.test(t))return'zubatto';if(/ucarpac|ユーカーパック/.test(t))return'ucarpac';if(/carnext|カーネクスト/.test(t))return'carnext';if(/バイクランド|bikeland/.test(t))return'bikeland';if(/バイク王|bikeking|bike king/.test(t))return'bikeking';if(/保険スクエア|保険.*bang|insurance.*bang|bang！|bang!/.test(t))return'insurance_bang';if(/ニコノリ|niconori/.test(t))return'niconori';if(/楽天|rakuten/.test(t)||row?.event==='rakuten_click')return'rakuten';return'unknown'}
 function providerFromCar(row){if(row?.provider)return String(row.provider);const t=String(row?.target||'').toLowerCase(),p=(String(row?.target||'').split('|')[1]||'').trim().toLowerCase(),x=`${p} ${t}`;if(/afi-b\.com|afb/.test(x))return'afb';if(/accesstrade|access trade/.test(x))return'accesstrade';if(/a8\.net|\ba8\b/.test(x))return'a8';if(/rakuten|楽天/.test(x))return'rakuten';if(/dmm|fanza/.test(x))return'dmm-fanza';if(/fc2/.test(x))return'fc2';return'unknown'}
-function probeSql(alias){return `(${PROBE_PATHS.map(p=>`lower(${alias}.page_path) LIKE '${p.replace(/'/g,"''")}%'`).join(' OR ')})`}
+function probeSql(alias){return `(${PROBE_PATHS.map(p=>`lower(${alias}.page_path) LIKE '${p.replace(/'/g,"''")}%'`).join(' OR ')} OR lower(${alias}.page_path) LIKE '%.html/%')`}
 export async function onRequestGet({request,env}){
   if(!auth(request,env))return json({ok:false,error:'unauthorized'},401);if(!env.ANALYTICS_DB)return json({ok:false,error:'ANALYTICS_DB missing'},503);
   const u=new URL(request.url),requested=Number(u.searchParams.get('days')||7),days=[1,7,30,90].includes(requested)?requested:7,mod=`-${Math.max(days-1,0)} days`,cutoff=`datetime(date('now','+9 hours',?),'-9 hours')`,resultCutoff=`date('now','+9 hours',?)`,db=env.ANALYTICS_DB;await schema(db);
@@ -38,7 +39,7 @@ export async function onRequestGet({request,env}){
   const authHeader=request.headers.get('authorization')||'';let car=null;
   try{const r=await fetch(`${CAR_URL}?days=${days}`,{headers:{authorization:authHeader},cf:{cacheTtl:0}});if(r.ok)car=await r.json()}catch{}
 
-  const suspicious=`SELECT site_key,browser_id,date(occurred_at,'+9 hours') day FROM central_events WHERE event_name='page_view' GROUP BY site_key,browser_id,date(occurred_at,'+9 hours') HAVING COUNT(*)>=20 AND COUNT(DISTINCT session_id)>=20 AND COUNT(DISTINCT page_path)>=10 AND (CAST(COUNT(DISTINCT session_id) AS REAL)/COUNT(*))>=0.90`;
+  const suspicious=`SELECT site_key,browser_id,date(occurred_at,'+9 hours') day FROM central_events WHERE event_name='page_view' GROUP BY site_key,browser_id,date(occurred_at,'+9 hours') HAVING (COUNT(*)>=20 AND COUNT(DISTINCT session_id)>=20 AND COUNT(DISTINCT page_path)>=10 AND (CAST(COUNT(DISTINCT session_id) AS REAL)/COUNT(*))>=0.90) OR (COUNT(*)>=25 AND COUNT(DISTINCT page_path)>=18 AND COUNT(DISTINCT session_id)<=5 AND (CAST(COUNT(DISTINCT page_path) AS REAL)/COUNT(*))>=0.60)`;
   const carClause=car?.summary?`AND c.site_key<>'car-bike'`:'';
   const cpath=`CASE WHEN c.page_path='/index.html' THEN '/' WHEN c.page_path LIKE '%.html' THEN substr(c.page_path,1,length(c.page_path)-5) ELSE c.page_path END`;
   const fpath=`CASE WHEN page_path='/index.html' THEN '/' WHEN page_path LIKE '%.html' THEN substr(page_path,1,length(page_path)-5) ELSE page_path END`;
