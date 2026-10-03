@@ -75,5 +75,5 @@ has(dashHtml,'SEO成果・インデックス管理','SEO panel missing');
 has(dashHtml,'収益改善の自動ランキング','automatic revenue ranking panel missing');
 
 console.log('Ops dashboard contract QA passed.');
-
 require('./analytics-consistency.spec.cjs');
+// consistency-trigger: 2026-10-03
