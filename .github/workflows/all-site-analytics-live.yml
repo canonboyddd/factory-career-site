@@ -1,0 +1,32 @@
+name: All-site analytics live QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/all-site-analytics-live.yml'
+      - 'qa/all-site-analytics-live.spec.cjs'
+      - 'assets/main.js'
+      - 'assets/analytics.js'
+      - 'functions/api/central/verify-sites.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-analytics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Run all-site live analytics QA
+        run: npx playwright test qa/all-site-analytics-live.spec.cjs --reporter=line
