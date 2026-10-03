@@ -20,29 +20,7 @@ jobs:
         with:
           node-version: '22'
       - name: Patch shared main loader
-        run: |
-          node <<'NODE'
-          const fs=require('fs');
-          const p='assets/main.js';
-          let s=fs.readFileSync(p,'utf8');
-          const old='  ensureConfig(initAnalytics);';
-          const replacement=`  function initD1Analytics(){
-    if(window.__factoryD1AnalyticsLoader||document.querySelector('[data-factory-d1-analytics]'))return;
-    window.__factoryD1AnalyticsLoader=true;
-    const s=document.createElement('script');
-    s.src=root+'assets/analytics.js?v=20261003-1';
-    s.dataset.factoryD1Analytics='';
-    s.async=false;
-    document.head.appendChild(s);
-  }
-  ensureConfig(()=>{initAnalytics();initD1Analytics();});`;
-          if(!s.includes(old)){
-            if(s.includes('initD1Analytics'))process.exit(0);
-            throw new Error('analytics loader insertion point missing');
-          }
-          s=s.replace(old,replacement);
-          fs.writeFileSync(p,s);
-          NODE
+        run: python -c 'from pathlib import Path; p=Path("assets/main.js"); s=p.read_text(); old="  ensureConfig(initAnalytics);"; new="  function initD1Analytics(){\n    if(window.__factoryD1AnalyticsLoader||document.querySelector(\"[data-factory-d1-analytics]\"))return;\n    window.__factoryD1AnalyticsLoader=true;\n    const s=document.createElement(\"script\");\n    s.src=root+\"assets/analytics.js?v=20261003-1\";\n    s.dataset.factoryD1Analytics=\"\";\n    s.async=false;\n    document.head.appendChild(s);\n  }\n  ensureConfig(()=>{initAnalytics();initD1Analytics();});"; assert old in s or "initD1Analytics" in s, "analytics loader insertion point missing"; p.write_text(s if "initD1Analytics" in s else s.replace(old,new))'
       - name: Validate syntax
         run: node --check assets/main.js && node --check assets/analytics.js
       - name: Commit repair
