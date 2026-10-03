@@ -3,8 +3,8 @@ function auth(request,env){const x=request.headers.get('authorization')||'';retu
 function rows(x){return x?.results||[];}
 const CONFIGURED_SITES=['factory','sugutsucool','car-bike','okazu','clipmade'];
 const CAR_URL='https://norimono-cost.com/api/admin/central-export';
-const PROBE_PATHS=["/.git/","/.ssh/","/actuator/","/.env","/wp-admin","/wp-login","/phpmyadmin","/server-status","/vendor/phpunit","/.aws/","/.docker/","/config/","/boaform/","/cgi-bin/"];
-function probeSql(alias){return `(${PROBE_PATHS.map(p=>`lower(${alias}.page_path) LIKE '${p.replace(/'/g,"''")}%'`).join(' OR ')})`;}
+const PROBE_PATHS=["//","/.git/","/.ssh/","/actuator/","/.env","/wp-admin","/wp-login","/wordpress/","/wp/","/wp-content/","/wp-includes/","/xmlrpc.php","/openid_connect/","/cpanel/","/phpmyadmin","/server-status","/vendor/phpunit","/.aws/","/.docker/","/config/","/boaform/","/cgi-bin/"];
+function probeSql(alias){return `(${PROBE_PATHS.map(p=>`lower(${alias}.page_path) LIKE '${p.replace(/'/g,"''")}%'`).join(' OR ')} OR lower(${alias}.page_path) LIKE '%.html/%')`;}
 function canonicalPage(value){let p=String(value||'/').split('?')[0].split('#')[0]||'/';if(p==='/index.html')return'/';return p.endsWith('.html')?(p.slice(0,-5)||'/'):p;}
 async function schema(db){await db.batch([
   db.prepare(`CREATE TABLE IF NOT EXISTS central_events (id INTEGER PRIMARY KEY AUTOINCREMENT, occurred_at TEXT NOT NULL DEFAULT (datetime('now')), site_key TEXT NOT NULL, event_name TEXT NOT NULL, browser_id TEXT NOT NULL, session_id TEXT NOT NULL, page_path TEXT NOT NULL, page_title TEXT, referrer TEXT, program TEXT, placement TEXT, outbound_domain TEXT, device_type TEXT)`),
@@ -52,10 +52,17 @@ export async function onRequestGet({request,env}){
     FROM central_events
     WHERE event_name='page_view'
     GROUP BY site_key,browser_id,date(occurred_at,'+9 hours')
-    HAVING COUNT(*)>=20
-       AND COUNT(DISTINCT session_id)>=20
-       AND COUNT(DISTINCT page_path)>=10
-       AND (CAST(COUNT(DISTINCT session_id) AS REAL)/COUNT(*))>=0.90`;
+    HAVING (
+      COUNT(*)>=20
+      AND COUNT(DISTINCT session_id)>=20
+      AND COUNT(DISTINCT page_path)>=10
+      AND (CAST(COUNT(DISTINCT session_id) AS REAL)/COUNT(*))>=0.90
+    ) OR (
+      COUNT(*)>=25
+      AND COUNT(DISTINCT page_path)>=18
+      AND COUNT(DISTINCT session_id)<=5
+      AND (CAST(COUNT(DISTINCT page_path) AS REAL)/COUNT(*))>=0.60
+    )`;
   const carClause=car?.summary?`AND c.site_key<>'car-bike'`:'';
   const centralClean=`SELECT c.* FROM central_events c
     LEFT JOIN (${suspicious}) b
