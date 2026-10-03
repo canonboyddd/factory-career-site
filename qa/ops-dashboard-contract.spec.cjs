@@ -76,4 +76,4 @@ has(dashHtml,'収益改善の自動ランキング','automatic revenue ranking p
 
 console.log('Ops dashboard contract QA passed.');
 require('./analytics-consistency.spec.cjs');
-// consistency-trigger: 2026-10-03
+// consistency-trigger: 2026-10-03-r2
