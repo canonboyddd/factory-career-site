@@ -1,9 +1,9 @@
+import {CENTRAL_CLICK_SQL,VEHICLE_CLICK_EVENTS,PROBE_PATHS,SUSPICIOUS_BROWSER_SQL} from '../../shared/ops-analytics-contract.js';
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});}
 function auth(request,env){const x=request.headers.get('authorization')||'';return Boolean(env.ADMIN_TOKEN&&x===`Bearer ${env.ADMIN_TOKEN}`);}
 function rows(x){return x?.results||[];}
 const CONFIGURED_SITES=['factory','sugutsucool','car-bike','okazu','clipmade'];
 const CAR_URL='https://norimono-cost.com/api/admin/central-export';
-const PROBE_PATHS=["//","/.git/","/.ssh/","/actuator/","/.env","/wp-admin","/wp-login","/wordpress/","/wp/","/wp-content/","/wp-includes/","/xmlrpc.php","/openid_connect/","/cpanel/","/phpmyadmin","/server-status","/vendor/phpunit","/.aws/","/.docker/","/config/","/boaform/","/cgi-bin/"];
 function probeSql(alias){return `(${PROBE_PATHS.map(p=>`lower(${alias}.page_path) LIKE '${p.replace(/'/g,"''")}%'`).join(' OR ')} OR lower(${alias}.page_path) LIKE '%.html/%')`;}
 function canonicalPage(value){let p=String(value||'/').split('?')[0].split('#')[0]||'/';if(p==='/index.html')return'/';return p.endsWith('.html')?(p.slice(0,-5)||'/'):p;}
 async function schema(db){await db.batch([
@@ -12,7 +12,7 @@ async function schema(db){await db.batch([
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_site ON central_events(site_key)`)
 ]);}
 function isAffiliateClickRow(row){
-  return ['affiliate_slot_click','car_valuation_click','bike_buyback_click','rakuten_click','affiliate_click','affiliate_click_unified'].includes(String(row?.event||row?.event_name||''));
+  return VEHICLE_CLICK_EVENTS.includes(String(row?.event||row?.event_name||''));
 }
 function affiliateProgram(row){
   if(row?.program)return String(row.program);
@@ -48,22 +48,8 @@ export async function onRequestGet({request,env}){
     if(r.ok)car=await r.json();else carError=`HTTP ${r.status}`;
   }catch(e){carError=String(e?.message||e||'fetch failed');}
 
-  const suspicious=`SELECT site_key,browser_id,date(occurred_at,'+9 hours') day
-    FROM central_events
-    WHERE event_name='page_view'
-    GROUP BY site_key,browser_id,date(occurred_at,'+9 hours')
-    HAVING (
-      COUNT(*)>=20
-      AND COUNT(DISTINCT session_id)>=20
-      AND COUNT(DISTINCT page_path)>=10
-      AND (CAST(COUNT(DISTINCT session_id) AS REAL)/COUNT(*))>=0.90
-    ) OR (
-      COUNT(*)>=25
-      AND COUNT(DISTINCT page_path)>=18
-      AND COUNT(DISTINCT session_id)<=5
-      AND (CAST(COUNT(DISTINCT page_path) AS REAL)/COUNT(*))>=0.60
-    )`;
-  const carClause=car?.summary?`AND c.site_key<>'car-bike'`:'';
+  const suspicious=SUSPICIOUS_BROWSER_SQL;
+  const carClause=`AND c.site_key<>'car-bike'`;
   const centralClean=`SELECT c.* FROM central_events c
     LEFT JOIN (${suspicious}) b
       ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours')
@@ -72,12 +58,12 @@ export async function onRequestGet({request,env}){
     UNION ALL
     SELECT site_key,event_name,browser_id,session_id,page_path,page_title,occurred_at,program,placement,device_type FROM (${centralClean})`;
 
-  const baseTotals=await q1(`WITH e AS (${union}) SELECT SUM(CASE WHEN event_name='page_view' THEN 1 ELSE 0 END) pv,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN browser_id END) browsers,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN session_id END) sessions,SUM(CASE WHEN event_name IN ('affiliate_click','affiliate_click_unified') THEN 1 ELSE 0 END) affiliate_clicks FROM e WHERE occurred_at>=${cutoff}`,[mod]);
-  const liveSites=await q(`WITH e AS (${union}) SELECT site_key,SUM(CASE WHEN event_name='page_view' THEN 1 ELSE 0 END) pv,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN browser_id END) browsers,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN session_id END) sessions,SUM(CASE WHEN event_name IN ('affiliate_click','affiliate_click_unified') THEN 1 ELSE 0 END) affiliate_clicks FROM e WHERE occurred_at>=${cutoff} GROUP BY site_key ORDER BY pv DESC`,[mod]);
+  const baseTotals=await q1(`WITH e AS (${union}) SELECT SUM(CASE WHEN event_name='page_view' THEN 1 ELSE 0 END) pv,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN browser_id END) browsers,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN session_id END) sessions,SUM(CASE WHEN event_name IN ${CENTRAL_CLICK_SQL} THEN 1 ELSE 0 END) affiliate_clicks FROM e WHERE occurred_at>=${cutoff}`,[mod]);
+  const liveSites=await q(`WITH e AS (${union}) SELECT site_key,SUM(CASE WHEN event_name='page_view' THEN 1 ELSE 0 END) pv,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN browser_id END) browsers,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN session_id END) sessions,SUM(CASE WHEN event_name IN ${CENTRAL_CLICK_SQL} THEN 1 ELSE 0 END) affiliate_clicks FROM e WHERE occurred_at>=${cutoff} GROUP BY site_key ORDER BY pv DESC`,[mod]);
   const seen=await q(`WITH e AS (${union}) SELECT site_key,MAX(occurred_at) last_seen FROM e GROUP BY site_key`);
   const dailyResult=await q(`WITH e AS (${union}) SELECT date(occurred_at,'+9 hours') day,site_key,SUM(CASE WHEN event_name='page_view' THEN 1 ELSE 0 END) pv,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN session_id END) sessions FROM e WHERE occurred_at>=${cutoff} GROUP BY day,site_key ORDER BY day,site_key`,[mod]);
   const pagesResult=await q(`WITH e AS (${union}) SELECT site_key,page_path,MAX(COALESCE(page_title,'')) title,COUNT(*) pv,COUNT(DISTINCT session_id) sessions FROM e WHERE event_name='page_view' AND occurred_at>=${cutoff} GROUP BY site_key,page_path ORDER BY pv DESC LIMIT 100`,[mod]);
-  const affiliatesResult=await q(`WITH e AS (${union}) SELECT site_key,COALESCE(NULLIF(program,''),'unknown') program,COUNT(*) clicks,COUNT(DISTINCT session_id) sessions FROM e WHERE event_name IN ('affiliate_click','affiliate_click_unified') AND occurred_at>=${cutoff} GROUP BY site_key,program ORDER BY clicks DESC LIMIT 100`,[mod]);
+  const affiliatesResult=await q(`WITH e AS (${union}) SELECT site_key,COALESCE(NULLIF(program,''),'unknown') program,COUNT(*) clicks,COUNT(DISTINCT session_id) sessions FROM e WHERE event_name IN ${CENTRAL_CLICK_SQL} AND occurred_at>=${cutoff} GROUP BY site_key,program ORDER BY clicks DESC LIMIT 100`,[mod]);
   const filteredRow=await q1(`SELECT COUNT(*) filtered FROM central_events c LEFT JOIN (${suspicious}) b ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours') WHERE c.event_name='page_view' AND c.occurred_at>=${cutoff} AND (b.browser_id IS NOT NULL OR ${probeSql('c')})`,[mod]);
 
   const periodMap=new Map(rows(liveSites).map(x=>[x.site_key,x]));
@@ -112,7 +98,7 @@ export async function onRequestGet({request,env}){
   }
   pages=[...mergedPages.values()];
 
-  const sites=CONFIGURED_SITES.map(site_key=>{const x=periodMap.get(site_key)||{};return{site_key,pv:Number(x.pv||0),browsers:Number(x.browsers||0),sessions:Number(x.sessions||0),affiliate_clicks:Number(x.affiliate_clicks||0),connected:seenMap.has(site_key),last_seen:seenMap.get(site_key)||null,source:site_key==='car-bike'?(car?'vehicle-d1':'central-fallback'):'central'};});
+  const sites=CONFIGURED_SITES.map(site_key=>{const x=periodMap.get(site_key)||{};return{site_key,pv:Number(x.pv||0),browsers:Number(x.browsers||0),sessions:Number(x.sessions||0),affiliate_clicks:Number(x.affiliate_clicks||0),connected:seenMap.has(site_key),last_seen:seenMap.get(site_key)||null,source:site_key==='car-bike'?(car?'vehicle-d1':'vehicle-unavailable'):'central'};});
 
   const totals={
     pv:Number(baseTotals?.pv||0)+Number(car?.summary?.views||0),
@@ -126,5 +112,5 @@ export async function onRequestGet({request,env}){
   pages.sort((a,b)=>Number(b.pv||0)-Number(a.pv||0));
   affiliates.sort((a,b)=>Number(b.clicks||0)-Number(a.clicks||0));
   daily.sort((a,b)=>String(a.day).localeCompare(String(b.day))||String(a.site_key).localeCompare(String(b.site_key)));
-  return json({ok:true,days,generated_at:new Date().toISOString(),totals,sites,daily,pages:pages.slice(0,100),affiliates:affiliates.slice(0,100),sources:{car:{ok:Boolean(car),error:carError,mode:car?'vehicle-d1':'central-fallback'}}});
+  return json({ok:true,days,generated_at:new Date().toISOString(),totals,sites,daily,pages:pages.slice(0,100),affiliates:affiliates.slice(0,100),sources:{car:{ok:Boolean(car),error:carError,mode:car?'vehicle-d1':'vehicle-unavailable'}}});
 }

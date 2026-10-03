@@ -5,8 +5,8 @@
   const fmt=n=>Number(n||0).toLocaleString('ja-JP');
   const pct=n=>`${Number(n||0).toFixed(2)}%`;
   const token=()=>sessionStorage.getItem(tokenKey)||'';
-  const days=()=>Number(document.querySelector('[data-days].active')?.dataset.days||7);
-  let busy=false;
+  const days=()=>Number(window.__opsDashboardDays||document.querySelector('[data-days].active')?.dataset.days||7);
+  let busy=false,pendingDays=null;
 
   function empty(cols,text='まだデータがありません。'){return `<tr><td colspan="${cols}" class="muted">${esc(text)}</td></tr>`}
   function ctaLabel(v){return ({product_top:'商品上部',product_middle:'商品中部',product_bottom:'商品下部',ranking_cta:'ランキング',subscription_cta:'見放題',affiliate_link:'その他リンク'})[v]||v||'不明'}
@@ -48,7 +48,7 @@
     const s=data.summary||{};
     if($('okazuUpdated'))$('okazuUpdated').textContent=`更新 ${new Date(data.generated_at).toLocaleString('ja-JP')}`;
     if($('okazuMetrics'))$('okazuMetrics').innerHTML=[
-      ['PV',fmt(s.page_views)],['セッション',fmt(s.sessions)],['商品遷移',fmt(s.product_opens)],['FANZAクリック',fmt(s.affiliate_clicks)],['クリックセッション',fmt(s.affiliate_sessions)],['100PVあたりクリック',Number(s.clicks_per_100_pv||0).toFixed(2)]
+      ['PV',fmt(s.page_views)],['セッション',fmt(s.sessions)],['商品遷移',fmt(s.product_opens)],['アフィリエイトクリック',fmt(s.affiliate_clicks)],['クリックセッション',fmt(s.affiliate_sessions)],['100PVあたりクリック',Number(s.clicks_per_100_pv||0).toFixed(2)]
     ].map(([l,v])=>`<div class="intel-metric"><span>${l}</span><strong>${v}</strong></div>`).join('');
     if($('okazuActressRows'))$('okazuActressRows').innerHTML=entityRows(data.actresses);
     if($('okazuGenreRows'))$('okazuGenreRows').innerHTML=entityRows(data.genres);
@@ -58,24 +58,27 @@
     if($('okazuSourceRows'))$('okazuSourceRows').innerHTML=(data.source_pages||[]).slice(0,30).map(x=>`<tr><td><strong>${esc(x.source_page)}</strong></td><td>${esc(x.source_type||'')}</td><td>${fmt(x.clicks)}</td></tr>`).join('')||empty(3);
   }
 
-  async function load(){
-    if(!ensurePanel()||busy)return;
+  async function load(forDays=days()){
+    if(!ensurePanel())return;
+    const requested=Number(forDays||days());
+    if(busy){pendingDays=requested;return}
     const t=token();
     if(!t)return;
     busy=true;
     try{
       if($('okazuUpdated'))$('okazuUpdated').textContent='集計中…';
-      const res=await fetch(`/api/admin/okazu-analytics?days=${days()}&v=1`,{headers:{authorization:'Bearer '+t},cache:'no-store'});
+      const res=await fetch(`/api/admin/okazu-analytics?days=${requested}&v=2`,{headers:{authorization:'Bearer '+t},cache:'no-store'});
       let data={};try{data=await res.json()}catch{}
       if(!res.ok||!data.ok){if($('okazuUpdated'))$('okazuUpdated').textContent=`取得エラー: ${data.error||`HTTP ${res.status}`}`;return}
+      if(requested!==days()||Number(data.days)!==requested)return;
       render(data);
-    }finally{busy=false}
+    }finally{busy=false;if(pendingDays!=null){const next=pendingDays;pendingDays=null;if(next!==requested)load(next)}}
   }
 
   function init(){
     ensurePanel();
-    document.addEventListener('click',e=>{if(e.target.closest('#load,#refresh,[data-days]'))setTimeout(load,120)});
-    if(token())setTimeout(load,260);
+    window.addEventListener('ops:period-ready',e=>load(e.detail?.days));
+    if(token()&&window.__opsDashboardDays)setTimeout(()=>load(window.__opsDashboardDays),0);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
   window.loadOkazuAnalytics=load;

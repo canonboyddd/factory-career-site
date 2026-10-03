@@ -13,6 +13,7 @@ const dashApi=read('functions/api/admin/central-dashboard.js');
 const healthApi=read('functions/api/admin/production-health.js');
 const centralCollect=read('functions/api/central/collect.js');
 const dashHtml=read('ops-dashboard.html');
+const sharedApi=read('functions/shared/ops-analytics-contract.js');
 
 for(const key of ['factory','sugutsucool','okazu','car-bike','clipmade']){
   has(seoApi,`'${key}'`,`SEO API lost site ${key}`);
@@ -29,7 +30,7 @@ has(seoUi,'5サイト検索パフォーマンス','five-site SEO portfolio UI mi
 has(seoUi,'seoOpportunityRows','SEO opportunity table missing');
 
 has(intelApi,"'affiliate_impression','affiliate_slot_view'",'affiliate impression normalization missing');
-has(intelApi,"'affiliate_click','affiliate_click_unified'",'affiliate click normalization missing');
+has(sharedApi,"CENTRAL_CLICK_SQL=\"('affiliate_click','affiliate_click_unified')\"",'affiliate click normalization missing');
 has(intelApi,'クリックあり・成果0','revenue no-conversion rule missing');
 has(intelApi,'高PV・クリック0','high-PV zero-click rule missing');
 has(intelApi,'広告到達不足','low affiliate reach rule missing');
@@ -40,8 +41,8 @@ has(intelApi,'CTA未到達','CTA reach rule missing');
 has(intelApi,"c.site_key<>'car-bike'",'vehicle D1 de-duplication missing');
 has(intelApi,'[mod,mod,mod,mod]);','executive analytics bind count regression');
 has(intelApi,'PROBE_PATHS','executive security-probe filtering missing');
-has(intelApi,'COUNT(DISTINCT page_path)>=18','executive behavioral crawler filtering missing');
-has(intelApi,'"/openid_connect/"','executive scanner path filtering missing');
+has(sharedApi,'COUNT(DISTINCT page_path)>=18','executive behavioral crawler filtering missing');
+has(sharedApi,'"/openid_connect/"','executive scanner path filtering missing');
 has(intelApi,"LIKE '%.html/%'",'executive malformed html path filtering missing');
 has(intelApi,'bike_value_post_estimate_alt','bike king placement mapping missing');
 has(intelApi,"return'bikeland'",'bike land placement mapping missing');
@@ -58,11 +59,11 @@ has(intelUi,"startsWith('/bikes/')?'バイク':'車'",'bike vehicle label fallba
 
 has(okazuApi,'const safe=async','Okazu resilient query wrapper missing');
 has(okazuApi,'partial:warnings.length>0','Okazu partial-result reporting missing');
-has(okazuApi,"event_name IN ('affiliate_click','affiliate_click_unified')",'Okazu normalized affiliate clicks missing');
+has(okazuApi,'CENTRAL_CLICK_SQL','Okazu normalized affiliate clicks missing');
 has(dashApi,'filtered_automated_pv','automated traffic exclusion summary missing');
 has(dashApi,'PROBE_PATHS','central dashboard security-probe filtering missing');
-has(dashApi,'COUNT(DISTINCT page_path)>=18','central dashboard behavioral crawler filtering missing');
-has(dashApi,'"/openid_connect/"','central dashboard scanner path filtering missing');
+has(sharedApi,'COUNT(DISTINCT page_path)>=18','central dashboard behavioral crawler filtering missing');
+has(sharedApi,'"/openid_connect/"','central dashboard scanner path filtering missing');
 has(healthApi,'central-tracker\\.js\\?v=20261001-1','production health tracker version is stale');
 has(centralCollect,'function securityProbe','central collector security-probe filter missing');
 has(centralCollect,"filtered:'security_probe'",'central collector probe rejection response missing');
@@ -74,3 +75,5 @@ has(dashHtml,'SEO成果・インデックス管理','SEO panel missing');
 has(dashHtml,'収益改善の自動ランキング','automatic revenue ranking panel missing');
 
 console.log('Ops dashboard contract QA passed.');
+
+require('./analytics-consistency.spec.cjs');
