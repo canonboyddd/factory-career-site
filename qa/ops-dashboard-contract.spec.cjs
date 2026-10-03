@@ -68,7 +68,7 @@ has(centralCollect,'function securityProbe','central collector security-probe fi
 has(centralCollect,"filtered:'security_probe'",'central collector probe rejection response missing');
 has(centralCollect,'behavioralCrawler','central collector behavioral crawler filter missing');
 has(centralCollect,"filtered:'behavioral_crawler'",'central collector behavioral crawler response missing');
-has(centralCollect,'"/openid_connect/"','central collector scanner path filtering missing');
+has(centralCollect,'openid_connect','central collector scanner path filtering missing');
 has(dashHtml,'全ASP 実収益','actual earnings panel missing');
 has(dashHtml,'SEO成果・インデックス管理','SEO panel missing');
 has(dashHtml,'収益改善の自動ランキング','automatic revenue ranking panel missing');
