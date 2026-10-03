@@ -29,7 +29,16 @@
     window.gtag('js',new Date());window.gtag('config',id,{anonymize_ip:true});
     const s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(id);s.dataset.siteGa4='';document.head.appendChild(s);
   }
-  ensureConfig(initAnalytics);
+  function initD1Analytics(){
+    if(window.__factoryD1AnalyticsLoader||document.querySelector("[data-factory-d1-analytics]"))return;
+    window.__factoryD1AnalyticsLoader=true;
+    const s=document.createElement("script");
+    s.src=root+"assets/analytics.js?v=20261003-1";
+    s.dataset.factoryD1Analytics="";
+    s.async=false;
+    document.head.appendChild(s);
+  }
+  ensureConfig(()=>{initAnalytics();initD1Analytics();});
 
   // Missing canonical tags on early pages are filled consistently.
   if(!document.querySelector('link[rel="canonical"]')){
