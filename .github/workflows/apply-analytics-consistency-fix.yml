@@ -28,6 +28,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add functions assets ops-dashboard.html qa
+          git add functions assets ops-dashboard.html qa .github/workflows/ops-dashboard-qa.yml
           git commit -m "Unify dashboard periods and analytics sources"
           git push
