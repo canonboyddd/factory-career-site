@@ -1,9 +1,10 @@
 const {test,expect}=require('@playwright/test');
 
+test.setTimeout(180000);
 const HUMAN_UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36';
 const sites=[
   {key:'factory',url:'https://factory-career-site.pages.dev/',must:[/factory-career-site\.pages\.dev\/api\/analytics\/collect/]},
-  {key:'sugutsucool',url:'https://sugutsucool.pages.dev/',must:[/sugutsucool-analytics\.super-canon-boy\.workers\.dev\/collect/,/factory-career-site\.pages\.dev\/api\/central\/collect.*site_key=sugutsucool/]},
+  {key:'sugutsucool',url:'https://sugutsucool.pages.dev/',must:[/sugutsucool-analytics\.super-canon-boy\.workers\.dev\/collect/,/sugutsucool\.pages\.dev\/api\/ops-collect/],mustNot:[/factory-career-site\.pages\.dev\/api\/central\/collect.*site_key=sugutsucool/]},
   {key:'car-bike',url:'https://norimono-cost.com/',must:[/norimono-cost\.com\/api\/analytics/,/factory-career-site\.pages\.dev\/api\/central\/collect.*site_key=car-bike/]},
   {key:'okazu',url:'https://okazu-yoridori-midori.pages.dev/',must:[/okazu-yoridori-midori\.pages\.dev\/api\/ops-collect/]},
   {key:'clipmade',url:'https://clipmade-site.pages.dev/',must:[/clipmade-site\.pages\.dev\/api\/ops-collect/]}
@@ -25,10 +26,10 @@ async function waitForSuguDeploy(request){
   for(let i=0;i<40;i++){
     const r=await request.get('https://sugutsucool.pages.dev/assets/analytics-track.js?live-analytics-qa=1',{failOnStatusCode:false});
     const text=await r.text();
-    if(r.ok()&&text.includes('central(eventType,extra);return post(payload(eventType,extra)'))return;
+    if(r.ok()&&text.includes('function send(eventType,extra,opts){return post(payload(eventType,extra)'))return;
     await new Promise(resolve=>setTimeout(resolve,3000));
   }
-  throw new Error('Sugu production did not deploy central page-view tracking');
+  throw new Error('Sugu production did not deploy the deduplicated analytics sender');
 }
 
 async function waitForVerificationApi(request){
