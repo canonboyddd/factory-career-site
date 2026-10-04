@@ -1,0 +1,32 @@
+name: Live Site Behavior
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.html'
+      - 'assets/**'
+      - 'functions/**'
+      - 'qa/live-site-behavior.cjs'
+      - 'sitemap*.xml'
+      - '.github/workflows/live-site-behavior.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-behavior:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Audit production pages and critical flows
+        run: node qa/live-site-behavior.cjs
