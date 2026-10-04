@@ -28,8 +28,6 @@ jobs:
         run: |
           cat > /tmp/public-copy-audit.cjs <<'NODE'
           const { chromium } = require(process.cwd() + '/node_modules/playwright');
-          const fs = require('fs');
-          const { XMLParser } = require('fast-xml-parser');
 
           const forbidden = [
             /運営者/g,/管理者/g,/運営用/g,/管理用/g,/SEO/g,/検索意図/g,/インデックス/g,
@@ -87,5 +85,4 @@ jobs:
             if (hits.length) process.exitCode = 3;
           })();
           NODE
-          npm install --no-save fast-xml-parser@5.2.5
           node /tmp/public-copy-audit.cjs
