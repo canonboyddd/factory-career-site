@@ -125,7 +125,7 @@
         a.rel='sponsored nofollow noopener';
         a.referrerPolicy=p.referrerPolicy||'no-referrer-when-downgrade';
         a.textContent=p.name+'を確認する';
-        a.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:'diagnosis',placement:'diagnosis_result',result_type:type,job}));
+        a.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:'diagnosis',placement:'diagnosis_result'}));
         wrap.appendChild(a);
 
         const pixel=String(p.impressionPixel||'').trim();
@@ -139,7 +139,7 @@
       });
     }else pr.style.display='none';
 
-    window.trackSiteEvent?.('diagnosis_complete',{score,result_type:type,job,change,intent,guide});
+    window.trackSiteEvent?.('diagnosis_complete',{page:'diagnosis'});
     shell.style.display='none';result.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});
   }
   render();
