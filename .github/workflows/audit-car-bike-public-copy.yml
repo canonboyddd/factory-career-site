@@ -2,6 +2,11 @@ name: Audit car-bike public copy
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/audit-car-bike-public-copy.mjs'
+      - '.github/workflows/audit-car-bike-public-copy.yml'
   schedule:
     - cron: '20 6 * * *'
 
