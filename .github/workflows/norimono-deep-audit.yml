@@ -1,0 +1,28 @@
+name: Norimono deep production audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/audit-norimono-deep.mjs'
+      - '.github/workflows/norimono-deep-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deep-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Audit all production pages and critical behavior
+        run: node scripts/audit-norimono-deep.mjs
