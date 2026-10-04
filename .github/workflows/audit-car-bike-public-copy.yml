@@ -1,0 +1,21 @@
+name: Audit car-bike public copy
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  audit-public-copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Audit every sitemap URL for operator-only copy
+        run: node scripts/audit-car-bike-public-copy.mjs
