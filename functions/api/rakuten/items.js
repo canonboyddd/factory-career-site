@@ -10,6 +10,7 @@ const CATEGORIES = {
 };
 
 const SITE_ORIGIN = 'https://factory-career-site.pages.dev';
+const EDGE_TTL_SECONDS = 21600;
 
 function json(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',...extra}});
@@ -38,8 +39,19 @@ function normalizeItems(body) {
     };
   }).filter(item=>item.name&&item.url);
 }
+function cacheRequest(key,hits,affiliate) {
+  return new Request(`${SITE_ORIGIN}/__edge-cache/rakuten-items?category=${encodeURIComponent(key)}&hits=${hits}&affiliate=${affiliate?'1':'0'}`,{method:'GET'});
+}
+async function edgeCacheMatch(cacheKey) {
+  try { return typeof caches!=='undefined' && caches.default ? await caches.default.match(cacheKey) : null; }
+  catch (_) { return null; }
+}
+async function edgeCachePut(cacheKey,response) {
+  try { if(typeof caches!=='undefined'&&caches.default) await caches.default.put(cacheKey,response.clone()); }
+  catch (_) { }
+}
 
-export async function onRequestGet({request,env}) {
+export async function onRequestGet({request,env,waitUntil}) {
   const appId=String(env.RAKUTEN_APP_ID||'').trim();
   const accessKey=String(env.RAKUTEN_ACCESS_KEY||'').trim();
   const affiliateId=String(env.RAKUTEN_AFFILIATE_ID||'').trim();
@@ -48,6 +60,15 @@ export async function onRequestGet({request,env}) {
   if(missing.length)return json({ok:false,setup_required:true,missing},diag?200:503);
   const key=String(url.searchParams.get('category')||'work'); const category=CATEGORIES[key]||CATEGORIES.work;
   const hits=Math.min(8,Math.max(3,Number(url.searchParams.get('hits')||6)));
+  const cacheKey=cacheRequest(key,hits,Boolean(affiliateId));
+
+  if(!diag){
+    const cached=await edgeCacheMatch(cacheKey);
+    if(cached){
+      const headers=new Headers(cached.headers); headers.set('x-rakuten-cache','HIT');
+      return new Response(cached.body,{status:cached.status,statusText:cached.statusText,headers});
+    }
+  }
 
   async function callRakuten(useAffiliate) {
     const params=new URLSearchParams({applicationId:appId,accessKey,keyword:category.keyword,hits:String(hits),sort:category.sort,format:'json',formatVersion:'2',elements:'itemName,itemPrice,itemUrl,affiliateUrl,mediumImageUrls,shopName,reviewAverage,reviewCount,itemCaption,postageFlag'});
@@ -63,19 +84,29 @@ export async function onRequestGet({request,env}) {
   try{
     let selected=await callRakuten(Boolean(affiliateId));
     let affiliateRequestActive=Boolean(affiliateId&&selected.res.ok); let affiliateWarning='';
-    if(!selected.res.ok&&affiliateId){const withoutAffiliate=await callRakuten(false);if(withoutAffiliate.res.ok){selected=withoutAffiliate;affiliateRequestActive=false;affiliateWarning='affiliate_id_rejected';}}
+    // Only retry without affiliate ID when the upstream explicitly rejects the request itself.
+    // Never double-hit the API on rate limits or upstream/server failures.
+    if(!selected.res.ok&&affiliateId&&[400,401,403].includes(selected.res.status)){
+      const withoutAffiliate=await callRakuten(false);
+      if(withoutAffiliate.res.ok){selected=withoutAffiliate;affiliateRequestActive=false;affiliateWarning='affiliate_id_rejected';}
+    }
     const {res,raw,body}=selected;
     if(!res.ok){
       const detail=errorDetail(body,raw,[appId,accessKey,affiliateId]);
       const payload={ok:false,error:'rakuten_api_error',status:res.status,detail:String(detail).slice(0,500)};
       if(diag)payload.diagnostics={app_id_present:true,access_key_present:true,affiliate_id_present:Boolean(affiliateId),request_origin:SITE_ORIGIN,content_type:res.headers.get('content-type')||'',body_preview:redact(raw,[appId,accessKey,affiliateId])};
-      return json(payload,diag?200:(res.status===429?429:502));
+      return json(payload,diag?200:(res.status===429?429:502),res.status===429?{'retry-after':res.headers.get('retry-after')||'60'}:{});
     }
     const items=normalizeItems(body);
     const affiliateLinkCount=items.filter(item=>item.affiliate).length;
     const affiliateVerified=Boolean(affiliateRequestActive&&items.length>0&&affiliateLinkCount===items.length);
-    return json({ok:true,category:key,label:category.label,updated_at:new Date().toISOString(),affiliate_active:affiliateVerified,affiliate_verified:affiliateVerified,affiliate_link_count:affiliateLinkCount,affiliate_warning:affiliateWarning,items,
+    const response=json({ok:true,category:key,label:category.label,updated_at:new Date().toISOString(),affiliate_active:affiliateVerified,affiliate_verified:affiliateVerified,affiliate_link_count:affiliateLinkCount,affiliate_warning:affiliateWarning,items,
       ...(diag?{diagnostics:{item_count:items.length,affiliate_link_count:affiliateLinkCount,affiliate_verified:affiliateVerified,request_origin:SITE_ORIGIN,content_type:res.headers.get('content-type')||'',affiliate_warning:affiliateWarning}}:{})
-    },200,{'cache-control':diag?'no-store':'public, max-age=900, s-maxage=21600'});
+    },200,{'cache-control':diag?'no-store':`public, max-age=900, s-maxage=${EDGE_TTL_SECONDS}`,'x-rakuten-cache':'MISS'});
+    if(!diag){
+      const task=edgeCachePut(cacheKey,response);
+      if(typeof waitUntil==='function')waitUntil(task); else await task;
+    }
+    return response;
   }catch(error){return json({ok:false,error:'rakuten_fetch_failed',detail:String(error?.message||error).slice(0,500)},diag?200:502);}
 }
