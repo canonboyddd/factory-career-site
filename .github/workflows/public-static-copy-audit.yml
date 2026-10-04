@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - '**/*.html'
       - '.github/workflows/public-static-copy-audit.yml'
   workflow_dispatch:
 
@@ -25,5 +26,7 @@ jobs:
             ! -path './central-dashboard/*' \
             ! -path './shorts-content-factory/*' \
             ! -path './shorts-content-factory-audit/*' \
-            -print0 | xargs -0 grep -nE '運営者|管理者|運営用|管理用|SEO|検索意図|インデックス|canonical|構造化データ|Search Console|IndexNow|サイトマップ送信|計測|CVR|CTR|コンバージョン|CTA|アフィリエイト運用|収益化|収益確認|案件クリック|デバッグ|テスト用|管理画面|内部用|運用メモ|運営メモ|管理メモ|サイト改善用' || true
+            ! -name 'ops-dashboard.html' \
+            ! -name 'rakuten-check.html' \
+            -print0 | xargs -0 grep -nEi '運営者|管理者|運営用|管理用|SEO|検索意図|インデックス|canonical|構造化データ|Search Console|IndexNow|サイトマップ送信|計測|PV|セッション|CVR|CTR|コンバージョン|CTA|アフィリエイト運用|収益化|収益確認|案件クリック|デバッグ|テスト用|管理画面|内部用|運用メモ|運営メモ|管理メモ|サイト改善用|owner|admin|analytics dashboard|internal use' || true
           echo 'STATIC_PUBLIC_COPY_HITS_END'
