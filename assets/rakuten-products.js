@@ -3,7 +3,10 @@
   window.__rakutenProductsLoaded = true;
 
   const money = n => Number(n || 0).toLocaleString('ja-JP');
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+  const CACHE_TTL = 30 * 60 * 1000;
+  const memoryCache = new Map();
+  const inflight = new Map();
 
   const nav = document.querySelector('.site-header nav');
   if (nav && !nav.querySelector('a[href="/factory-items"]')) {
@@ -26,6 +29,56 @@
     return map[slug] || '';
   })();
 
+  function cacheKey(category, hits) { return `${category}:${hits}`; }
+  function sessionRead(key) {
+    try {
+      const raw = sessionStorage.getItem(`rakuten:${key}`);
+      if (!raw) return null;
+      const entry = JSON.parse(raw);
+      if (!entry || Date.now() - Number(entry.at || 0) > CACHE_TTL || !entry.data?.ok) {
+        sessionStorage.removeItem(`rakuten:${key}`); return null;
+      }
+      return entry.data;
+    } catch (_) { return null; }
+  }
+  function sessionWrite(key, data) {
+    try { sessionStorage.setItem(`rakuten:${key}`, JSON.stringify({at:Date.now(), data})); } catch (_) {}
+  }
+  async function getProducts(category, hits) {
+    const key = cacheKey(category, hits);
+    const mem = memoryCache.get(key);
+    if (mem && Date.now() - mem.at <= CACHE_TTL) return mem.data;
+    const stored = sessionRead(key);
+    if (stored) { memoryCache.set(key,{at:Date.now(),data:stored}); return stored; }
+    if (inflight.has(key)) return inflight.get(key);
+    const task = (async () => {
+      const res = await fetch(`/api/rakuten/items?category=${encodeURIComponent(category)}&hits=${hits}`, {cache:'default'});
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        const error = new Error(String(data.detail || data.error || `HTTP ${res.status}`).slice(0,160));
+        error.status = res.status; error.data = data; throw error;
+      }
+      memoryCache.set(key,{at:Date.now(),data}); sessionWrite(key,data); return data;
+    })();
+    inflight.set(key,task);
+    try { return await task; } finally { inflight.delete(key); }
+  }
+
+  function renderFailure(container, error) {
+    const grid = container.querySelector('[data-rakuten-grid]') || container;
+    const status = container.querySelector('[data-rakuten-status]');
+    grid.innerHTML = '';
+    if (error?.status === 429) {
+      if (status) status.innerHTML = '商品情報が混み合っています。<a href="/factory-items">仕事グッズ一覧</a>から時間をおいてご確認ください。';
+      return;
+    }
+    if (error?.data?.setup_required) {
+      if (status) status.textContent = '商品情報を現在表示できません。';
+      return;
+    }
+    if (status) status.innerHTML = '商品情報を一時的に取得できません。<a href="/factory-items">仕事グッズ一覧</a>をご確認ください。';
+  }
+
   async function load(container, category='work', hits=6) {
     if (!container || container.dataset.rakutenLoaded === '1') return;
     container.dataset.rakutenLoaded = '1';
@@ -34,15 +87,7 @@
     if (status) status.textContent = '楽天市場から商品を読み込み中…';
 
     try {
-      const res = await fetch(`/api/rakuten/items?category=${encodeURIComponent(category)}&hits=${hits}`, {cache:'default'});
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) {
-        if (data.setup_required) { if (status) status.textContent = '楽天APIの設定を確認中です。'; return; }
-        const message = String(data.detail || data.error || `HTTP ${res.status}`).slice(0,160);
-        if (status) status.textContent = `楽天APIエラー: ${message}`;
-        grid.innerHTML = ''; return;
-      }
-
+      const data = await getProducts(category,hits);
       const items = Array.isArray(data.items) ? data.items : [];
       if (!items.length) { if (status) status.textContent = '現在表示できる商品がありません。'; return; }
 
@@ -70,10 +115,21 @@
           program:'rakuten', placement:`rakuten_${category}_card_${index + 1}`
         }));
       }
-    } catch (error) {
-      const message = String(error?.message || error || '通信エラー').slice(0,160);
-      if (status) status.textContent = `楽天API通信エラー: ${message}`;
-      grid.innerHTML = '';
+    } catch (error) { renderFailure(container,error); }
+  }
+
+  function scheduleLoad(root, category, hits, eager=false) {
+    if (!root) return;
+    if (eager) { load(root,category,hits); return; }
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(entries => {
+        if (entries.some(x => x.isIntersecting)) { io.disconnect(); load(root,category,hits); }
+      }, {rootMargin:'250px'});
+      io.observe(root);
+    } else {
+      const once=()=>load(root,category,hits);
+      addEventListener('scroll',once,{once:true,passive:true});
+      addEventListener('touchstart',once,{once:true,passive:true});
     }
   }
 
@@ -91,11 +147,7 @@
     bindCategoryButtons(root);
     const category = root.dataset.category || 'work'; const hits = Number(root.dataset.hits || 6);
     const eager = location.pathname === '/factory-items' || location.pathname === '/factory-items.html' || root.dataset.eager === '1';
-    if (eager) load(root, category, hits);
-    else if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(entries => { if (entries.some(x => x.isIntersecting)) { io.disconnect(); load(root, category, hits); } }, {rootMargin:'300px'});
-      io.observe(root);
-    } else load(root, category, hits);
+    scheduleLoad(root,category,hits,eager);
   });
 
   if (location.pathname === '/' && !document.querySelector('[data-rakuten-home]')) {
@@ -113,9 +165,9 @@
     if (article && !document.querySelector('[data-auto-rakuten-widget]')) {
       const section = document.createElement('section');
       section.className = 'rakuten-article-widget'; section.dataset.rakutenWidget = ''; section.dataset.autoRakutenWidget = ''; section.dataset.category = articleCategory; section.dataset.hits = '4';
-      section.innerHTML = `<div class="rakuten-widget-head"><div><span class="eyebrow">仕事を整えるアイテム</span><h2>この記事に関連する楽天市場の商品</h2><p>記事テーマと直接関係する用品だけを表示しています。職場のルール・指定品を優先してください。</p></div><a href="/factory-items#${articleCategory}">このカテゴリをもっと見る →</a></div><p class="rakuten-status" data-rakuten-status>商品を準備しています…</p><div class="rakuten-grid compact" data-rakuten-grid></div><p class="rakuten-disclaimer">楽天アフィリエイトを利用する場合があります。価格・在庫・送料・仕様は販売ページの最新情報をご確認ください。安全保護具は勤務先の規定・指定品を優先してください。</p>`;
+      section.innerHTML = `<div class="rakuten-widget-head"><div><span class="eyebrow">仕事を整えるアイテム</span><h2>この記事に関連する楽天市場の商品</h2><p>記事テーマと直接関係する用品だけを表示しています。職場のルール・指定品を優先してください。</p></div><a href="/factory-items#${articleCategory}">このカテゴリをもっと見る →</a></div><p class="rakuten-status" data-rakuten-status>商品欄までスクロールすると商品情報を読み込みます。</p><div class="rakuten-grid compact" data-rakuten-grid></div><p class="rakuten-disclaimer">楽天アフィリエイトを利用する場合があります。価格・在庫・送料・仕様は販売ページの最新情報をご確認ください。安全保護具は勤務先の規定・指定品を優先してください。</p>`;
       const faq = article.querySelector('#faq'); if (faq) faq.before(section); else article.appendChild(section);
-      load(section, articleCategory, 4);
+      scheduleLoad(section,articleCategory,4,false);
     }
   }
 })();
