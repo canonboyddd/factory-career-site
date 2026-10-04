@@ -26,3 +26,5 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Audit all production pages and critical behavior
         run: node scripts/audit-norimono-deep.mjs
+
+# selector-repair rerun: 2026-10-05
