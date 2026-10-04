@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
     paths:
+      - '**/*.html'
+      - 'assets/**/*.js'
+      - 'sitemap.xml'
       - '.github/workflows/public-copy-audit.yml'
   workflow_dispatch:
 
