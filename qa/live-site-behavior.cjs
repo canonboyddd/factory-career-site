@@ -20,7 +20,7 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
   const sitemapUrls=[...sitemapText.matchAll(/<loc>(.*?)<\/loc>/g)].map(m=>m[1].trim()).filter(u=>u.startsWith(BASE));
   const urls=[...new Set([...sitemapUrls,...EXTRA.map(x=>BASE+x)].map(norm))];
 
-  async function preparePage(page, label){
+  async function preparePage(page){
     const pageErrors=[]; const badSameOrigin=[];
     page.on('pageerror',e=>pageErrors.push(String(e.message||e).slice(0,300)));
     page.on('response',r=>{
@@ -34,8 +34,8 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
     return {pageErrors,badSameOrigin};
   }
 
-  for(let i=0;i<urls.length;i++){
-    const url=urls[i]; const page=await context.newPage(); const runtime=await preparePage(page,url);
+  for(const url of urls){
+    const page=await context.newPage(); const runtime=await preparePage(page);
     try{
       const res=await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
       if(!res || res.status()>=400){failures.push(`PAGE_STATUS ${res?.status()||0} ${url}`);continue;}
@@ -67,18 +67,16 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
     }catch(e){failures.push(`CRAWL_EXCEPTION ${url} :: ${String(e.message||e).slice(0,220)}`)}finally{await page.close()}
   }
 
-  // Deduplicated internal-link HTTP verification.
   for(const href of internalLinks){
     try{
-      const u=new URL(href); if(u.origin!==BASE) continue;
-      if(u.pathname.startsWith('/api/')) continue;
+      const u=new URL(href); if(u.origin!==BASE||u.pathname.startsWith('/api/')) continue;
       const r=await request.get(href,{timeout:20000,maxRedirects:5});
       if(r.status()>=400) failures.push(`BROKEN_INTERNAL ${r.status()} ${href}`);
     }catch(e){failures.push(`BROKEN_INTERNAL_ERR ${href} :: ${String(e.message||e).slice(0,140)}`)}
   }
 
   async function withPage(path,fn){
-    const page=await context.newPage(); const runtime=await preparePage(page,path);
+    const page=await context.newPage(); const runtime=await preparePage(page);
     try{
       const res=await page.goto(BASE+path,{waitUntil:'domcontentloaded',timeout:30000});
       if(!res||res.status()>=400) throw new Error(`HTTP ${res?.status()}`);
@@ -86,6 +84,20 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
       if(runtime.pageErrors.length) throw new Error(`pageerror: ${runtime.pageErrors.join(' | ')}`);
       if(runtime.badSameOrigin.length) throw new Error(`resource errors: ${runtime.badSameOrigin.join(', ')}`);
     }catch(e){failures.push(`FLOW ${path} :: ${String(e.message||e).slice(0,350)}`)}finally{await page.close()}
+  }
+
+  async function auditEvents(page){
+    await page.evaluate(()=>{
+      window.__qaTrackedEvents=[];
+      const original=window.trackSiteEvent;
+      window.trackSiteEvent=function(name,detail={}){
+        window.__qaTrackedEvents.push({name,detail:JSON.parse(JSON.stringify(detail||{}))});
+        return original?.call(this,name,detail);
+      };
+    });
+  }
+  async function lastEvent(page,name){
+    return page.evaluate(n=>[...(window.__qaTrackedEvents||[])].reverse().find(x=>x.name===n)||null,name);
   }
 
   await withPage('/articles/assembly-career',async page=>{
@@ -98,6 +110,7 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
   });
 
   await withPage('/diagnosis',async page=>{
+    await auditEvents(page);
     for(let i=0;i<7;i++){
       const q=page.locator('.question.active');
       if(await q.count()!==1) throw new Error(`active question missing at ${i+1}`);
@@ -108,11 +121,13 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
     if(!await page.locator('#resultBox').evaluate(el=>el.classList.contains('active'))) throw new Error('result box not active');
     const score=(await page.locator('#score').textContent()||'').trim();
     if(!/^\d+%$/.test(score)) throw new Error(`invalid result score ${score}`);
-    const diagEvent=await page.evaluate(()=>[...(window.dataLayer||[])].reverse().find(x=>x&&x.event==='diagnosis_complete')||null);
-    if(diagEvent && ['score','result_type','job','change','intent','guide'].some(k=>Object.prototype.hasOwnProperty.call(diagEvent,k))) throw new Error(`diagnosis answers leaked to analytics event: ${JSON.stringify(diagEvent)}`);
+    const ev=await lastEvent(page,'diagnosis_complete');
+    if(!ev) throw new Error('diagnosis_complete event missing');
+    if(['score','result_type','job','change','intent','guide'].some(k=>Object.prototype.hasOwnProperty.call(ev.detail,k))) throw new Error(`diagnosis answers leaked to analytics event: ${JSON.stringify(ev.detail)}`);
   });
 
   await withPage('/tools/salary-compare',async page=>{
+    await auditEvents(page);
     const values={base:'250000',bonus:'800000',night:'40000',ot:'35000',other:'15000'};
     for(const [id,v] of Object.entries(values)) await page.locator('#'+id).fill(v);
     await page.locator('#calc').click();
@@ -121,17 +136,25 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
     if(annual!=='4,880,000円') throw new Error(`annual mismatch: ${annual}`);
     if(ratio!=='18%') throw new Error(`ratio mismatch: ${ratio}`);
     if(!await page.locator('#result').evaluate(el=>el.classList.contains('active'))) throw new Error('salary result hidden');
+    const ev=await lastEvent(page,'salary_tool_complete');
+    if(!ev) throw new Error('salary_tool_complete event missing');
+    if(['base','bonus','night','ot','other','annual','variable','dependency_ratio','ratio'].some(k=>Object.prototype.hasOwnProperty.call(ev.detail,k))) throw new Error(`salary values/results leaked to analytics event: ${JSON.stringify(ev.detail)}`);
   });
 
   await withPage('/tools/job-offer-score',async page=>{
+    await auditEvents(page);
     const ids=['income','night','overtime','holiday','commute','work'];
     for(const id of ids) await page.locator('#'+id).selectOption('3');
     await page.locator('#calc').click();
     if((await page.locator('#total').textContent()||'').trim()!=='18/30') throw new Error('total score mismatch');
     if((await page.locator('#pct').textContent()||'').trim()!=='60点') throw new Error('100-point score mismatch');
+    const ev=await lastEvent(page,'job_offer_tool_complete');
+    if(!ev) throw new Error('job_offer_tool_complete event missing');
+    if(['income','night','overtime','holiday','commute','work','score','weak'].some(k=>Object.prototype.hasOwnProperty.call(ev.detail,k))) throw new Error(`job offer values/results leaked to analytics event: ${JSON.stringify(ev.detail)}`);
   });
 
   await withPage('/tools/resume-draft',async page=>{
+    await auditEvents(page);
     await page.locator('#years').fill('5');
     await page.locator('#process').fill('自動車部品の組立工程');
     await page.locator('#tools').fill('トルクレンチ');
@@ -140,8 +163,25 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
     await page.locator('#make').click();
     const out=(await page.locator('#output').textContent()||'');
     for(const s of ['5年程度','自動車部品の組立工程','トルクレンチ','5Sと不良一次対応','新人教育']) if(!out.includes(s)) throw new Error(`resume output missing ${s}`);
-    const ev=await page.evaluate(()=>[...(window.dataLayer||[])].reverse().find(x=>x&&x.event==='resume_tool_complete')||null);
-    if(ev&&Object.prototype.hasOwnProperty.call(ev,'job')) throw new Error(`resume input leaked to analytics event: ${JSON.stringify(ev)}`);
+    const ev=await lastEvent(page,'resume_tool_complete');
+    if(!ev) throw new Error('resume_tool_complete event missing');
+    if(['job','years','process','tools','quality','role','output'].some(k=>Object.prototype.hasOwnProperty.call(ev.detail,k))) throw new Error(`resume input leaked to analytics event: ${JSON.stringify(ev.detail)}`);
+  });
+
+  await withPage('/factory-items',async page=>{
+    await page.waitForFunction(()=>{
+      const s=document.querySelector('[data-rakuten-status]')?.textContent||'';
+      return s && !/準備しています|読み込み中|再試行しています/.test(s);
+    },{timeout:25000});
+    const status=(await page.locator('[data-rakuten-status]').textContent()||'').trim();
+    if(/エラー|0件|設定|タイムアウト/.test(status)) throw new Error(`Rakuten status: ${status}`);
+    const count=await page.locator('.rakuten-product').count();
+    if(count<1) throw new Error(`Rakuten products not rendered: ${status}`);
+    const first=page.locator('.rakuten-product').first();
+    const price=(await first.locator('.rakuten-meta strong').textContent()||'').trim();
+    const href=await first.locator('a.rakuten-buy').getAttribute('href');
+    if(!/^¥[\d,]+$/.test(price)) throw new Error(`invalid product price: ${price}`);
+    if(!href||!/^https?:\/\//.test(href)) throw new Error(`invalid Rakuten product URL: ${href}`);
   });
 
   await browser.close();
