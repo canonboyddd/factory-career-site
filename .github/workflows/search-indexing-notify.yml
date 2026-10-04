@@ -1,0 +1,107 @@
+name: Search Indexing Notify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'robots.txt'
+      - 'sitemap.xml'
+      - 'sitemap-core.xml'
+      - 'articles/**'
+      - 'salary-guide.html'
+      - 'career-guide.html'
+      - 'job-change-guide.html'
+      - '273171107244642a9058e815cec1165446d9085e5b054876.txt'
+      - '.github/workflows/search-indexing-notify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify-indexing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for production crawl files
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://factory-career-site.pages.dev'
+          KEY='273171107244642a9058e815cec1165446d9085e5b054876'
+          ready=0
+          for i in $(seq 1 12); do
+            key_body=$(curl -fsS "$BASE/$KEY.txt" 2>/dev/null || true)
+            robots=$(curl -fsS "$BASE/robots.txt" 2>/dev/null || true)
+            sitemap=$(curl -fsS "$BASE/sitemap-core.xml" 2>/dev/null || true)
+            if [ "$key_body" = "$KEY" ] && echo "$robots" | grep -q 'Sitemap:' && echo "$sitemap" | grep -q 'factory-career-site.pages.dev/articles/factory-quit'; then
+              ready=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ready" = '1'
+          echo 'Production IndexNow key, robots.txt and sitemap-core.xml are reachable.'
+
+      - name: Verify priority pages are indexable
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://factory-career-site.pages.dev'
+          paths=(
+            '/articles/factory-quit'
+            '/articles/night-shift-hard'
+            '/articles/factory-two-shift-hard'
+            '/articles/factory-three-shift-hard'
+            '/articles/factory-night-to-day'
+            '/salary-guide'
+          )
+          for path in "${paths[@]}"; do
+            body=$(curl -fsSL "$BASE$path")
+            echo "$body" | grep -qi '<link rel="canonical"'
+            if echo "$body" | grep -Eqi 'name=["'"']robots["'"'][^>]*noindex'; then
+              echo "noindex found on $path" >&2
+              exit 1
+            fi
+            echo "Indexable: $path"
+          done
+
+      - name: Build IndexNow payload
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          key = '273171107244642a9058e815cec1165446d9085e5b054876'
+          ns = {'sm': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+          root = ET.parse('sitemap-core.xml').getroot()
+          urls = [el.text.strip() for el in root.findall('sm:url/sm:loc', ns) if el.text and el.text.strip()]
+          payload = {
+              'host': 'factory-career-site.pages.dev',
+              'key': key,
+              'keyLocation': f'https://factory-career-site.pages.dev/{key}.txt',
+              'urlList': urls,
+          }
+          Path('/tmp/indexnow.json').write_text(json.dumps(payload, ensure_ascii=False), encoding='utf-8')
+          print(f'Prepared {len(urls)} URLs for IndexNow.')
+          PY
+
+      - name: Submit URLs to IndexNow
+        shell: bash
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/indexnow-response.txt -w '%{http_code}' \
+            -X POST 'https://api.indexnow.org/indexnow' \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            --data-binary @/tmp/indexnow.json)
+          cat /tmp/indexnow-response.txt || true
+          echo "IndexNow HTTP $code"
+          if [ "$code" != '200' ] && [ "$code" != '202' ]; then
+            exit 1
+          fi
+          echo 'IndexNow accepted the URL batch.'
