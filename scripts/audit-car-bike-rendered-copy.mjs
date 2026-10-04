@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 
 const ORIGIN='https://norimono-cost.com';
 const START=`${ORIGIN}/sitemap-index.xml`;
+const EXTRA_URLS=[`${ORIGIN}/admin-feedback.html`,`${ORIGIN}/404.html`];
 const CONCURRENCY=6;
 const PATTERNS=[
   ['運営者向け',/運営者向け/],['サイト運営者',/サイト運営者/],['管理者向け',/管理者向け/],['運営用',/運営用/],['管理用',/管理用/],
@@ -16,12 +17,12 @@ const LEGAL_ALLOW={
   '/policy.html':new Set(['サイト運営者','Cloudflare'])
 };
 function urlsFromXml(xml){return [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m=>m[1].replace(/&amp;/g,'&'));}
-async function fetchText(url){const r=await fetch(url,{headers:{'user-agent':'NorimonoRenderedCopyAudit/1.0'}});if(!r.ok)throw new Error(`${r.status} ${url}`);return r.text();}
+async function fetchText(url){const r=await fetch(url,{headers:{'user-agent':'NorimonoRenderedCopyAudit/1.1'}});if(!r.ok)throw new Error(`${r.status} ${url}`);return r.text();}
 async function collectSitemaps(start){const seen=new Set(),pages=new Set(),queue=[start];while(queue.length){const u=queue.shift();if(seen.has(u))continue;seen.add(u);const xml=await fetchText(u);for(const loc of urlsFromXml(xml)){if(/\.xml(?:$|\?)/i.test(loc))queue.push(loc);else if(loc.startsWith(ORIGIN))pages.add(loc);}}return [...pages];}
-const urls=await collectSitemaps(START);
+const urls=[...new Set([...(await collectSitemaps(START)),...EXTRA_URLS])];
 console.log(`RENDERED_AUDIT_URLS=${urls.length}`);
 const browser=await chromium.launch({headless:true});
-const context=await browser.newContext({userAgent:'NorimonoRenderedCopyAudit/1.0'});
+const context=await browser.newContext({userAgent:'NorimonoRenderedCopyAudit/1.1'});
 await context.route('**/*',async route=>{
   const req=route.request();const t=req.resourceType();const u=req.url();
   if(['image','media','font'].includes(t)||/\/api\/(?:analytics|ops-collect|central\/collect)/.test(u))return route.abort();
