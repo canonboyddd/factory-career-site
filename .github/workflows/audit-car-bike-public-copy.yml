@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/audit-car-bike-public-copy.mjs'
+      - 'scripts/audit-car-bike-rendered-copy.mjs'
       - '.github/workflows/audit-car-bike-public-copy.yml'
   schedule:
     - cron: '20 6 * * *'
@@ -24,3 +25,9 @@ jobs:
           node-version: '20'
       - name: Audit every sitemap URL for operator-only copy
         run: node scripts/audit-car-bike-public-copy.mjs
+      - name: Install Chromium for rendered copy audit
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Audit rendered DOM on every sitemap URL
+        run: node scripts/audit-car-bike-rendered-copy.mjs
