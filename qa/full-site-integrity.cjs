@@ -113,7 +113,6 @@ for (const file of htmlFiles) {
     }
   }
 
-  // Admin pages assemble some widgets dynamically, so DOM contracts there are covered by live admin QA instead.
   if (!ADMIN_PREFIXES.some(p=>r.startsWith(p))) {
     const scripts = attrs(html,'src').filter(v=>!isExternal(v) && /\.js(?:[?#].*)?$/.test(v));
     for (const s of scripts) {
@@ -130,10 +129,11 @@ for (const file of htmlFiles) {
   }
 }
 
-// Verify literal runtime API references. Tests are not runtime code, and central-tracker's /api/ops-collect is a fallback for other domains.
+// Verify literal API references only in code that can run in the public site.
+// qa/ and scripts/ are maintenance/test tooling and may intentionally probe removed or alternate endpoints.
 for (const f of [...jsFiles,...htmlFiles]) {
   const rf=rel(f);
-  if (rf.startsWith('qa/')) continue;
+  if (rf.startsWith('qa/') || rf.startsWith('scripts/')) continue;
   const txt=fs.readFileSync(f,'utf8');
   for (const m of txt.matchAll(/["'`](\/api\/[A-Za-z0-9_\-/]+)(?:\?[^"'`]*)?["'`]/g)) {
     const api=m[1];
