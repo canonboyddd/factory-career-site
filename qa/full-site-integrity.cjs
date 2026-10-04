@@ -5,8 +5,9 @@ const cp = require('child_process');
 const ROOT = process.cwd();
 const HOST = 'https://factory-career-site.pages.dev';
 const IGNORE_DIRS = new Set(['.git', 'node_modules']);
+const RAW_HTML_SKIP = new Set(['google8d061a8385e0755b.html']);
 const HTML_SKIP_CANONICAL = new Set([
-  '404.html','admin-analytics.html','ops-dashboard.html','rakuten-check.html',
+  '404.html','admin-analytics.html','ops-dashboard.html','rakuten-check.html','google8d061a8385e0755b.html',
   'shorts-content-factory/index.html','shorts-content-factory/privacy.html','shorts-content-factory/terms.html','shorts-content-factory/data-management.html',
   'shorts-content-factory-audit/index.html','shorts-content-factory-audit/privacy.html','shorts-content-factory-audit/terms.html','shorts-content-factory-audit/data-deletion.html'
 ]);
@@ -31,7 +32,7 @@ function isExternal(v){ return /^(?:https?:|mailto:|tel:|javascript:|data:|blob:
 function mapPublicPath(target, fromFile){
   if (!target || target.startsWith('#') || isExternal(target)) return null;
   if (target.startsWith('/api/')) return {api: target};
-  let raw = cleanTarget(target);
+  const raw = cleanTarget(target);
   if (!raw) return null;
   let abs;
   if (raw.startsWith('/')) abs = path.join(ROOT, raw.slice(1));
@@ -60,7 +61,6 @@ const htmlFiles = files.filter(f=>f.endsWith('.html'));
 const jsFiles = files.filter(f=>/\.(?:js|cjs|mjs)$/.test(f));
 const errors=[]; const warnings=[];
 
-// Syntax check every JS/CJS/MJS file.
 for (const f of jsFiles) {
   const r = cp.spawnSync(process.execPath, ['--check', f], {encoding:'utf8'});
   if (r.status !== 0) errors.push(`JS_SYNTAX ${rel(f)} :: ${(r.stderr||r.stdout).trim().split('\n').slice(-2).join(' ')}`);
@@ -70,12 +70,11 @@ for (const file of htmlFiles) {
   const r = rel(file);
   const html = fs.readFileSync(file,'utf8');
   const visible = stripHtml(html);
-  if (!/<html\b/i.test(html) || !/<body\b/i.test(html) || !/<\/body>/i.test(html)) errors.push(`HTML_STRUCTURE ${r} :: html/body tag missing`);
+  if (!RAW_HTML_SKIP.has(r) && (!/<html\b/i.test(html) || !/<body\b/i.test(html) || !/<\/body>/i.test(html))) errors.push(`HTML_STRUCTURE ${r} :: html/body tag missing`);
   const ids = [...html.matchAll(/\bid\s*=\s*["']([^"']+)["']/gi)].map(m=>m[1]);
   const dup = ids.filter((x,i)=>ids.indexOf(x)!==i);
   if (dup.length) errors.push(`DUPLICATE_ID ${r} :: ${[...new Set(dup)].join(', ')}`);
 
-  // Local href/src existence.
   for (const attr of ['href','src']) for (const v of attrs(html,attr)) {
     if (!v || v.startsWith('#') || isExternal(v)) continue;
     const mapped = mapPublicPath(v,file);
@@ -87,7 +86,6 @@ for (const file of htmlFiles) {
     if (!mapped.candidates.some(fs.existsSync)) errors.push(`BROKEN_${attr.toUpperCase()} ${r} :: ${v}`);
   }
 
-  // Internal anchor existence.
   for (const v of attrs(html,'href')) {
     if (v.startsWith('#') && v.length > 1) {
       const id = decodeURIComponent(v.slice(1));
@@ -95,14 +93,16 @@ for (const file of htmlFiles) {
     }
   }
 
-  // Obvious placeholder/dead CTAs.
-  for (const m of visible.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
-    const href=m[1].trim(); const text=m[2].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,80);
+  // Runtime affiliate cards intentionally start hidden with href="#" and are resolved by offers.js.
+  for (const m of visible.matchAll(/<a\b([^>]*)href\s*=\s*["']([^"']*)["']([^>]*)>([\s\S]*?)<\/a>/gi)) {
+    const openAttrs=(m[1]+' '+m[3]);
+    const href=m[2].trim();
+    const text=m[4].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,80);
+    if (/\bdata-program-link\b/i.test(openAttrs)) continue;
     if (href==='#' || /^javascript:/i.test(href)) warnings.push(`PLACEHOLDER_LINK ${r} :: ${JSON.stringify(text)} -> ${href}`);
   }
   if (/\b(?:TODO|FIXME|TBD)\b/i.test(visible)) warnings.push(`PUBLIC_TODO ${r}`);
 
-  // Canonical contract for normal public pages.
   if (!HTML_SKIP_CANONICAL.has(r) && !ADMIN_PREFIXES.some(p=>r.startsWith(p))) {
     const cm = html.match(/<link\b[^>]*rel\s*=\s*["']canonical["'][^>]*href\s*=\s*["']([^"']+)["'][^>]*>/i)
       || html.match(/<link\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*rel\s*=\s*["']canonical["'][^>]*>/i);
@@ -113,31 +113,35 @@ for (const file of htmlFiles) {
     }
   }
 
-  // Referenced local JS DOM-id contract: only error for getElementById IDs used by page-specific script.
-  const scripts = attrs(html,'src').filter(v=>!isExternal(v) && /\.js(?:[?#].*)?$/.test(v));
-  for (const s of scripts) {
-    const mapped=mapPublicPath(s,file); if(!mapped || !mapped.candidates) continue;
-    const sf=mapped.candidates.find(fs.existsSync); if(!sf) continue;
-    const sr=rel(sf);
-    const shared = /assets\/(?:main|analytics|central-tracker|clean-url-seo|seo-|runtime-fixes|article-conversion|benchmark-layout|top-sites-layout|discovery-hubs|pillar-content|core-intent|job-change|application-funnel|offers|rakuten-display-fix)\.?.*\.js$/.test(sr);
-    if (shared) continue;
-    const js=fs.readFileSync(sf,'utf8');
-    for (const mm of js.matchAll(/getElementById\(\s*["']([^"']+)["']\s*\)/g)) {
-      if (!ids.includes(mm[1])) errors.push(`DOM_ID_MISSING ${r} <- ${sr} :: #${mm[1]}`);
+  // Admin pages assemble some widgets dynamically, so DOM contracts there are covered by live admin QA instead.
+  if (!ADMIN_PREFIXES.some(p=>r.startsWith(p))) {
+    const scripts = attrs(html,'src').filter(v=>!isExternal(v) && /\.js(?:[?#].*)?$/.test(v));
+    for (const s of scripts) {
+      const mapped=mapPublicPath(s,file); if(!mapped || !mapped.candidates) continue;
+      const sf=mapped.candidates.find(fs.existsSync); if(!sf) continue;
+      const sr=rel(sf);
+      const shared = /assets\/(?:main|analytics|central-tracker|clean-url-seo|seo-|runtime-fixes|article-conversion|benchmark-layout|top-sites-layout|discovery-hubs|pillar-content|core-intent|job-change|application-funnel|offers|rakuten-display-fix)\.?.*\.js$/.test(sr);
+      if (shared) continue;
+      const js=fs.readFileSync(sf,'utf8');
+      for (const mm of js.matchAll(/getElementById\(\s*["']([^"']+)["']\s*\)/g)) {
+        if (!ids.includes(mm[1])) errors.push(`DOM_ID_MISSING ${r} <- ${sr} :: #${mm[1]}`);
+      }
     }
   }
 }
 
-// Scan JS/HTML for internal API strings and verify Cloudflare Function files exist.
+// Verify literal runtime API references. Tests are not runtime code, and central-tracker's /api/ops-collect is a fallback for other domains.
 for (const f of [...jsFiles,...htmlFiles]) {
+  const rf=rel(f);
+  if (rf.startsWith('qa/')) continue;
   const txt=fs.readFileSync(f,'utf8');
   for (const m of txt.matchAll(/["'`](\/api\/[A-Za-z0-9_\-/]+)(?:\?[^"'`]*)?["'`]/g)) {
     const api=m[1];
-    if (!apiCandidates(api).some(fs.existsSync)) errors.push(`MISSING_API_REF ${rel(f)} :: ${api}`);
+    if (rf==='assets/central-tracker.js' && api==='/api/ops-collect') continue;
+    if (!apiCandidates(api).some(fs.existsSync)) errors.push(`MISSING_API_REF ${rf} :: ${api}`);
   }
 }
 
-// Sitemap URLs must resolve to a repository page (for this host).
 for (const sm of ['sitemap.xml','sitemap-core.xml']) if (fs.existsSync(sm)) {
   const txt=fs.readFileSync(sm,'utf8');
   for (const m of txt.matchAll(/<loc>(https:\/\/factory-career-site\.pages\.dev\/[^<]*)<\/loc>/g)) {
