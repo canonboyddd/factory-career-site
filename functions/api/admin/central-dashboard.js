@@ -37,7 +37,7 @@ export async function onRequestGet({request,env}){
   if(!auth(request,env))return json({ok:false,error:'unauthorized'},401);
   if(!env.ANALYTICS_DB)return json({ok:false,error:'ANALYTICS_DB missing'},503);
   const db=env.ANALYTICS_DB;await schema(db);
-  const u=new URL(request.url);const d=Number(u.searchParams.get('days')||7);const days=[1,7,30,90].includes(d)?d:7;
+  const u=new URL(request.url);const d=Number(u.searchParams.get('days')||7);const days=[1,7,30,90,180].includes(d)?d:7;
   const mod=`-${Math.max(days-1,0)} days`;const cutoff=`datetime(date('now','+9 hours',?),'-9 hours')`;
   const q=(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return s.all();};
   const q1=(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return s.first();};
