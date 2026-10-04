@@ -62,7 +62,7 @@ jobs:
           for path in "${paths[@]}"; do
             body=$(curl -fsSL "$BASE$path")
             echo "$body" | grep -qi '<link rel="canonical"'
-            if echo "$body" | grep -Eqi 'name=["'"']robots["'"'][^>]*noindex'; then
+            if echo "$body" | grep -Eqi "<meta[^>]+noindex"; then
               echo "noindex found on $path" >&2
               exit 1
             fi
