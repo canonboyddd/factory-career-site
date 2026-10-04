@@ -23,7 +23,7 @@ function visibleText(html){return html
   .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
   .replace(/\s+/g,' ').trim();
 }
-async function get(url){const r=await fetch(url,{headers:{'user-agent':'NorimonoPublicCopyAudit/1.1'}});if(!r.ok)throw new Error(`${r.status} ${url}`);return {text:await r.text(),type:r.headers.get('content-type')||''};}
+async function get(url){const r=await fetch(url,{headers:{'user-agent':'NorimonoPublicCopyAudit/1.2'}});if(!r.ok)throw new Error(`${r.status} ${url}`);return {text:await r.text(),type:r.headers.get('content-type')||''};}
 async function collectSitemaps(start){const seen=new Set(),pages=new Set(),queue=[start];while(queue.length){const u=queue.shift();if(seen.has(u))continue;seen.add(u);const {text}=await get(u);for(const loc of urlsFromXml(text)){if(/\.xml(?:$|\?)/i.test(loc))queue.push(loc);else if(loc.startsWith(ORIGIN))pages.add(loc);}}return [...pages];}
 const pages=await collectSitemaps(START);
 console.log(`AUDIT_URLS=${pages.length}`);
