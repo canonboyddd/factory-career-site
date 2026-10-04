@@ -1,0 +1,29 @@
+name: Public Static Copy Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/public-static-copy-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan public HTML copy
+        shell: bash
+        run: |
+          set +e
+          echo 'STATIC_PUBLIC_COPY_HITS_START'
+          find . -type f -name '*.html' \
+            ! -name 'admin-*.html' \
+            ! -path './central-dashboard/*' \
+            ! -path './shorts-content-factory/*' \
+            ! -path './shorts-content-factory-audit/*' \
+            -print0 | xargs -0 grep -nE '運営者|管理者|運営用|管理用|SEO|検索意図|インデックス|canonical|構造化データ|Search Console|IndexNow|サイトマップ送信|計測|CVR|CTR|コンバージョン|CTA|アフィリエイト運用|収益化|収益確認|案件クリック|デバッグ|テスト用|管理画面|内部用|運用メモ|運営メモ|管理メモ|サイト改善用' || true
+          echo 'STATIC_PUBLIC_COPY_HITS_END'
