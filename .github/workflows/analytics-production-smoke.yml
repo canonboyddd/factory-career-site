@@ -1,0 +1,75 @@
+name: Analytics Production Smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/analytics-production-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analytics-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify production analytics assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://factory-career-site.pages.dev'
+          curl -fsSL "$BASE/" | grep -q 'assets/main.js'
+          curl -fsSL "$BASE/assets/main.js" | grep -q 'assets/analytics.js'
+          curl -fsSL "$BASE/assets/analytics.js" | grep -q "collect('page_view'"
+          echo 'Production analytics assets are present.'
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Verify browser emits page_view
+        shell: bash
+        run: |
+          cat > /tmp/analytics-smoke.cjs <<'NODE'
+          const { chromium } = require(process.cwd() + '/node_modules/playwright');
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage();
+            let observed = null;
+            await page.route('**/api/analytics/collect', async route => {
+              const req = route.request();
+              try {
+                const body = req.postDataJSON();
+                if (body && body.event_name === 'page_view') observed = body;
+              } catch (_) {}
+              await route.abort();
+            });
+            await page.goto('https://factory-career-site.pages.dev/?utm_source=analytics-smoke&utm_medium=github-actions&utm_campaign=measurement-check', { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.waitForTimeout(3000);
+            if (!observed) throw new Error('page_view request was not emitted by the production page');
+            if (observed.page_path !== '/') throw new Error(`unexpected page_path: ${observed.page_path}`);
+            console.log('Observed production page_view payload:', JSON.stringify({ event_name: observed.event_name, page_path: observed.page_path, page_type: observed.page_type, device_type: observed.device_type }));
+            await browser.close();
+          })().catch(err => { console.error(err); process.exit(1); });
+          NODE
+          node /tmp/analytics-smoke.cjs
+
+      - name: Verify production collector writes to D1
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://factory-career-site.pages.dev'
+          BID="analytics-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          SID="analytics-smoke-session-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          BODY=$(printf '{"event_name":"external_link_click","browser_id":"%s","session_id":"%s","page_path":"/__analytics-smoke__","page_name":"analytics-smoke","page_type":"diagnostic","page_title":"Analytics production smoke test","landing_page":"/__analytics-smoke__","first_referrer":"github-actions","utm_source":"analytics-smoke","utm_medium":"github-actions","utm_campaign":"measurement-check","outbound_domain":"example.invalid","device_type":"server"}' "$BID" "$SID")
+          RESPONSE=$(curl -fsS -X POST "$BASE/api/analytics/collect" -H 'content-type: application/json' --data "$BODY")
+          echo "$RESPONSE"
+          echo "$RESPONSE" | grep -q '"ok":true'
+          echo 'Production collector accepted and stored the diagnostic event in D1.'
