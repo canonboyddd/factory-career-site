@@ -96,6 +96,83 @@
 /shorts-content-factory-audit/*
   X-Robots-Tag: noindex, nofollow, noarchive
 
+# Search-quality focus: useful supporting pages remain accessible and followable,
+# but are kept out of the index while stronger hub pages carry the search intent.
+/articles/factory-annual-holidays-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-annual-holidays-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-bonus-offer-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-bonus-offer-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-callout-duty-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-callout-duty-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-early-shift-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-early-shift-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-late-shift-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-late-shift-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-long-hours-offer-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-long-hours-offer-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-oncall-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-oncall-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-overtime-pay-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-overtime-pay-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-paid-leave-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-paid-leave-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-salary-down-transfer-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-salary-down-transfer-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-transfer-policy-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-transfer-policy-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/factory-weekend-shift-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/factory-weekend-shift-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/manufacturing-allowances-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/manufacturing-allowances-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/manufacturing-base-salary-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/manufacturing-base-salary-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
+/articles/production-tech-business-travel-check
+  X-Robots-Tag: noindex, follow, noarchive
+/articles/production-tech-business-travel-check.html
+  X-Robots-Tag: noindex, follow, noarchive
+
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
