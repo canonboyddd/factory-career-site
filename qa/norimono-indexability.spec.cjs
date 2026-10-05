@@ -27,7 +27,8 @@ test('priority sitemap includes all strengthened vehicle SEO pages with fresh la
 test('Search Console winner comparison pages expose tuned metadata and decision guide',async({page})=>{
   const cases=[
     ['/compare-guides/note-vs-aqua','ノートとアクアを比較｜維持費・燃費・5年総額はどっちが安い？','ノートとアクアを比較','/cars/nissan-note'],
-    ['/compare-guides/prius-vs-aqua','プリウスとアクアを比較｜維持費・燃費・5年総額はどっちが安い？','プリウスとアクアを比較','/cars/toyota-prius']
+    ['/compare-guides/prius-vs-aqua','プリウスとアクアを比較｜維持費・燃費・5年総額はどっちが安い？','プリウスとアクアを比較','/cars/toyota-prius'],
+    ['/compare-guides/rav4-vs-vezel','RAV4とヴェゼルはどっち？維持費・燃費・サイズ・5年総額を比較','RAV4とヴェゼルはどっち','/cars/toyota-rav4']
   ];
   for(const [route,title,h1,vehicleHref] of cases){
     const response=await page.goto(base+route,{waitUntil:'domcontentloaded',timeout:45000});expect(response?.status(),`${route}: status`).toBeLessThan(400);
@@ -48,5 +49,30 @@ test('bike insurance targets age and engine-size search intent',async({page})=>{
   await expect(page.locator('#age-cc')).toContainText('20歳以下');
   await expect(page.locator('#age-cc')).toContainText('126〜250cc');
   await expect(page.locator('#bike-estimate')).toContainText('円');
+  const canonical=page.locator('link[rel="canonical"]');expect(await canonical.count()).toBe(1);await expect(canonical).toHaveAttribute('href',base+route);
+});
+
+test('Search Console vehicle winners expose direct maintenance answers',async({page})=>{
+  const cases=[
+    ['/cars/toyota-yaris-cross','ヤリスクロスの維持費はいくら？自動車税・燃費・5年コストの目安','30,500円'],
+    ['/cars/toyota-camry','カムリの維持費はいくら？税金・燃費・保険の年間/月額目安','年間と月額で確認'],
+    ['/cars/nissan-cube','キューブの維持費はいくら？税金・燃費・保険の年間/月額目安','中古車は年式を確認'],
+    ['/cars/nissan-note-aura','ノートオーラの維持費はいくら？燃費・税金・年間/月額の目安','燃費だけで判断しない']
+  ];
+  for(const [route,title,answer] of cases){
+    const response=await page.goto(base+route,{waitUntil:'domcontentloaded',timeout:45000});expect(response?.status(),`${route}: status`).toBeLessThan(400);
+    await expect(page).toHaveTitle(title);
+    const block=page.locator('[data-gsc-winner-v118="1"]');await expect(block,`${route}: winner block`).toBeVisible();await expect(block).toContainText(answer);
+    const canonical=page.locator('link[rel="canonical"]');expect(await canonical.count(),`${route}: canonical count`).toBe(1);await expect(canonical).toHaveAttribute('href',base+route);
+  }
+});
+
+test('bike resale ranking matches generic bike resale intent',async({page})=>{
+  const route='/bike-rankings/bike-resale';
+  const response=await page.goto(base+route,{waitUntil:'domcontentloaded',timeout:45000});expect(response?.status(),`${route}: status`).toBeLessThan(400);
+  await expect(page).toHaveTitle('バイクのリセールランキング｜売却まで含めて高く売れやすい車種を比較');
+  await expect(page.locator('h1').first()).toContainText('バイクのリセールランキング');
+  const block=page.locator('[data-gsc-bike-ranking-v119="1"]');await expect(block).toBeVisible();await expect(block).toContainText('リセール率だけで決めない');
+  expect(await block.locator('a[href="/bike-value"]').count()).toBeGreaterThan(0);
   const canonical=page.locator('link[rel="canonical"]');expect(await canonical.count()).toBe(1);await expect(canonical).toHaveAttribute('href',base+route);
 });
