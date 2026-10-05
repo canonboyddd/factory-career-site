@@ -16,7 +16,7 @@ permissions:
 jobs:
   audit-public-copy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,24 +26,52 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Crawl all sitemap pages for operator-facing visible text
+      - name: Crawl all public HTML for operator-facing visible text and links
         shell: bash
         run: |
           cat > /tmp/public-copy-audit.cjs <<'NODE'
           const { chromium } = require(process.cwd() + '/node_modules/playwright');
+          const fs = require('fs');
+          const path = require('path');
 
+          const SITE = 'https://factory-career-site.pages.dev';
           const forbidden = [
-            /運営者/g,/管理者/g,/運営用/g,/管理用/g,/SEO/g,/検索意図/g,/インデックス/g,
-            /canonical/gi,/構造化データ/g,/Search Console/gi,/IndexNow/gi,/サイトマップ送信/g,
-            /計測/g,/PV/g,/セッション/g,/CVR/gi,/CTR/gi,/コンバージョン/g,/CTA/g,
-            /アフィリエイト運用/g,/収益化/g,/収益確認/g,/案件クリック/g,/デバッグ/g,/テスト用/g,
+            /サイト運営者/g,/運営者向け/g,/管理者向け/g,/運営用/g,/管理用/g,
+            /SEO対策/gi,/SEO強化/gi,/SEO用/gi,/検索意図/g,/Search Console/gi,/IndexNow/gi,
+            /サイトマップ送信/g,/canonical/gi,/構造化データ/g,
+            /\bPV\b/g,/\bCVR\b/gi,/\bCTR\b/gi,/コンバージョン率/g,/中間CTA/g,/CTA改善/gi,
+            /アフィリエイト運用/g,/収益化/g,/収益確認/g,/案件クリック/g,/テスト用/g,
             /管理画面/g,/内部用/g,/運用メモ/g,/運営メモ/g,/管理メモ/g,/サイト改善用/g
           ];
+          const internalHref = /\/(?:admin-(?:analytics|seo)(?:\.html)?|ops-dashboard(?:\.html)?|rakuten-check(?:\.html)?|api\/admin\/|shorts-content-factory(?:-audit)?\/|central-dashboard\/)/i;
+          const internalRepoPath = /^(?:404\.html|admin-(?:analytics|seo)\.html|ops-dashboard\.html|rakuten-check\.html|central-dashboard\/|shorts-content-factory\/|shorts-content-factory-audit\/)/i;
+
+          function walk(dir, base = '') {
+            const out = [];
+            for (const entry of fs.readdirSync(dir, {withFileTypes:true})) {
+              if (entry.name === '.git' || entry.name === 'node_modules') continue;
+              const rel = base ? `${base}/${entry.name}` : entry.name;
+              const abs = path.join(dir, entry.name);
+              if (entry.isDirectory()) out.push(...walk(abs, rel));
+              else if (entry.isFile() && entry.name.endsWith('.html')) out.push(rel.replace(/\\/g,'/'));
+            }
+            return out;
+          }
+
+          function repoFileToUrl(file) {
+            if (internalRepoPath.test(file)) return null;
+            let p = '/' + file;
+            if (/\/index\.html$/i.test(p)) p = p.replace(/\/index\.html$/i, '/');
+            else if (/^\/index\.html$/i.test(p)) p = '/';
+            else p = p.replace(/\.html$/i, '');
+            return SITE + p;
+          }
 
           async function getUrls() {
-            const xml = await (await fetch('https://factory-career-site.pages.dev/sitemap.xml')).text();
-            const urls = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1].trim());
-            return [...new Set(urls)].filter(u => u.startsWith('https://factory-career-site.pages.dev/'));
+            const xml = await (await fetch(SITE + '/sitemap.xml')).text();
+            const sitemapUrls = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1].trim());
+            const repoUrls = walk(process.cwd()).map(repoFileToUrl).filter(Boolean);
+            return [...new Set([...sitemapUrls, ...repoUrls])].filter(u => u.startsWith(SITE + '/'));
           }
 
           (async () => {
@@ -51,14 +79,18 @@ jobs:
             const browser = await chromium.launch({headless:true});
             const context = await browser.newContext();
             const hits = [];
+            const adminLinks = [];
             const errors = [];
             for (const url of urls) {
               const page = await context.newPage();
               await page.route('**/api/analytics/collect', route => route.abort());
               try {
                 const res = await page.goto(url, {waitUntil:'domcontentloaded', timeout:25000});
-                if (!res || res.status() >= 400) errors.push({url,status:res?.status() || 0});
-                await page.waitForTimeout(300);
+                if (!res || res.status() >= 400) {
+                  errors.push({url,status:res?.status() || 0});
+                  continue;
+                }
+                await page.waitForTimeout(500);
                 const text = await page.locator('body').innerText().catch(()=> '');
                 const lines = text.split(/\n+/).map(s=>s.trim()).filter(Boolean);
                 for (const line of lines) {
@@ -68,6 +100,16 @@ jobs:
                       hits.push({url,line});
                       break;
                     }
+                  }
+                }
+                const links = page.locator('a[href]');
+                const count = await links.count();
+                for (let i = 0; i < count; i++) {
+                  const a = links.nth(i);
+                  if (!(await a.isVisible().catch(()=>false))) continue;
+                  const href = await a.getAttribute('href');
+                  if (href && internalHref.test(new URL(href, url).pathname)) {
+                    adminLinks.push({url,href,text:(await a.innerText().catch(()=>'' )).trim()});
                   }
                 }
               } catch (e) {
@@ -81,11 +123,14 @@ jobs:
             console.log('OPERATOR_COPY_HITS_START');
             for (const h of hits) console.log(`${h.url}\t${h.line}`);
             console.log('OPERATOR_COPY_HITS_END');
+            console.log('VISIBLE_INTERNAL_LINKS_START');
+            for (const h of adminLinks) console.log(`${h.url}\t${h.href}\t${h.text}`);
+            console.log('VISIBLE_INTERNAL_LINKS_END');
             console.log('CRAWL_ERRORS_START');
             for (const e of errors) console.log(JSON.stringify(e));
             console.log('CRAWL_ERRORS_END');
             if (errors.length) process.exitCode = 2;
-            if (hits.length) process.exitCode = 3;
+            if (hits.length || adminLinks.length) process.exitCode = 3;
           })();
           NODE
           node /tmp/public-copy-audit.cjs
