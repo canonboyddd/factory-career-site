@@ -1,0 +1,28 @@
+name: Search Quality Focus
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '_headers'
+      - 'robots.txt'
+      - 'sitemap.xml'
+      - 'sitemap-core.xml'
+      - 'articles/**'
+      - 'qa/search-quality-focus.cjs'
+      - '.github/workflows/search-quality-focus.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-focus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify index focus
+        run: node qa/search-quality-focus.cjs
