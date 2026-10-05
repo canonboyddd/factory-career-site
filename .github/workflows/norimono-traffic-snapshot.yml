@@ -1,0 +1,52 @@
+name: Norimono traffic snapshot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norimono-traffic-snapshot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch aggregate analytics without exposing token
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, urllib.request, sys
+          token=os.environ.get('ADMIN_TOKEN','')
+          if not token:
+              print('ERROR: ADMIN_TOKEN secret is not configured')
+              sys.exit(2)
+          base='https://factory-career-site.pages.dev/api/admin/central-dashboard'
+          for days in (7,30):
+              req=urllib.request.Request(f'{base}?days={days}',headers={'Authorization':f'Bearer {token}','User-Agent':'norimono-traffic-snapshot/1.0'})
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      data=json.load(r)
+              except Exception as e:
+                  print(f'ERROR days={days}: {e}')
+                  sys.exit(3)
+              site=next((x for x in data.get('sites',[]) if x.get('site_key')=='car-bike'),{})
+              daily=[x for x in data.get('daily',[]) if x.get('site_key')=='car-bike']
+              pages=[x for x in data.get('pages',[]) if x.get('site_key')=='car-bike'][:15]
+              aff=[x for x in data.get('affiliates',[]) if x.get('site_key')=='car-bike']
+              out={
+                  'days':days,
+                  'generated_at':data.get('generated_at'),
+                  'site':site,
+                  'daily':daily,
+                  'top_pages':pages,
+                  'affiliate_clicks':aff,
+                  'filtered_automated_pv':data.get('totals',{}).get('filtered_automated_pv')
+              }
+              print('NORIMONO_SNAPSHOT '+json.dumps(out,ensure_ascii=False,separators=(',',':')))
+          PY
