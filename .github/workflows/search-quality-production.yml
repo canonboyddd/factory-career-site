@@ -1,0 +1,97 @@
+name: Search Quality Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '_headers'
+      - 'robots.txt'
+      - 'sitemap.xml'
+      - 'sitemap-core.xml'
+      - '.github/workflows/search-quality-production.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-headers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for production SEO headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://factory-career-site.pages.dev/articles/factory-paid-leave-check'
+          for i in $(seq 1 18); do
+            headers="$(curl -fsSI "$url" || true)"
+            if printf '%s' "$headers" | grep -Eqi '^x-robots-tag:.*noindex.*follow'; then
+              echo 'Production SEO headers are deployed.'
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'Production did not expose the expected noindex/follow header.' >&2
+          exit 1
+
+      - name: Verify focused noindex pages and priority pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://factory-career-site.pages.dev'
+          noindex_paths=(
+            /articles/factory-annual-holidays-check
+            /articles/factory-bonus-offer-check
+            /articles/factory-callout-duty-check
+            /articles/factory-early-shift-check
+            /articles/factory-late-shift-check
+            /articles/factory-long-hours-offer-check
+            /articles/factory-oncall-check
+            /articles/factory-overtime-pay-check
+            /articles/factory-paid-leave-check
+            /articles/factory-salary-down-transfer-check
+            /articles/factory-transfer-policy-check
+            /articles/factory-weekend-shift-check
+            /articles/manufacturing-allowances-check
+            /articles/manufacturing-base-salary-check
+            /articles/production-tech-business-travel-check
+          )
+          core_paths=(
+            /
+            /job-change-guide
+            /salary-guide
+            /career-guide
+            /articles/factory-quit
+            /articles/night-shift-hard
+            /articles/factory-white-company
+            /articles/manufacturing-role-salary-comparison
+            /articles/factory-job-offer-check
+            /articles/manufacturing-agent-guide
+          )
+
+          for path in "${noindex_paths[@]}"; do
+            headers="$(curl -fsSI "$base$path")"
+            printf '%s' "$headers" | grep -Eqi '^x-robots-tag:.*noindex.*follow' || {
+              echo "Missing noindex/follow on $path" >&2
+              exit 1
+            }
+            echo "NOINDEX OK $path"
+          done
+
+          for path in "${core_paths[@]}"; do
+            headers="$(curl -fsSI "$base$path")"
+            if printf '%s' "$headers" | grep -Eqi '^x-robots-tag:.*noindex'; then
+              echo "Priority page is noindexed: $path" >&2
+              exit 1
+            fi
+            echo "INDEXABLE OK $path"
+          done
+
+          robots="$(curl -fsS "$base/robots.txt")"
+          for path in "${noindex_paths[@]}"; do
+            if printf '%s\n' "$robots" | grep -Fqx "Disallow: $path"; then
+              echo "Noindex page is blocked in robots.txt: $path" >&2
+              exit 1
+            fi
+          done
+          echo 'PASS: production search-quality focus is active.'
