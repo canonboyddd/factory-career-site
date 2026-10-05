@@ -1,6 +1,6 @@
 name: Norimono production QA
 
-# Production browser QA for norimono-cost.com including monetization, indexability and Search Console winner pages.
+# Production browser QA for norimono-cost.com including monetization, indexability and Search Console winner pages. Search Console winner set v22.
 on:
   workflow_dispatch:
   schedule:
