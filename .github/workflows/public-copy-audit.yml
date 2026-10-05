@@ -16,7 +16,7 @@ permissions:
 jobs:
   audit-public-copy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,14 +81,16 @@ jobs:
             const hits = [];
             const adminLinks = [];
             const errors = [];
-            for (const url of urls) {
+            let cursor = 0;
+
+            async function auditUrl(url) {
               const page = await context.newPage();
               await page.route('**/api/analytics/collect', route => route.abort());
               try {
                 const res = await page.goto(url, {waitUntil:'domcontentloaded', timeout:25000});
                 if (!res || res.status() >= 400) {
                   errors.push({url,status:res?.status() || 0});
-                  continue;
+                  return;
                 }
                 await page.waitForTimeout(500);
                 const text = await page.locator('body').innerText().catch(()=> '');
@@ -118,6 +120,16 @@ jobs:
                 await page.close();
               }
             }
+
+            async function worker() {
+              while (true) {
+                const i = cursor++;
+                if (i >= urls.length) return;
+                await auditUrl(urls[i]);
+              }
+            }
+
+            await Promise.all(Array.from({length:6}, () => worker()));
             await browser.close();
             console.log(`AUDITED_URLS=${urls.length}`);
             console.log('OPERATOR_COPY_HITS_START');
