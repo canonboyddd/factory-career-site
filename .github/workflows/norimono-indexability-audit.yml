@@ -1,0 +1,26 @@
+name: Norimono indexability audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa/norimono-indexability-audit.cjs'
+      - '.github/workflows/norimono-indexability-audit.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '25 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check every production sitemap URL
+        run: node qa/norimono-indexability-audit.cjs
