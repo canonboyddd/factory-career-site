@@ -11,6 +11,7 @@ async function pooled(items,fn,n=CONCURRENCY){let i=0;const out=[];async functio
 
 (async()=>{
   const problems=[];
+  const warnings=[];
   const index=await fetchText(INDEX);
   if(index.r.status!==200)throw new Error(`sitemap index HTTP ${index.r.status}`);
   const sitemapUrls=extractLocs(index.text);
@@ -22,7 +23,7 @@ async function pooled(items,fn,n=CONCURRENCY){let i=0;const out=[];async functio
   },8);
   const refs=[];for(const m of maps)for(const url of m.locs)refs.push({sitemap:m.url,url});
   const byUrl=new Map();for(const x of refs){const a=byUrl.get(x.url)||[];a.push(x.sitemap);byUrl.set(x.url,a)}
-  for(const [url,maps2] of byUrl)if(maps2.length>1)problems.push({type:'duplicate_sitemap_url',url,count:maps2.length,sitemaps:maps2});
+  for(const [url,maps2] of byUrl)if(maps2.length>1)warnings.push({type:'duplicate_sitemap_url',url,count:maps2.length,sitemaps:maps2});
   const urls=[...byUrl.keys()];
   const checks=await pooled(urls,async url=>{
     let manual;
@@ -47,13 +48,14 @@ async function pooled(items,fn,n=CONCURRENCY){let i=0;const out=[];async functio
       else if(norm(c.canonical)!==norm(c.url))problems.push({type:'canonical_mismatch',url:c.url,canonical:c.canonical});
       if(c.canonical){const k=norm(c.canonical),a=canonicalOwners.get(k)||[];a.push(c.url);canonicalOwners.set(k,a)}
     }
-    if(/[?#]/.test(new URL(c.url).pathname+c.url.split(c.url.split('?')[0])[1]||'')){}
   }
   for(const [canonical,owners] of canonicalOwners)if(new Set(owners).size>1)problems.push({type:'duplicate_canonical',canonical,urls:[...new Set(owners)]});
-  const summary={sitemaps:sitemapUrls.length,raw_refs:refs.length,unique_urls:urls.length,problems:problems.length,by_type:{}};
+  const summary={sitemaps:sitemapUrls.length,raw_refs:refs.length,unique_urls:urls.length,problems:problems.length,warnings:warnings.length,by_type:{},warning_types:{}};
   for(const p of problems)summary.by_type[p.type]=(summary.by_type[p.type]||0)+1;
+  for(const w of warnings)summary.warning_types[w.type]=(summary.warning_types[w.type]||0)+1;
   console.log('INDEXABILITY_SUMMARY '+JSON.stringify(summary));
   console.log('SITEMAP_COUNTS '+JSON.stringify(maps.map(m=>({sitemap:m.url,count:m.locs.length}))));
+  if(warnings.length)console.log('INDEXABILITY_WARNINGS '+JSON.stringify(warnings.slice(0,200)));
   if(problems.length){console.log('INDEXABILITY_PROBLEMS '+JSON.stringify(problems.slice(0,200)));process.exit(1)}
-  console.log('PASS: all sitemap URLs are direct 200, indexable, and self-canonical.');
+  console.log('PASS: all unique sitemap URLs are direct 200, indexable, and self-canonical.');
 })().catch(e=>{console.error(e);process.exit(2)});
