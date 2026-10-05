@@ -18,6 +18,7 @@ jobs:
           fetch-depth: 0
       - name: Replace internal CTA labels
         run: |
+          # One-time source cleanup for the two public service review pages.
           python - <<'PY'
           from pathlib import Path
           files = [
