@@ -11,6 +11,28 @@
     }
   }
 
+  function cleanPublicFacingCopy(root = document) {
+    const replacements = [
+      ['検索意図を細かく分けた記事です。', '悩みや目的を細かく分けた記事です。'],
+      ['PR｜中間CTA', 'PR'],
+      ['利用中ASPの管理画面：成果地点、成果報酬、承認・否認条件', '提携サービスの公式提供情報・利用条件'],
+      ['読者の検索意図・職種・希望条件との適合性', '読者の職種・希望条件との適合性']
+    ];
+    const start = root.nodeType === Node.TEXT_NODE ? root.parentNode : root;
+    if (!start) return;
+    const walker = document.createTreeWalker(start, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => {
+      const parent = node.parentElement;
+      if (!parent || parent.closest('script,style,noscript,textarea')) return;
+      let text = node.nodeValue || '';
+      let next = text;
+      replacements.forEach(([from, to]) => { next = next.split(from).join(to); });
+      if (next !== text) node.nodeValue = next;
+    });
+  }
+
   function normalizeLinks(root = document) {
     const nodes = root.matches?.('a[href]') ? [root] : [...(root.querySelectorAll?.('a[href]') || [])];
     nodes.forEach(a => {
@@ -192,6 +214,7 @@
   }
 
   function run() {
+    cleanPublicFacingCopy(document);
     normalizeLinks(document);
     dedupeHead();
     removeUnavailableProgramCards();
@@ -202,6 +225,7 @@
     ensureFooterSiteMap();
     ensureCleanUrlServiceBridge();
     bindCleanUrlTracking();
+    cleanPublicFacingCopy(document);
     normalizeLinks(document);
   }
 
@@ -211,6 +235,7 @@
     let needsGlobalPass = false;
     records.forEach(record => record.addedNodes.forEach(node => {
       if (node.nodeType !== 1) return;
+      cleanPublicFacingCopy(node);
       normalizeLinks(node);
       if (node.matches?.('img') || node.querySelector?.('img')) fixImages();
       if (node.matches?.('.offer-section,[data-program-card],[data-clean-seo-links],[data-seo-cluster-links],[data-core-links]') || node.querySelector?.('.offer-section,[data-program-card],[data-clean-seo-links],[data-seo-cluster-links],[data-core-links]')) needsGlobalPass = true;
@@ -220,6 +245,7 @@
       dedupeDynamicSections();
       fixEmptyOfferSections();
       ensureCleanUrlServiceBridge();
+      cleanPublicFacingCopy(document);
     }
   });
   if (document.body) observer.observe(document.body, { childList: true, subtree: true });
