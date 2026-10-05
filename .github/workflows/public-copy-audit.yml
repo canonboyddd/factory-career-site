@@ -6,6 +6,7 @@ on:
     paths:
       - '**/*.html'
       - 'assets/**/*.js'
+      - 'assets/**/*.css'
       - 'sitemap.xml'
       - '.github/workflows/public-copy-audit.yml'
   workflow_dispatch:
