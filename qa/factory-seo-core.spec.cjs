@@ -76,7 +76,7 @@ for (const href of ['/articles/manufacturing-role-salary-comparison','/articles/
 const factoryQuit = read('articles/factory-quit.html');
 check(factoryQuit.includes('工場勤務を辞めたい人へ【2026年】'), 'factory-quit carries 2026 search freshness');
 check(factoryQuit.includes('/articles/night-shift-hard'), 'factory-quit links to night-shift guide');
-check(factoryQuit.includes('令和７年　雇用動向調査結果の概要'), 'factory-quit cites official employment trends');
+check(factoryQuit.includes('雇用動向調査') && factoryQuit.includes('mhlw.go.jp/toukei/itiran/roudou/koyou/doukou/26-2/index.html'), 'factory-quit cites current official employment trends');
 
 const nightShiftHard = read('articles/night-shift-hard.html');
 check(nightShiftHard.includes('夜勤がきつい・辞めたい人へ【2026年】'), 'night-shift-hard carries 2026 search freshness');
