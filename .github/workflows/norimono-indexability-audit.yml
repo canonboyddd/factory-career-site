@@ -24,3 +24,5 @@ jobs:
           node-version: '22'
       - name: Check every production sitemap URL
         run: node qa/norimono-indexability-audit.cjs
+
+# rerun after sitemap deduplication: 2026-10-07
