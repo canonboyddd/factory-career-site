@@ -32,3 +32,5 @@ jobs:
         run: npx playwright test qa/all-site-analytics-live.spec.cjs --reporter=line
 
 # cross-site rerun after intentional Okazu product-router noindex classification: 2026-10-08
+
+# final rerun after ClipMade clean URL deployment: 2026-10-08
