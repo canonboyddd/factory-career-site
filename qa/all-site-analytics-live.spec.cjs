@@ -150,3 +150,5 @@ test('all five production sites keep public search pages indexable',async()=>{
 });
 
 // all-site indexability rerun: 2026-10-07 after Sugu legal-page fix
+
+// all-site final rerun: 2026-10-08 after Okazu ranking index fix
