@@ -79,3 +79,72 @@ test('central D1 has page-view receipt history for all five sites',async({reques
   for(const key of ['factory','sugutsucool','car-bike','okazu','clipmade'])expect(keys.has(key),`missing site in verification API: ${key}`).toBeTruthy();
   for(const row of data.sites)expect(row.status,`${row.site_key} has never written a page_view to D1`).not.toBe('never');
 });
+
+
+function extractLocs(xml){return [...String(xml||'').matchAll(/<loc>([^<]+)<\/loc>/gi)].map(m=>m[1].trim())}
+function metaRobots(html){const s=String(html||'');const m=s.match(/<meta[^>]+name=["']robots["'][^>]+content=["']([^"']+)["'][^>]*>|<meta[^>]+content=["']([^"']+)["'][^>]+name=["']robots["'][^>]*>/i);return (m?.[1]||m?.[2]||'').toLowerCase()}
+function canonicalHref(html){const s=String(html||'');const m=s.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>|<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["'][^>]*>/i);return m?.[1]||m?.[2]||''}
+function samePage(a,b){try{const x=new URL(a),y=new URL(b);const norm=p=>p==='/'?'/':p.replace(/\/$/,'');return x.origin===y.origin&&norm(x.pathname)===norm(y.pathname)}catch{return false}}
+function internalLinks(html,base){
+  const out=new Set();
+  for(const m of String(html||'').matchAll(/<a\b[^>]*\bhref=["']([^"'#]+)["'][^>]*>/gi)){
+    try{const u=new URL(m[1],base);const b=new URL(base);if(u.origin!==b.origin)continue;if(/^(?:mailto|tel|javascript):/i.test(m[1]))continue;u.hash='';u.search='';if(/\.(?:png|jpe?g|webp|gif|svg|css|js|json|xml|txt|pdf|zip|exe|mp4|webm|ico)$/i.test(u.pathname))continue;out.add(u.href)}catch{}
+  }
+  return [...out];
+}
+async function getText(url){
+  const r=await fetch(url,{redirect:'manual',headers:{'user-agent':'Mozilla/5.0 all-site-indexability-live/1.0'}});
+  let body='';try{body=await r.text()}catch{}
+  return {url,status:r.status,headers:r.headers,body};
+}
+async function pool(items,fn,limit=16){
+  let i=0;const out=new Array(items.length);
+  async function worker(){while(true){const n=i++;if(n>=items.length)return;out[n]=await fn(items[n],n)}}
+  await Promise.all(Array.from({length:Math.min(limit,items.length||1)},worker));return out;
+}
+const seoSites=[
+  {key:'factory',home:'https://factory-career-site.pages.dev/',sitemap:'https://factory-career-site.pages.dev/sitemap.xml',allowNoindex:[/^\/admin-/,/^\/ops-dashboard(?:\/|$)/,/^\/rakuten-check(?:\.html)?$/, /^\/shorts-content-factory(?:-audit)?\//,
+    /^\/articles\/(?:factory-annual-holidays-check|factory-bonus-offer-check|factory-callout-duty-check|factory-early-shift-check|factory-late-shift-check|factory-long-hours-offer-check|factory-oncall-check|factory-overtime-pay-check|factory-paid-leave-check|factory-salary-down-transfer-check|factory-transfer-policy-check|factory-weekend-shift-check|manufacturing-allowances-check|manufacturing-base-salary-check|production-tech-business-travel-check)(?:\.html)?$/]},
+  {key:'sugutsucool',home:'https://sugutsucool.pages.dev/',sitemap:'https://sugutsucool.pages.dev/sitemap.xml',allowNoindex:[/^\/admin-/,/^\/404(?:\.html)?$/]},
+  {key:'car-bike',home:'https://norimono-cost.com/',sitemap:'https://norimono-cost.com/sitemap-index.xml',allowNoindex:[/^\/admin-feedback(?:\.html)?$/, /^\/product(?:\.html)?$/, /^\/404(?:\.html)?$/]},
+  {key:'okazu',home:'https://okazu-yoridori-midori.pages.dev/',sitemap:'https://okazu-yoridori-midori.pages.dev/sitemap.xml',allowNoindex:[/^\/404(?:\.html)?$/, /^\/ga4-check(?:\.html)?$/]},
+  {key:'clipmade',home:'https://clipmade-site.pages.dev/',sitemap:'https://clipmade-site.pages.dev/sitemap.xml',allowNoindex:[/^\/404(?:\.html)?$/]}
+];
+async function sitemapUrls(entry){
+  const root=await getText(entry.sitemap);expect(root.status,`${entry.key} sitemap HTTP`).toBe(200);
+  if(/<sitemapindex\b/i.test(root.body)){
+    const children=extractLocs(root.body);const maps=await pool(children,getText,8);const urls=[];
+    for(const m of maps){expect(m.status,`${entry.key} child sitemap HTTP ${m.url}`).toBe(200);urls.push(...extractLocs(m.body))}
+    return urls;
+  }
+  return extractLocs(root.body);
+}
+test('all five production sites keep public search pages indexable',async()=>{
+  for(const site of seoSites){
+    const urls=await sitemapUrls(site);
+    const unique=[...new Set(urls)];
+    expect(unique.length,`${site.key}: sitemap URL count`).toBeGreaterThan(0);
+    expect(unique.length,`${site.key}: duplicate sitemap URL`).toBe(urls.length);
+    const checked=await pool(unique,getText,18);
+    for(const x of checked){
+      expect(x.status,`${site.key}: sitemap URL must be direct 200: ${x.url}`).toBe(200);
+      const xr=String(x.headers.get('x-robots-tag')||'').toLowerCase();
+      expect(xr,`${site.key}: X-Robots-Tag noindex in sitemap: ${x.url}`).not.toContain('noindex');
+      if(/text\/html/i.test(String(x.headers.get('content-type')||''))){
+        expect(metaRobots(x.body),`${site.key}: meta noindex in sitemap: ${x.url}`).not.toContain('noindex');
+        const canonical=canonicalHref(x.body);expect(canonical,`${site.key}: canonical missing: ${x.url}`).toBeTruthy();
+        expect(samePage(canonical,x.url),`${site.key}: canonical mismatch: ${x.url} -> ${canonical}`).toBeTruthy();
+      }
+    }
+    const home=await getText(site.home);expect(home.status,`${site.key} home HTTP`).toBe(200);
+    const links=internalLinks(home.body,site.home).slice(0,300);
+    const linked=await pool(links,getText,16);
+    for(const x of linked){
+      if(x.status!==200||!/text\/html/i.test(String(x.headers.get('content-type')||'')))continue;
+      const path=new URL(x.url).pathname;const allow=site.allowNoindex.some(re=>re.test(path));
+      const robots=(String(x.headers.get('x-robots-tag')||'')+' '+metaRobots(x.body)).toLowerCase();
+      if(!allow)expect(robots,`${site.key}: unexpected noindex on public home-linked page ${x.url}`).not.toContain('noindex');
+    }
+    console.log(`SEO_OK ${site.key} sitemap=${unique.length} homeLinks=${links.length}`);
+  }
+});
