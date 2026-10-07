@@ -30,3 +30,5 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run all-site live analytics QA
         run: npx playwright test qa/all-site-analytics-live.spec.cjs --reporter=line
+
+# cross-site rerun after intentional Okazu product-router noindex classification: 2026-10-08
