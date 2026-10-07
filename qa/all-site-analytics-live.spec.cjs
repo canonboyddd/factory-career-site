@@ -148,3 +148,5 @@ test('all five production sites keep public search pages indexable',async()=>{
     console.log(`SEO_OK ${site.key} sitemap=${unique.length} homeLinks=${links.length}`);
   }
 });
+
+// all-site indexability rerun: 2026-10-07 after Sugu legal-page fix
