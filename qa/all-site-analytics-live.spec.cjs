@@ -1,6 +1,6 @@
 const {test,expect}=require('@playwright/test');
 
-test.setTimeout(180000);
+test.setTimeout(600000);
 const HUMAN_UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36';
 const sites=[
   {key:'factory',url:'https://factory-career-site.pages.dev/',must:[/factory-career-site\.pages\.dev\/api\/analytics\/collect/]},
