@@ -93,9 +93,18 @@ function internalLinks(html,base){
   return [...out];
 }
 async function getText(url){
-  const r=await fetch(url,{redirect:'manual',headers:{'user-agent':'Mozilla/5.0 all-site-indexability-live/1.0'}});
-  let body='';try{body=await r.text()}catch{}
-  return {url,status:r.status,headers:r.headers,body};
+  let last;
+  for(let attempt=1;attempt<=4;attempt++){
+    try{
+      const r=await fetch(url,{redirect:'manual',headers:{'user-agent':'Mozilla/5.0 all-site-indexability-live/1.0'}});
+      let body='';try{body=await r.text()}catch{}
+      return {url,status:r.status,headers:r.headers,body};
+    }catch(e){
+      last=e;
+      if(attempt<4)await new Promise(resolve=>setTimeout(resolve,400*attempt));
+    }
+  }
+  throw last;
 }
 async function pool(items,fn,limit=16){
   let i=0;const out=new Array(items.length);
@@ -125,7 +134,7 @@ test('all five production sites keep public search pages indexable',async()=>{
     const unique=[...new Set(urls)];
     expect(unique.length,`${site.key}: sitemap URL count`).toBeGreaterThan(0);
     expect(unique.length,`${site.key}: duplicate sitemap URL`).toBe(urls.length);
-    const checked=await pool(unique,getText,18);
+    const checked=await pool(unique,getText,8);
     for(const x of checked){
       expect(x.status,`${site.key}: sitemap URL must be direct 200: ${x.url}`).toBe(200);
       const xr=String(x.headers.get('x-robots-tag')||'').toLowerCase();
@@ -138,7 +147,7 @@ test('all five production sites keep public search pages indexable',async()=>{
     }
     const home=await getText(site.home);expect(home.status,`${site.key} home HTTP`).toBe(200);
     const links=internalLinks(home.body,site.home).slice(0,300);
-    const linked=await pool(links,getText,16);
+    const linked=await pool(links,getText,8);
     for(const x of linked){
       if(x.status!==200||!/text\/html/i.test(String(x.headers.get('content-type')||'')))continue;
       const path=new URL(x.url).pathname;const allow=site.allowNoindex.some(re=>re.test(path));
