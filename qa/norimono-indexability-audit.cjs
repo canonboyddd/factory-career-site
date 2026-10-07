@@ -1,6 +1,6 @@
 const BASE='https://norimono-cost.com';
 const INDEX=`${BASE}/sitemap-index.xml`;
-const CONCURRENCY=16;
+const CONCURRENCY=16;\n// feedback indexability guard: public feedback is submitted in the sitemap and must never regress to noindex.
 
 function extractLocs(xml){return [...String(xml||'').matchAll(/<loc>([^<]+)<\/loc>/gi)].map(m=>m[1].trim())}
 function canonicalFrom(html){const m=String(html||'').match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>|<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["'][^>]*>/i);return m?(m[1]||m[2]||'').trim():''}
