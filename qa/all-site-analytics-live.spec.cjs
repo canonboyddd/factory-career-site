@@ -105,7 +105,7 @@ async function pool(items,fn,limit=16){
 const seoSites=[
   {key:'factory',home:'https://factory-career-site.pages.dev/',sitemap:'https://factory-career-site.pages.dev/sitemap.xml',allowNoindex:[/^\/admin-/,/^\/ops-dashboard(?:\/|$)/,/^\/rakuten-check(?:\.html)?$/, /^\/shorts-content-factory(?:-audit)?\//,
     /^\/articles\/(?:factory-annual-holidays-check|factory-bonus-offer-check|factory-callout-duty-check|factory-early-shift-check|factory-late-shift-check|factory-long-hours-offer-check|factory-oncall-check|factory-overtime-pay-check|factory-paid-leave-check|factory-salary-down-transfer-check|factory-transfer-policy-check|factory-weekend-shift-check|manufacturing-allowances-check|manufacturing-base-salary-check|production-tech-business-travel-check)(?:\.html)?$/]},
-  {key:'sugutsucool',home:'https://sugutsucool.pages.dev/',sitemap:'https://sugutsucool.pages.dev/sitemap.xml',allowNoindex:[/^\/admin-/,/^\/404(?:\.html)?$/]},
+  {key:'sugutsucool',home:'https://sugutsucool.pages.dev/',sitemap:'https://sugutsucool.pages.dev/sitemap.xml',allowNoindex:[/^\/admin-/,/^\/contact\/$/,/^\/404(?:\.html)?$/]},
   {key:'car-bike',home:'https://norimono-cost.com/',sitemap:'https://norimono-cost.com/sitemap-index.xml',allowNoindex:[/^\/admin-feedback(?:\.html)?$/, /^\/product(?:\.html)?$/, /^\/404(?:\.html)?$/]},
   {key:'okazu',home:'https://okazu-yoridori-midori.pages.dev/',sitemap:'https://okazu-yoridori-midori.pages.dev/sitemap.xml',allowNoindex:[/^\/404(?:\.html)?$/, /^\/ga4-check(?:\.html)?$/]},
   {key:'clipmade',home:'https://clipmade-site.pages.dev/',sitemap:'https://clipmade-site.pages.dev/sitemap.xml',allowNoindex:[/^\/404(?:\.html)?$/]}
