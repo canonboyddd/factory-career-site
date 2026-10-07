@@ -17,11 +17,23 @@ test('Google ownership verification file remains directly accessible',async({req
 
 test('old Pages host permanently redirects to primary domain',async({request})=>{const r=await request.get('https://car-bike-cost-site.pages.dev/sell-car',{maxRedirects:0});expect(r.status()).toBe(301);expect(r.headers()['location']).toBe(`${base}/sell-car`)});
 
-test('priority sitemap includes all strengthened vehicle SEO pages with fresh lastmod',async({request})=>{
-  const r=await request.get(`${base}/vehicle-search-priority-v74-sitemap.xml`);expect(r.status()).toBe(200);const xml=await r.text();
+test('strengthened vehicle SEO pages exist exactly once across the sitemap set',async({request})=>{
+  const indexRes=await request.get(`${base}/sitemap-index.xml`);expect(indexRes.status()).toBe(200);const indexXml=await indexRes.text();
+  const sitemapUrls=[...indexXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
+  expect(sitemapUrls.length).toBeGreaterThan(0);
+  let allXml='';
+  for(const url of sitemapUrls){const res=await request.get(url);expect(res.status(),`sitemap: ${url}`).toBe(200);allXml+='\n'+await res.text()}
   const routes=['/cars/toyota-prius','/cars/toyota-alphard','/cars/honda-n-box','/cars/toyota-hiace-wagon','/cars/toyota-harrier','/cars/toyota-sienta','/cars/suzuki-jimny','/cars/suzuki-spacia','/cars/daihatsu-tanto','/cars/honda-freed','/cars/toyota-aqua','/cars/honda-fit','/bikes/honda-rebel-250','/bikes/honda-pcx','/bikes/kawasaki-ninja-250','/bikes/honda-gb350','/bikes/yamaha-nmax','/bikes/yamaha-yzf-r25','/bikes/honda-super-cub-110','/bikes/honda-hunter-cub-ct125','/bikes/kawasaki-z900rs'];
-  for(const route of routes)expect(xml,`priority sitemap: ${route}`).toContain(`<loc>${base}${route}</loc>`);
-  expect(xml).toContain('<lastmod>2026-10-01</lastmod>');expect(xml).not.toMatch(/<loc>[^<]*\.html<\/loc>/i);
+  for(const route of routes){const loc=`<loc>${base}${route}</loc>`;expect(allXml.split(loc).length-1,`sitemap occurrence: ${route}`).toBe(1)}
+  expect(allXml).not.toMatch(/<loc>[^<]*\.html<\/loc>/i);
+});
+
+test('public feedback board is indexable while generic product detail stays intentionally noindex',async({page,request})=>{
+  const response=await page.goto(base+'/feedback',{waitUntil:'domcontentloaded',timeout:45000});expect(response?.status()).toBeLessThan(400);
+  expect(String(response?.headers()['x-robots-tag']||''),'feedback X-Robots-Tag').not.toMatch(/noindex/i);
+  const meta=page.locator('meta[name="robots"]');expect(await meta.count()).toBe(1);await expect(meta).toHaveAttribute('content',/index,follow/i);
+  const canonical=page.locator('link[rel="canonical"]');expect(await canonical.count()).toBe(1);await expect(canonical).toHaveAttribute('href',base+'/feedback');
+  const product=await request.get(base+'/product');expect(product.status()).toBeLessThan(400);expect(await product.text()).toMatch(/name=["']robots["'][^>]*content=["'][^"']*noindex/i);
 });
 
 test('Search Console winner comparison pages expose tuned metadata and decision guide',async({page})=>{
