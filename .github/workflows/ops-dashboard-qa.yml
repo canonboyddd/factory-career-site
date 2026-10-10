@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'functions/api/admin/central-dashboard.js'
+      - 'functions/shared/ops-analytics-contract.js'
+      - 'assets/ops-dashboard.js'
+      - 'qa/analytics-consistency.spec.cjs'
       - 'functions/api/admin/ops-intelligence.js'
       - 'functions/api/admin/okazu-analytics.js'
       - 'functions/api/admin/seo-data.js'
@@ -40,5 +43,7 @@ jobs:
           node --check functions/api/central/collect.js
           node --check assets/admin-seo-data.js
           node --check assets/ops-intelligence.js
+          node --check assets/ops-dashboard.js
+          node --check functions/shared/ops-analytics-contract.js
       - name: Check dashboard contracts
         run: node qa/ops-dashboard-contract.spec.cjs
