@@ -1,4 +1,4 @@
-import {CENTRAL_CLICK_SQL,VEHICLE_CLICK_EVENTS,PROBE_PATHS,SUSPICIOUS_BROWSER_SQL} from '../../shared/ops-analytics-contract.js';
+import {CENTRAL_CLICK_SQL,VEHICLE_CLICK_EVENTS,PROBE_PATHS,SUSPICIOUS_BROWSER_SQL,SUSPICIOUS_BURST_SQL} from '../../shared/ops-analytics-contract.js';
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});}
 function auth(request,env){const x=request.headers.get('authorization')||'';return Boolean(env.ADMIN_TOKEN&&x===`Bearer ${env.ADMIN_TOKEN}`);}
 function rows(x){return x?.results||[];}
@@ -49,11 +49,13 @@ export async function onRequestGet({request,env}){
   }catch(e){carError=String(e?.message||e||'fetch failed');}
 
   const suspicious=SUSPICIOUS_BROWSER_SQL;
+  const burst=SUSPICIOUS_BURST_SQL;
   const carClause=`AND c.site_key<>'car-bike'`;
   const centralClean=`SELECT c.* FROM central_events c
     LEFT JOIN (${suspicious}) b
       ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours')
-    WHERE b.browser_id IS NULL ${carClause} AND NOT ${probeSql('c')}`;
+    LEFT JOIN (${burst}) burst ON burst.site_key=c.site_key AND burst.day=date(c.occurred_at,'+9 hours')
+    WHERE b.browser_id IS NULL AND burst.day IS NULL ${carClause} AND NOT ${probeSql('c')}`;
   const union=`SELECT 'factory' site_key,event_name,browser_id,session_id,page_path,page_title,occurred_at,program,placement,device_type FROM analytics_events
     UNION ALL
     SELECT site_key,event_name,browser_id,session_id,page_path,page_title,occurred_at,program,placement,device_type FROM (${centralClean})`;
@@ -64,7 +66,7 @@ export async function onRequestGet({request,env}){
   const dailyResult=await q(`WITH e AS (${union}) SELECT date(occurred_at,'+9 hours') day,site_key,SUM(CASE WHEN event_name='page_view' THEN 1 ELSE 0 END) pv,COUNT(DISTINCT CASE WHEN event_name='page_view' THEN session_id END) sessions FROM e WHERE occurred_at>=${cutoff} GROUP BY day,site_key ORDER BY day,site_key`,[mod]);
   const pagesResult=await q(`WITH e AS (${union}) SELECT site_key,page_path,MAX(COALESCE(page_title,'')) title,COUNT(*) pv,COUNT(DISTINCT session_id) sessions FROM e WHERE event_name='page_view' AND occurred_at>=${cutoff} GROUP BY site_key,page_path ORDER BY pv DESC LIMIT 100`,[mod]);
   const affiliatesResult=await q(`WITH e AS (${union}) SELECT site_key,COALESCE(NULLIF(program,''),'unknown') program,COUNT(*) clicks,COUNT(DISTINCT session_id) sessions FROM e WHERE event_name IN ${CENTRAL_CLICK_SQL} AND occurred_at>=${cutoff} GROUP BY site_key,program ORDER BY clicks DESC LIMIT 100`,[mod]);
-  const filteredRow=await q1(`SELECT COUNT(*) filtered FROM central_events c LEFT JOIN (${suspicious}) b ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours') WHERE c.event_name='page_view' AND c.occurred_at>=${cutoff} AND (b.browser_id IS NOT NULL OR ${probeSql('c')})`,[mod]);
+  const filteredRow=await q1(`SELECT COUNT(*) filtered FROM central_events c LEFT JOIN (${suspicious}) b ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours') LEFT JOIN (${burst}) burst ON burst.site_key=c.site_key AND burst.day=date(c.occurred_at,'+9 hours') WHERE c.event_name='page_view' AND c.occurred_at>=${cutoff} AND (b.browser_id IS NOT NULL OR burst.day IS NOT NULL OR ${probeSql('c')})`,[mod]);
 
   const periodMap=new Map(rows(liveSites).map(x=>[x.site_key,x]));
   const seenMap=new Map(rows(seen).map(x=>[x.site_key,x.last_seen]));
