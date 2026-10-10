@@ -1,4 +1,4 @@
-import {CENTRAL_CLICK_SQL,PROBE_PATHS,SUSPICIOUS_BROWSER_SQL} from '../../shared/ops-analytics-contract.js';
+import {CENTRAL_CLICK_SQL,PROBE_PATHS,SUSPICIOUS_BROWSER_SQL,SUSPICIOUS_BURST_SQL} from '../../shared/ops-analytics-contract.js';
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}})}
 function auth(request,env){const x=request.headers.get('authorization')||'';return Boolean(env.ADMIN_TOKEN&&x===`Bearer ${env.ADMIN_TOKEN}`)}
 function rows(x){return x?.results||[]}
@@ -102,7 +102,9 @@ export async function onRequestGet({request,env}){
   const q1=async(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return await s.first()||{}};
   const safe=async(label,fn,fallback)=>{try{return await fn()}catch(e){warnings.push(`${label}: ${safeMessage(e)}`);return fallback}};
   const suspicious=SUSPICIOUS_BROWSER_SQL;
-  const filteredPeriod=`SELECT c.* FROM central_events c LEFT JOIN (${suspicious}) b ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours') WHERE b.browser_id IS NULL AND c.site_key='okazu' AND NOT ${probeSql('c')} AND c.occurred_at>=${cutoff}`;
+  const burst=SUSPICIOUS_BURST_SQL;
+  const filteredPeriod=`SELECT c.* FROM central_events c LEFT JOIN (${suspicious}) b ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours')
+    LEFT JOIN (${burst}) burst ON burst.site_key=c.site_key AND burst.day=date(c.occurred_at,'+9 hours') WHERE b.browser_id IS NULL AND burst.day IS NULL AND c.site_key='okazu' AND NOT ${probeSql('c')} AND c.occurred_at>=${cutoff}`;
 
   const summary=await safe('summary',()=>q1(`SELECT
       SUM(CASE WHEN event_name='page_view' THEN 1 ELSE 0 END) page_views,
