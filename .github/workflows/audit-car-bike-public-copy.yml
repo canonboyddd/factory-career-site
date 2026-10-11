@@ -9,7 +9,7 @@ on:
       - 'scripts/audit-car-bike-rendered-copy.mjs'
       - '.github/workflows/audit-car-bike-public-copy.yml'
   schedule:
-    - cron: '20 6 * * *'
+    - cron: '20 6 * * 0'
 
 permissions:
   contents: read
