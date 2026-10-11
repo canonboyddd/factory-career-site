@@ -8,7 +8,7 @@ on:
       - '.github/workflows/norimono-indexability-audit.yml'
   workflow_dispatch:
   schedule:
-    - cron: '25 6 * * *'
+    - cron: '25 6 * * 0'
 
 permissions:
   contents: read
