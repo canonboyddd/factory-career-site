@@ -11,6 +11,11 @@ on:
       - '.github/workflows/public-copy-audit.yml'
   workflow_dispatch:
 
+# Cancel superseded QA on rapid main pushes; keep the latest run only.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
