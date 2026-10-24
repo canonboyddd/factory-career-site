@@ -6,11 +6,7 @@ const CONFIGURED_SITES=['factory','sugutsucool','car-bike','okazu','clipmade'];
 const CAR_URL='https://norimono-cost.com/api/admin/central-export';
 function probeSql(alias){return `(${PROBE_PATHS.map(p=>`lower(${alias}.page_path) LIKE '${p.replace(/'/g,"''")}%'`).join(' OR ')} OR lower(${alias}.page_path) LIKE '%.html/%')`;}
 function canonicalPage(value){let p=String(value||'/').split('?')[0].split('#')[0]||'/';if(p==='/index.html')return'/';return p.endsWith('.html')?(p.slice(0,-5)||'/'):p;}
-async function schema(db){await db.batch([
-  db.prepare(`CREATE TABLE IF NOT EXISTS central_events (id INTEGER PRIMARY KEY AUTOINCREMENT, occurred_at TEXT NOT NULL DEFAULT (datetime('now')), site_key TEXT NOT NULL, event_name TEXT NOT NULL, browser_id TEXT NOT NULL, session_id TEXT NOT NULL, page_path TEXT NOT NULL, page_title TEXT, referrer TEXT, program TEXT, placement TEXT, outbound_domain TEXT, device_type TEXT)`),
-  db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_time ON central_events(occurred_at)`),
-  db.prepare(`CREATE INDEX IF NOT EXISTS idx_central_site ON central_events(site_key)`)
-]);}
+// Schema/index changes are operator migrations, never request-time writes.
 function isAffiliateClickRow(row){
   return VEHICLE_CLICK_EVENTS.includes(String(row?.event||row?.event_name||''));
 }
@@ -36,7 +32,7 @@ function affiliateProgram(row){
 export async function onRequestGet({request,env}){
   if(!auth(request,env))return json({ok:false,error:'unauthorized'},401);
   if(!env.ANALYTICS_DB)return json({ok:false,error:'ANALYTICS_DB missing'},503);
-  const db=env.ANALYTICS_DB;await schema(db);
+  const db=env.ANALYTICS_DB;
   const u=new URL(request.url);const d=Number(u.searchParams.get('days')||7);const days=[1,7,30,90,180].includes(d)?d:7;
   const mod=`-${Math.max(days-1,0)} days`;const cutoff=`datetime(date('now','+9 hours',?),'-9 hours')`;
   const q=(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return s.all();};

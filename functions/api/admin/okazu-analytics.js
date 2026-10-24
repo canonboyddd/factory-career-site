@@ -7,58 +7,7 @@ function num(v){return Number(v||0)}
 function safeMessage(error){return String(error?.message||error||'unknown').slice(0,220)}
 function probeSql(alias){return `(${PROBE_PATHS.map(p=>`lower(${alias}.page_path) LIKE '${p.replace(/'/g,"''")}%'`).join(' OR ')} OR lower(${alias}.page_path) LIKE '%.html/%')`}
 
-async function schema(db){
-  await db.prepare(`CREATE TABLE IF NOT EXISTS central_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    occurred_at TEXT NOT NULL DEFAULT (datetime('now')),
-    site_key TEXT NOT NULL,
-    event_name TEXT NOT NULL,
-    browser_id TEXT NOT NULL,
-    session_id TEXT NOT NULL,
-    page_path TEXT NOT NULL,
-    page_title TEXT,
-    referrer TEXT,
-    provider TEXT,
-    program TEXT,
-    placement TEXT,
-    variant TEXT,
-    outbound_domain TEXT,
-    device_type TEXT,
-    page_type TEXT,
-    vehicle TEXT,
-    actress TEXT,
-    genre TEXT,
-    maker TEXT,
-    product_id TEXT,
-    cta_position TEXT,
-    search_query TEXT,
-    result_count INTEGER,
-    origin_page_path TEXT,
-    origin_page_type TEXT,
-    origin_actress TEXT,
-    origin_genre TEXT,
-    origin_maker TEXT
-  )`).run();
-  const info=await db.prepare('PRAGMA table_info(central_events)').all();
-  const cols=new Set(rows(info).map(x=>String(x.name||'')));
-  for(const [name,type] of [
-    ['provider','TEXT'],['program','TEXT'],['placement','TEXT'],['variant','TEXT'],['device_type','TEXT'],['page_type','TEXT'],['vehicle','TEXT'],
-    ['actress','TEXT'],['genre','TEXT'],['maker','TEXT'],['product_id','TEXT'],['cta_position','TEXT'],
-    ['search_query','TEXT'],['result_count','INTEGER'],['origin_page_path','TEXT'],['origin_page_type','TEXT'],
-    ['origin_actress','TEXT'],['origin_genre','TEXT'],['origin_maker','TEXT']
-  ]){
-    if(!cols.has(name)){try{await db.prepare(`ALTER TABLE central_events ADD COLUMN ${name} ${type}`).run()}catch(e){if(!/duplicate column/i.test(String(e?.message||e)))throw e}}
-  }
-  const indexes=[
-    `CREATE INDEX IF NOT EXISTS idx_central_okazu_time ON central_events(site_key,occurred_at)`,
-    `CREATE INDEX IF NOT EXISTS idx_central_okazu_event ON central_events(site_key,event_name)`,
-    `CREATE INDEX IF NOT EXISTS idx_central_okazu_actress ON central_events(site_key,origin_actress)`,
-    `CREATE INDEX IF NOT EXISTS idx_central_okazu_genre ON central_events(site_key,origin_genre)`,
-    `CREATE INDEX IF NOT EXISTS idx_central_okazu_maker ON central_events(site_key,origin_maker)`
-  ];
-  for(const sql of indexes){try{await db.prepare(sql).run()}catch(e){console.warn('okazu index ensure failed',safeMessage(e))}}
-}
-
+// Schema/index changes are operator migrations, never request-time writes.
 async function entityRows(db,cutoff,mod,type,column,originColumn,filteredPeriod){
   if(!['actress','genre','maker'].includes(type))throw new Error('invalid entity type');
   const clickName=`CASE WHEN COALESCE(${originColumn},'')<>'' THEN ${originColumn} WHEN page_type='${type}' THEN ${column} ELSE '' END`;
@@ -97,7 +46,6 @@ export async function onRequestGet({request,env}){
   const cutoff=`datetime(date('now','+9 hours',?),'-9 hours')`;
   const db=env.ANALYTICS_DB;
   const warnings=[];
-  try{await schema(db)}catch(e){warnings.push(`schema: ${safeMessage(e)}`)}
   const q=async(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return rows(await s.all())};
   const q1=async(sql,b=[])=>{let s=db.prepare(sql);if(b.length)s=s.bind(...b);return await s.first()||{}};
   const safe=async(label,fn,fallback)=>{try{return await fn()}catch(e){warnings.push(`${label}: ${safeMessage(e)}`);return fallback}};
