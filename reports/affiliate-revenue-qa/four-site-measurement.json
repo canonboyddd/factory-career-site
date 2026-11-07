@@ -1,0 +1,18 @@
+{
+  "scope": ["factory", "sugutsucool", "car-bike", "clipmade"],
+  "excluded_from_this_run": "okazu: production snapshot replacement still in progress",
+  "checks_passed": 4,
+  "duration_seconds": 20.2,
+  "canonical_page_views_by_store": {
+    "factory": [1, 1],
+    "sugutsucool": [1, 1],
+    "car-bike": [1],
+    "clipmade": [1]
+  },
+  "car_client_central_requests": 0,
+  "automated_qa_telemetry_requests": 0,
+  "production_writes": 0,
+  "external_asp_requests_allowed": 0,
+  "central_receipt_contract": "passed",
+  "missing_and_stale_data_fixture": "passed"
+}

@@ -12,6 +12,9 @@ const sites=[
   {key:'okazu',url:'https://okazu-yoridori-midori.pages.dev/',must:['/api/ops-collect']},
   {key:'clipmade',url:'https://clipmade-site.pages.dev/',must:['/api/ops-collect']}
 ];
+const requestedSites=(process.env.MEASUREMENT_SITE_KEYS||'').split(',').filter(Boolean);
+if(requestedSites.some(key=>!sites.some(site=>site.key===key)))throw new Error('Unknown MEASUREMENT_SITE_KEYS entry');
+const measurementSites=requestedSites.length?sites.filter(site=>requestedSites.includes(site.key)):sites;
 const isAnalytics=url=>/\/api\/(?:analytics(?:\/collect)?|ops-collect|central\/collect)(?:[/?]|$)/.test(url)||/sugutsucool-analytics\.super-canon-boy\.workers\.dev\/collect/.test(url);
 const isTrackingHost=url=>/https:\/\/[^/]*(?:a8\.net|accesstrade\.net|affiliate-b\.com|afi-b\.com|affiliate\.dmm\.com|af\.fc2\.com|google-analytics\.com|googletagmanager\.com|doubleclick\.net|posthog\.com)\//.test(url);
 async function waitForAsset(request,url,marker){
@@ -45,7 +48,7 @@ const eventName=x=>x.event_name||x.event_type||x.event||'';
 test('normal visitor measurement uses one canonical page-view per store without client duplicate forwarding',async({browser,request})=>{
   await waitForAsset(request,'https://factory-career-site.pages.dev/assets/analytics.js?qa=1','funnelEvents');
   await waitForAsset(request,'https://sugutsucool.pages.dev/assets/analytics-track.js?qa=1','__suguAnalyticsLoaded');
-  for(const site of sites){
+  for(const site of measurementSites){
     const {context,seen}=await measurementContext(browser,{human:true});
     try{
       const page=await context.newPage();
@@ -77,7 +80,7 @@ test('normal visitor measurement uses one canonical page-view per store without 
 test('automated QA browsers emit zero revenue telemetry across all five sites',async({browser,request})=>{
   await waitForAsset(request,'https://factory-career-site.pages.dev/assets/analytics.js?qa=1','funnelEvents');
   await waitForAsset(request,'https://sugutsucool.pages.dev/assets/analytics-track.js?qa=1','__suguAnalyticsLoaded');
-  for(const site of sites){
+  for(const site of measurementSites){
     const {context,seen}=await measurementContext(browser);
     try{
       const page=await context.newPage();

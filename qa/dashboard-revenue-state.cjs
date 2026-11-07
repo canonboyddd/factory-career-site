@@ -28,6 +28,18 @@ base[2]=base[3]='central-modern';d.execute('INSERT INTO central_events VALUES(?,
 print(json.dumps(dict(d.execute(x['sql'],['-99999 days']).fetchone())))`;
   const result=spawnSync(process.platform==='win32'?'python':'python3',['-c',python],{input:JSON.stringify(query),encoding:'utf8'});
   assert.equal(result.status,0,result.stderr);assert.equal(JSON.parse(result.stdout).pv,2,'legacy local + modern central; never count mirrored modern local twice');
+  const health=await import(pathToFileURL(path.join(root,'functions/api/admin/production-health.js')));
+  let modern=true;
+  global.fetch=async url=>{
+    const p=new URL(url).pathname;
+    const samples={'/robots.txt':'Sitemap: https://norimono-cost.com/sitemap-index.xml','/sitemap-index.xml':'<sitemapindex><sitemap/></sitemapindex>','/page-loader-v50.js':'/* no client forwarding */','/analytics.js':modern?"collectionVersion:'human-filtered-v118';const endpoint='/api/analytics';if(!e.isTrusted)return;":'/* obsolete client */','/affiliate-afb-v84.js':'Z209o-31470S affiliate-b.com','/affiliate-cro-v114.js':'sell_diagnosis_result','/deploy-marker.txt':'old marker, retained'};
+    return new Response(samples[p]||'<!doctype html><html></html>',{status:200});
+  };
+  try{
+    const context={request:new Request('https://example.invalid/api/admin/production-health',{headers:{authorization:'Bearer fixture'}}),env:{ADMIN_TOKEN:'fixture'}};
+    const current=await(await health.onRequestGet(context)).json();assert.equal(current.summary.failed,0);
+    modern=false;const obsolete=await(await health.onRequestGet(context)).json();assert(obsolete.failed.some(x=>x.kind==='analytics'));
+  }finally{global.fetch=oldFetch;}
   const server=http.createServer((req,res)=>{let rel=new URL(req.url,'http://localhost').pathname.slice(1)||'index.html';if(!path.extname(rel))rel+='.html';const file=path.resolve(root,rel);if(!file.startsWith(root+path.sep)||!fs.existsSync(file)){res.writeHead(404);res.end();return;}res.writeHead(200,{'content-type':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html'});res.end(fs.readFileSync(file));});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));server.unref();
   const base=`http://127.0.0.1:${server.address().port}`;
@@ -52,6 +64,7 @@ print(json.dumps(dict(d.execute(x['sql'],['-99999 days']).fetchone())))`;
     assert(!(await page.locator('#programPerformanceRows').innerText()).includes('0円'));
     assert((await page.locator('[data-measurement-definition]').innerText()).includes('実ユーザーであることは保証できません'));
     assert(!(await page.locator('.qa-panel').innerText()).includes('起動前失敗'));
+    assert(!(await page.locator('.qa-panel').innerText()).includes('20 / 20 PASS'));
     assert.equal(errors.length,0,errors.join('\n'));
     await page.screenshot({path:path.join(root,'reports/affiliate-revenue-qa/dashboard-fixture-unavailable.jpg'),type:'jpeg',quality:80,fullPage:true});
   }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

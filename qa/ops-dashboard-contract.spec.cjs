@@ -64,7 +64,8 @@ has(dashApi,'filtered_automated_pv','automated traffic exclusion summary missing
 has(dashApi,'PROBE_PATHS','central dashboard security-probe filtering missing');
 has(sharedApi,'COUNT(DISTINCT page_path)>=18','central dashboard behavioral crawler filtering missing');
 has(sharedApi,'"/openid_connect/"','central dashboard scanner path filtering missing');
-has(healthApi,'central-tracker\\.js\\?v=20261001-1','production health tracker version is stale');
+has(healthApi,'human-filtered-v118','production health must check the canonical measurement client');
+has(healthApi,"'/analytics.js'",'production health measurement path missing');
 has(centralCollect,'function securityProbe','central collector security-probe filter missing');
 has(centralCollect,"filtered:'security_probe'",'central collector probe rejection response missing');
 has(centralCollect,'behavioralCrawler','central collector behavioral crawler filter missing');
