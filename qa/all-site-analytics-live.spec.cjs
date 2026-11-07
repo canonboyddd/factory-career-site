@@ -1,85 +1,118 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require(process.env.PLAYWRIGHT_TEST_MODULE || '@playwright/test');
+const fs=require('node:fs');
+const path=require('node:path');
 
-test.setTimeout(600000);
+test.setTimeout(900000);
+if(process.env.PLAYWRIGHT_EXECUTABLE)test.use({launchOptions:{executablePath:process.env.PLAYWRIGHT_EXECUTABLE}});
 const HUMAN_UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36';
 const sites=[
-  {key:'factory',url:'https://factory-career-site.pages.dev/',must:[/factory-career-site\.pages\.dev\/api\/analytics\/collect/]},
-  {key:'sugutsucool',url:'https://sugutsucool.pages.dev/',must:[/sugutsucool-analytics\.super-canon-boy\.workers\.dev\/collect/,/sugutsucool\.pages\.dev\/api\/ops-collect/],mustNot:[/factory-career-site\.pages\.dev\/api\/central\/collect.*site_key=sugutsucool/]},
-  {key:'car-bike',url:'https://norimono-cost.com/',must:[/norimono-cost\.com\/api\/analytics/,/factory-career-site\.pages\.dev\/api\/central\/collect.*site_key=car-bike/]},
-  {key:'okazu',url:'https://okazu-yoridori-midori.pages.dev/',must:[/okazu-yoridori-midori\.pages\.dev\/api\/ops-collect/]},
-  {key:'clipmade',url:'https://clipmade-site.pages.dev/',must:[/clipmade-site\.pages\.dev\/api\/ops-collect/]}
+  {key:'factory',url:'https://factory-career-site.pages.dev/',must:['/api/analytics/collect','/api/central/collect']},
+  {key:'sugutsucool',url:'https://sugutsucool.pages.dev/',must:['sugutsucool-analytics.super-canon-boy.workers.dev/collect','/api/ops-collect']},
+  {key:'car-bike',url:'https://norimono-cost.com/',must:['/api/analytics']},
+  {key:'okazu',url:'https://okazu-yoridori-midori.pages.dev/',must:['/api/ops-collect']},
+  {key:'clipmade',url:'https://clipmade-site.pages.dev/',must:['/api/ops-collect']}
 ];
-
 const isAnalytics=url=>/\/api\/(?:analytics(?:\/collect)?|ops-collect|central\/collect)(?:[/?]|$)/.test(url)||/sugutsucool-analytics\.super-canon-boy\.workers\.dev\/collect/.test(url);
-
-async function waitForFactoryDeploy(request){
-  for(let i=0;i<40;i++){
-    const r=await request.get('https://factory-career-site.pages.dev/assets/main.js?live-analytics-qa=1',{failOnStatusCode:false});
-    const text=await r.text();
-    if(r.ok()&&text.includes('initD1Analytics')&&text.includes('assets/analytics.js?v=20261003-1'))return;
-    await new Promise(resolve=>setTimeout(resolve,3000));
+const isTrackingHost=url=>/https:\/\/[^/]*(?:a8\.net|accesstrade\.net|affiliate-b\.com|afi-b\.com|affiliate\.dmm\.com|af\.fc2\.com|google-analytics\.com|googletagmanager\.com|doubleclick\.net|posthog\.com)\//.test(url);
+async function waitForAsset(request,url,marker){
+  for(let i=0;i<60;i++){
+    const response=await request.get(url,{failOnStatusCode:false});
+    if(response.ok()&&(await response.text()).includes(marker))return;
+    await new Promise(resolve=>setTimeout(resolve,5000));
   }
-  throw new Error('Factory production did not deploy the D1 analytics loader');
+  throw new Error(`Updated measurement asset did not deploy: ${url}`);
 }
-
-async function waitForSuguDeploy(request){
-  for(let i=0;i<40;i++){
-    const r=await request.get('https://sugutsucool.pages.dev/assets/analytics-track.js?live-analytics-qa=1',{failOnStatusCode:false});
-    const text=await r.text();
-    if(r.ok()&&text.includes('function send(eventType,extra,opts){return post(payload(eventType,extra)'))return;
-    await new Promise(resolve=>setTimeout(resolve,3000));
-  }
-  throw new Error('Sugu production did not deploy the deduplicated analytics sender');
-}
-
-async function waitForVerificationApi(request){
-  for(let i=0;i<40;i++){
-    const r=await request.get('https://factory-career-site.pages.dev/api/central/verify-sites?hours=168&format=json&live-analytics-qa=1',{failOnStatusCode:false});
-    if(r.ok()){
-      try{
-        const data=await r.json();
-        if(data?.ok&&Array.isArray(data.sites)&&data.sites.some(x=>x.site_key==='factory'))return data;
-      }catch{}
+async function measurementContext(browser,{human=false}={}){
+  const context=await browser.newContext({userAgent:HUMAN_UA});
+  // Human-path simulation is confined to a context with every analytics request blocked.
+  if(human)await context.addInitScript(()=>Object.defineProperty(navigator,'webdriver',{get:()=>false}));
+  const seen=[];
+  await context.route('**/*',async route=>{
+    const req=route.request();
+    if(isAnalytics(req.url())){
+      let body={};try{body=req.postDataJSON()||{};}catch{}
+      const u=new URL(req.url());
+      seen.push({method:req.method(),url:req.url(),endpoint:u.hostname+u.pathname,...body});
+      return route.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});
     }
-    await new Promise(resolve=>setTimeout(resolve,3000));
-  }
-  throw new Error('Five-site verification API did not deploy');
+    if(isTrackingHost(req.url()))return route.abort('blockedbyclient');
+    return route.continue();
+  });
+  return {context,seen};
 }
+const eventName=x=>x.event_name||x.event_type||x.event||'';
 
-test('all five production sites emit access analytics',async({browser,request})=>{
-  await waitForFactoryDeploy(request);
-  await waitForSuguDeploy(request);
+test('normal visitor measurement uses one canonical page-view per store without client duplicate forwarding',async({browser,request})=>{
+  await waitForAsset(request,'https://factory-career-site.pages.dev/assets/analytics.js?qa=1','funnelEvents');
+  await waitForAsset(request,'https://sugutsucool.pages.dev/assets/analytics-track.js?qa=1','__suguAnalyticsLoaded');
   for(const site of sites){
-    const context=await browser.newContext({userAgent:HUMAN_UA});
-    await context.addInitScript(()=>{try{Object.defineProperty(navigator,'webdriver',{get:()=>undefined});}catch{}});
-    const page=await context.newPage();
-    const seen=[];
-    await page.route('**/*',async route=>{
-      const req=route.request();
-      if(isAnalytics(req.url())){seen.push(`${req.method()} ${req.url()}`);return route.abort('blockedbyclient');}
-      return route.continue();
-    });
-    const response=await page.goto(site.url,{waitUntil:'domcontentloaded',timeout:45000});
-    expect(response,`${site.key} homepage did not respond`).toBeTruthy();
-    expect(response.status(),`${site.key} homepage HTTP status`).toBeLessThan(400);
-    await page.waitForTimeout(1800);
-    console.log(`\n[${site.key}] analytics requests`);
-    for(const x of seen)console.log(x);
-    for(const re of site.must)expect(seen.some(x=>re.test(x)),`${site.key} did not emit expected analytics request: ${re}`).toBeTruthy();
-    for(const re of site.mustNot||[])expect(seen.some(x=>re.test(x)),`${site.key} emitted forbidden duplicate analytics request: ${re}`).toBeFalsy();
-    await context.close();
+    const {context,seen}=await measurementContext(browser,{human:true});
+    try{
+      const page=await context.newPage();
+      const response=await page.goto(site.url,{waitUntil:'domcontentloaded',timeout:45000});
+      expect(response?.status(),`${site.key} homepage HTTP`).toBeLessThan(400);
+      await page.waitForTimeout(2000);
+      const views=seen.filter(x=>eventName(x)==='page_view');
+      for(const endpoint of site.must){
+        const matching=views.filter(x=>x.endpoint.endsWith(endpoint));
+        expect(matching.length,`${site.key} canonical page_view at ${endpoint}`).toBe(1);
+        expect(matching[0].method).toBe('POST');
+      }
+      if(site.key==='car-bike'){
+        expect(seen.some(x=>x.endpoint.includes('/api/central/collect')),'car central forwarding is server-side only').toBe(false);
+        const event=views.find(x=>x.endpoint.endsWith('/api/analytics'));
+        expect(event.collectionVersion).toBe('human-filtered-v118');
+        expect(event.eventId).toBeTruthy();expect(event.visitorToken).toBeTruthy();expect(event.sessionToken).toBeTruthy();
+      }
+      for(const event of views){
+        const pagePath=event.page_path||event.path||event.page||'/';
+        expect(pagePath).not.toContain('?');
+        expect(JSON.stringify(event)).not.toMatch(/"(?:email|beta_key|access_key|answers)"\s*:/i);
+      }
+      console.log(`MEASUREMENT_OK ${site.key} canonical_store_views=${views.length}; all telemetry intercepted`);
+    }finally{await context.close();}
   }
 });
 
-test('central D1 has page-view receipt history for all five sites',async({request})=>{
-  const data=await waitForVerificationApi(request);
-  console.log('\n[central receipt verification]');
-  console.log(JSON.stringify(data,null,2));
-  const keys=new Set(data.sites.map(x=>x.site_key));
-  for(const key of ['factory','sugutsucool','car-bike','okazu','clipmade'])expect(keys.has(key),`missing site in verification API: ${key}`).toBeTruthy();
-  for(const row of data.sites)expect(row.status,`${row.site_key} has never written a page_view to D1`).not.toBe('never');
+test('automated QA browsers emit zero revenue telemetry across all five sites',async({browser,request})=>{
+  await waitForAsset(request,'https://factory-career-site.pages.dev/assets/analytics.js?qa=1','funnelEvents');
+  await waitForAsset(request,'https://sugutsucool.pages.dev/assets/analytics-track.js?qa=1','__suguAnalyticsLoaded');
+  for(const site of sites){
+    const {context,seen}=await measurementContext(browser);
+    try{
+      const page=await context.newPage();
+      await page.goto(site.url+'?qa=1',{waitUntil:'domcontentloaded',timeout:45000});
+      await page.waitForTimeout(1500);
+      expect(seen.length,`${site.key} must exclude webdriver and explicit QA`).toBe(0);
+    }finally{await context.close();}
+  }
 });
 
+function assertReceiptContract(data){
+  expect(data.ok).toBe(true);
+  expect(data.note).toMatch(/raw accepted page_view/);
+  expect(new Set(data.sites.map(row=>row.site_key))).toEqual(new Set(sites.map(site=>site.key)));
+  for(const row of data.sites){
+    expect(Number.isInteger(row.page_views)).toBe(true);expect(row.page_views).toBeGreaterThanOrEqual(0);
+    const expected=row.page_views>0?'recent':row.last_page_view?'stale':'never';
+    expect(row.status,`${row.site_key}: status must reflect observed receipts`).toBe(expected);
+  }
+}
+test('central receipt API labels raw and unavailable data without requiring fabricated traffic',async({request})=>{
+  const response=await request.get('https://factory-career-site.pages.dev/api/central/verify-sites?hours=168&format=json&qa=1');
+  expect(response.ok()).toBe(true);
+  const data=await response.json();assertReceiptContract(data);
+  console.log('Receipt statuses:',data.sites.map(row=>`${row.site_key}:${row.status}`).join(', '));
+});
+test('central receipt contract preserves never and stale when no new visitors exist',async()=>{
+  const source=fs.readFileSync(path.resolve(__dirname,'../functions/api/central/verify-sites.js'),'utf8');
+  const {onRequestGet}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+  const db={prepare:()=>({bind(){return this;},all:async()=>({results:[]}),first:async()=>({})})};
+  const response=await onRequestGet({request:new Request('https://example.invalid/api/central/verify-sites?format=json'),env:{ANALYTICS_DB:db}});
+  const data=await response.json();assertReceiptContract(data);
+  for(const row of data.sites)expect(row.status).toBe('never');
+  assertReceiptContract({...data,sites:data.sites.map(row=>({...row,last_page_view:'2026-01-01 00:00:00',status:'stale'}))});
+});
 
 function extractLocs(xml){return [...String(xml||'').matchAll(/<loc>([^<]+)<\/loc>/gi)].map(m=>m[1].trim())}
 function metaRobots(html){const s=String(html||'');const m=s.match(/<meta[^>]+name=["']robots["'][^>]+content=["']([^"']+)["'][^>]*>|<meta[^>]+content=["']([^"']+)["'][^>]+name=["']robots["'][^>]*>/i);return (m?.[1]||m?.[2]||'').toLowerCase()}

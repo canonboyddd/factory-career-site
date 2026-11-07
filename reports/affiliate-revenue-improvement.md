@@ -38,6 +38,8 @@
 - `qa/affiliate-revenue.spec.cjs`：通信を遮断した行動回帰と前後画像。
 - `qa/factory-seo-core.spec.cjs`：CRLFをLFに正規化。Windowsの改行差で既存_headers規則が見つからない偽失敗の原因を修正し、検査条件は維持。
 - `.github/workflows/analytics-production-smoke.yml`：既存Pages反映待ち・回帰・安全な本番除外確認・証拠保存。
+- `qa/live-site-behavior.cjs`：従来の実画面QAにも中央計測とASPピクセルの遮断を追加（`1d34c3c`）。
+- `qa/all-site-analytics-live.spec.cjs`：5サイトの新経路を検証。通常訪問の模倣とbot/QA除外を分け、各ストアのPVが1件であること、車の中央転送がサーバーのみであること、中央の未取得状態を正しく扱うことを検査。SEOの既存検査は維持。
 
 実装コミット：`e533cf75da7dbce459fe191276df324a72c7de1d` — `Improve factory diagnosis intent matching and trustworthy revenue measurement`。この行の追記は実装後の監査記録コミット。
 
