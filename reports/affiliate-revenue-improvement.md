@@ -152,6 +152,8 @@ GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages
 
 ## 10. 残る作業・ブロッカー
 
+最終追記: GitHub Actions「All-site analytics live QA」run `42394589768` attempt2が2026-11-08 02:50 JSTにsuccess。更新前のおかずサイトの2PVで失敗した同一CIを、全サイト反映後に元の検査条件・全URL対象のまま再実行した。ローカル全5テスト合格とCI成功がそろった。`reports/affiliate-revenue-qa/github-final-run.json`参照。追加の広範囲再試験は不要。
+
 1. 5サイト計測・SEO QAは完了。車 `/feedback` の不一致も修正・本番検証済み。工場の最終ヘルス表示修正も反映済み。実トークンを用いた管理画面確認だけは未取得。
 2. ASP側の最新提携承認・リンク有効性・掲載条件を管理画面で照合する必要がある。URL未設定のマジキャリは表示しない。
 3. ASP成果CSV／確定報酬とGSC実データのインポート後に成果の帰属期間・取消・確定を照合する。
