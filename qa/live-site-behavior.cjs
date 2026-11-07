@@ -29,7 +29,8 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
         if(u.origin===BASE && r.status()>=400 && !u.pathname.startsWith('/api/analytics/collect')) badSameOrigin.push(`${r.status()} ${u.pathname}`);
       }catch{}
     });
-    await page.route('**/api/analytics/collect',route=>route.fulfill({status:204,body:''}));
+    await page.route(/\/api\/(?:analytics(?:\/collect)?|central\/collect|ops-collect)(?:[/?]|$)/,route=>route.fulfill({status:204,body:''}));
+    await page.route(/https:\/\/[^/]*(?:a8\.net|accesstrade\.net|affiliate-b\.com|afi-b\.com)\//,route=>route.abort());
     await page.route('https://www.google-analytics.com/**',route=>route.fulfill({status:204,body:''})).catch(()=>{});
     return {pageErrors,badSameOrigin};
   }
