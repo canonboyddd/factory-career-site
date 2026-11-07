@@ -101,9 +101,26 @@ GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages
 
 最終ヘルス表示修正も `43d95ba1e6c604c72b2aa7c87e0abad5c361cc73` までGitHub mainへ反映済み。Cloudflare Pages `982994f8-fac5-41a2-903a-b5489f0b78e6` が成功し、`ops-health.js`／`ops-dashboard.js`／`ops-intelligence.js`／`ops-dashboard.html` がHTTP200・検証済み本文と一致、固定の過去QA成功表現なしを確認した（`dashboard-production-source.json`）。待ち状態ではない。
 
-`863c9c3` のコードチェックでは工場のPages／Ops syntax／public-copy／production-behavior／Integrity／analytics-smokeは成功。全サイトlive QAだけは更新途中のおかずサイトのPV二重送信と、新しい車本番で `/feedback` がsitemap掲載なのにnoindexである不一致を検出した（`github-checks-863.json`）。後者は車担当へ修正を依頼し、テストを緩和していない。両サイトの反映完了後に全5サイトの最終確認が必要。
+`863c9c3` のコードチェックでは工場のPages／Ops syntax／public-copy／production-behavior／Integrity／analytics-smokeは成功。全サイトlive QAだけは更新途中のおかずサイトのPV二重送信と、新しい車本番で `/feedback` がsitemap掲載なのにnoindexである不一致を検出した（`github-checks-863.json`）。後者は車担当へ修正を依頼した。当該2点の解消は後述の全5サイト最終検証で確認した。
 
-車の不一致は `4466928` で修正され、Cloudflare Pages `7eafd93f-b3b3-4d20-8f2f-f7a4821463eb` の成功後に統合QAから再検証した。sitemap全428URLとホーム15リンクで、直接200・noindexなし・canonical一致・重複なしを確認し、1テスト成功（6.1秒）。`car-seo-after-feedback.json` を参照。車のブロッカーは解消した。5サイト最終計測はおかずサイト反映後に確認する。
+車の不一致は `4466928` で修正され、Cloudflare Pages `7eafd93f-b3b3-4d20-8f2f-f7a4821463eb` の成功後に統合QAから再検証した。sitemap全428URLとホーム15リンクで、直接200・noindexなし・canonical一致・重複なしを確認し、1テスト成功（6.1秒）。`car-seo-after-feedback.json` を参照。車のブロッカーは解消し、その後のおかず更新も含む最終結果は次項の通り。
+
+### 5サイト最終検証：完了
+
+2026-11-08 02:19 JST開始、683.331秒で全5テスト成功、失敗・skip・flakyは0。おかずサイトの更新反映後に、対象を絞らない既定の全5サイト検査を実行した。`five-site-final-playwright.json` は実行結果、`five-site-final-summary.json` はそのstdoutから抽出した対象数。ローカル端末の絶対パスだけを正規化しており、判定結果は変更していない。
+
+| サイト | sitemap実HTTP検査URL数 | ホーム内部リンク数 |
+| --- | ---: | ---: |
+| 工場キャリア診断 | 99 | 35 |
+| SuguTsucool | 260 | 49 |
+| 車・バイク維持費 | 428 | 15 |
+| おかずよりどりみどり | 15,954 | 47 |
+| ClipMade | 46 | 9 |
+| 合計 | 16,787 | 155 |
+
+全sitemap URLで直接HTTP200・noindexなし・canonical一致・重複URLなしを確認。各サイトの正本ストアへのPVは1回（工場・Suguは用途の異なる2ストアに各1回）、車のクライアント中央直送0、全5サイトでbot/明示QAの収益計測送信0、中央のraw／未取得／古いデータの契約も通過した。全collectorとASP通信を遮断し、年齢確認の送信・申込み・購入は行っていない。
+
+最終実行は元の15分以内で完走したため、実行時間枠とHTTP同時数8を維持した。条件の緩和、URLの間引き、テストの削除はしていない。
 
 ## 8. 実測値と未取得データ
 
@@ -135,7 +152,7 @@ GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages
 
 ## 10. 残る作業・ブロッカー
 
-1. おかずサイト更新後の5サイト計測・SEO QA。車 `/feedback` の不一致は修正・本番検証済み。工場の最終ヘルス表示修正も反映済み。実トークンを用いた管理画面確認は未取得。
+1. 5サイト計測・SEO QAは完了。車 `/feedback` の不一致も修正・本番検証済み。工場の最終ヘルス表示修正も反映済み。実トークンを用いた管理画面確認だけは未取得。
 2. ASP側の最新提携承認・リンク有効性・掲載条件を管理画面で照合する必要がある。URL未設定のマジキャリは表示しない。
 3. ASP成果CSV／確定報酬とGSC実データのインポート後に成果の帰属期間・取消・確定を照合する。
 4. 新定義で有効な表示・クリック標本が貯まるまで、CTR改善・申込増加・増収は未検証。
