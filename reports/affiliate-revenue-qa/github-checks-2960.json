@@ -1,0 +1,77 @@
+{
+  "commit": "2960b3bfeee2adc2396efd95a22282cf29c65160",
+  "checks": [
+    {
+      "name": "Cloudflare Pages",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/runs/128462019149",
+      "started_at": "2026-11-07T16:37:30Z",
+      "completed_at": "2026-11-07T16:37:30Z"
+    },
+    {
+      "name": "live-analytics",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42392208122/job/128461948444",
+      "started_at": "2026-11-07T16:37:15Z",
+      "completed_at": "2026-11-07T16:47:00Z"
+    },
+    {
+      "name": "analytics-smoke",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42392208145/job/128461948415",
+      "started_at": "2026-11-07T16:37:15Z",
+      "completed_at": "2026-11-07T16:37:42Z"
+    },
+    {
+      "name": "seo-core",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42392208210/job/128461948365",
+      "started_at": "2026-11-07T16:37:15Z",
+      "completed_at": "2026-11-07T16:37:24Z"
+    },
+    {
+      "name": "production-behavior",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42392208133/job/128461948330",
+      "started_at": "2026-11-07T16:37:15Z",
+      "completed_at": "2026-11-07T16:37:24Z"
+    },
+    {
+      "name": "audit-public-copy",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42392208141/job/128461948303",
+      "started_at": "2026-11-07T16:37:15Z",
+      "completed_at": "2026-11-07T16:37:24Z"
+    },
+    {
+      "name": "audit",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42392208130/job/128461948157",
+      "started_at": "2026-11-07T16:37:15Z",
+      "completed_at": "2026-11-07T16:37:23Z"
+    },
+    {
+      "name": "production-headers",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42392208110/job/128461948127",
+      "started_at": "2026-11-07T16:37:15Z",
+      "completed_at": "2026-11-07T16:37:22Z"
+    },
+    {
+      "name": "quality-focus",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42392208105/job/128461947805",
+      "started_at": "2026-11-07T16:37:15Z",
+      "completed_at": "2026-11-07T16:37:19Z"
+    }
+  ]
+}

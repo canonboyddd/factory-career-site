@@ -1,0 +1,68 @@
+{
+  "url": "https://factory-career-site.pages.dev",
+  "verified_at": "2026-11-07T16:42:36.626Z",
+  "assets": [
+    {
+      "path": "assets/analytics.js",
+      "status": 200,
+      "sha256": "5d72e9d89e64c3b32dedf702272d05648e9817d64ee1cdb61d5a9a23b0f6c460",
+      "matches_source": true
+    },
+    {
+      "path": "assets/diagnosis.js",
+      "status": 200,
+      "sha256": "579a41d7dcc6903d7b29e8b6dd3b8724b42bca7ac43e8868d9481a97ccbf0082",
+      "matches_source": true
+    },
+    {
+      "path": "assets/main.js",
+      "status": 200,
+      "sha256": "8e0eabd40ce2648df770fab68be09459601a8fac3cb6afc3cd48f19dfc8d736e",
+      "matches_source": true
+    },
+    {
+      "path": "assets/central-tracker.js",
+      "status": 200,
+      "sha256": "7c01eeab1416b71b05207fac211cd5c6a2c7b73130971008a398783ddf7b77fc",
+      "matches_source": true
+    }
+  ],
+  "server_qa_excluded": true,
+  "responses": [
+    {
+      "width": 375,
+      "path": "/diagnosis",
+      "status": 200
+    },
+    {
+      "width": 375,
+      "path": "/articles/manufacturing-agent-guide",
+      "status": 200
+    },
+    {
+      "width": 768,
+      "path": "/diagnosis",
+      "status": 200
+    },
+    {
+      "width": 768,
+      "path": "/articles/manufacturing-agent-guide",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/diagnosis",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/articles/manufacturing-agent-guide",
+      "status": 200
+    }
+  ],
+  "js_errors": [],
+  "broken_same_origin": [],
+  "attempted_posts_or_collectors": [],
+  "production_writes": 0,
+  "external_asp_requests_allowed": 0
+}

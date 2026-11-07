@@ -43,6 +43,10 @@
 
 実装コミット：`e533cf75da7dbce459fe191276df324a72c7de1d` — `Improve factory diagnosis intent matching and trustworthy revenue measurement`。この行の追記は実装後の監査記録コミット。
 
+追加修正：`07ddf51dba31eefc13a0aa842f48aa510d449a45` はCI環境と本番QA、`048df3716ed7b10faedf7c61b322c0eebd5d08b8` は未取得報酬の表示と工場イベント重複集計を修正した。後者は `functions/api/admin/{central-dashboard,ops-intelligence,ops-revenue}.js`、`functions/shared/ops-analytics-contract.js`、`assets/{ops-dashboard,ops-intelligence,admin-revenue}.js`、`ops-dashboard.html` と回帰QAを含む。
+
+未取得ASPの0円表示をなくし、取込分のみの値であることを明示した。PV/CTRは「既知の巡回を除外した観測値」であり、人間の訪問の保証ではないと画面に記載した。2026-09-28の固定runner失敗表示は現在の状態と誤認されるため、最新Actions履歴を開く案内に置き換えた。案件一覧は車以外の実際に観測した案件も保持する。
+
 `assets/config.js`、案件URL・ID、sitemap、既存記事データ、診断採点、D1の既存データは変更していない。
 
 ## 4. 成果発生につながる理由
@@ -71,7 +75,9 @@
 
 検証内容：7問の進行／未選択の次へ抑止／開始・完了・結果各1件／回答値非送信／動的CTAの実可視表示／主ボタン・中ボタンを各1件／スクリプトclickを除外／安定した文言A/B／情報収集と継続の分岐／未設定案件非表示／比較から個別紹介への遷移／年収計算／職務経歴書作成／bot・運営者・QA除外／DB書込前フィルター。
 
-既存QA：`node qa/full-site-integrity.cjs`（163 HTML・67 JS/CJS/MJS、警告0）、`node qa/factory-seo-core.spec.cjs`、`node qa/analytics-consistency.spec.cjs`、`node --test qa/central-index-budget.test.mjs`（2テスト）。実行結果は `reports/affiliate-revenue-qa/results.json` とコミット前の検証ログ参照。
+既存QA：`node qa/full-site-integrity.cjs`（最終追加QA込み163 HTML・69 JS/CJS/MJS、警告0）、`node qa/factory-seo-core.spec.cjs`、`node qa/ops-dashboard-contract.spec.cjs`、`node qa/analytics-consistency.spec.cjs`、`node --test qa/central-index-budget.test.mjs`（2テスト）。実行結果は `reports/affiliate-revenue-qa/results.json` とコミット前の検証ログ参照。
+
+追加 `qa/dashboard-revenue-state.cjs` は、実際のAPIが発行するSQLをSQLiteで実行し、「旧工場1PV＋同じ新訪問の独自1PV＋中央1PV」が2PVとなることを検証した。ASP実績行なしのAPI・画面が0円でなく未取得となることも通信遮断したfixtureで検証済み。`dashboard-fixture-unavailable.jpg` は**架空データを用いたローカルQA画面**であり、本番の実績画面ではない。
 
 画面は375px／768px／1440px。診断と比較記事で横はみ出しを確認し、修正後はなし。ブラウザーJavaScriptエラー0。実ASP申込・購入0、実計測へのQA書込0。
 
@@ -79,7 +85,13 @@
 
 開始時の本番 `/diagnosis?qa=1` はHTTP 200（2026-11-08、HTMLのみ取得・実行せず）。配布先は既存の `factory-career-site.pages.dev`。
 
-ローカルQA完了時点ではmainへ未push。親作業で差分レビュー後にGitHub mainへ反映し、既存Cloudflare Pages自動デプロイを待ち、本節へデプロイID・対象SHA・更新JSの一致・bot/QA除外応答・本番画面結果を追記する。Cloudflareへの別経路での上書きデプロイは行わない。
+GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages自動デプロイ成功をAPIとGitHub checkで確認した。デプロイID：`6ff54507-3535-4bf9-9955-45218b38551d`。成功時刻：2026-11-08 01:37:30 JST。別経路での上書きデプロイは行っていない。
+
+2026-11-08 01:42 JSTの本番QA：`analytics.js`／`diagnosis.js`／`main.js`／`central-tracker.js` はローカル検証済みソースと本文一致（SHA256は `production-results.json`）。375／768／1440pxで広告あり・なしの診断結果、比較記事、年収計算、職務経歴書作成を検証。JavaScriptエラー0、同一originの404/500等0、計測POST試行0。全ASP通信と全POSTはブラウザーで遮断している。唯一のcollector応答確認は `x-analytics-test: 1` を付け、DB書込前に `excluded:true` となることを確認した。
+
+`qa/live-site-behavior.cjs` でも本番99ページと内部106リンクを検査し、警告0・失敗0。`production-*.jpg` 9枚と `production-results.json` を保存した。
+
+初回GitHub ActionsではSEO core、Full Site Integrity、production headers、search qualityの成功を確認。既存のブラウザー2ジョブはUbuntu最新イメージが26.04へ変更されPlaywright 1.55が起動前に失敗した。analytics smokeは`curl | grep -q`のパイプ早期終了によるcurl exit23だった。`07ddf51`でUbuntu24.04固定と本文完全取得後の検査に修正し、テスト条件は維持した。追加ダッシュボード修正・CI修正の最終反映結果は下記追記欄で確認する。
 
 ## 8. 実測値と未取得データ
 
@@ -100,6 +112,7 @@
 ## 9. 今後の検証条件・計測仕様
 
 - 共通分析は中央 `central_events` を使用。工場独自 `analytics_events` は互換・診断調査用の補助ストアであり、中央の数値と足し合わせない。同じ操作が両方に1件ずつあるのは別用途の保存であり、合算用ではない。
+- 既存ダッシュボードの工場履歴は、最初の中央計測デプロイ時刻 `2026-11-07 16:37:30 UTC` より前の独自履歴と、その後の中央イベントを使用する。同じ新訪問の鏡像イベントをUNIONで二重加算しない。原データは削除しない。古いキャッシュの計測や新旧定義の境界を含む期間には欠測・定義差があり、前期間比を増加実績とみなさない。
 - 中央の `page_view`、`affiliate_impression`、`affiliate_click`、`diagnosis_start`、`diagnosis_complete`、`diagnosis_result_view` を分離する。案件・ASP・位置・文言群・端末・日付・匿名ブラウザー／セッションで集計する。
 - 表示はCTAが50%以上見える状態を1秒継続したもの。ページ内の同じ案件・位置・文言群は最大1表示。動的追加にも対応。クリックは信頼できるclick／auxclickのみ。再訪や別の意図したクリックは個別の操作として扱う。
 - 表示セッションは`COUNT(DISTINCT session_id)`を表示イベントで数える。クリックセッションはクリックイベントで別に数える。クリック数÷可視表示数と、クリックセッション÷CTA到達セッションを区別し、PVをCTRの分母にしない。
@@ -110,7 +123,7 @@
 
 ## 10. 残る作業・ブロッカー
 
-1. GitHub main反映後のCloudflare Pagesデプロイと本番QA結果の追記。
+1. `07ddf51`／`048df37` の追加修正をmainへ反映した後のCI・ダッシュボードQA結果の追記。5サイト全体のQAは他サイトの反映完了後に確認する。
 2. ASP側の最新提携承認・リンク有効性・掲載条件を管理画面で照合する必要がある。URL未設定のマジキャリは表示しない。
 3. ASP成果CSV／確定報酬とGSC実データのインポート後に成果の帰属期間・取消・確定を照合する。
 4. 新定義で有効な表示・クリック標本が貯まるまで、CTR改善・申込増加・増収は未検証。
