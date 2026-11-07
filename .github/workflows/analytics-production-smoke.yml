@@ -14,6 +14,11 @@ on:
       - 'functions/api/analytics/collect.js'
       - 'qa/affiliate-revenue.spec.cjs'
       - 'qa/affiliate-production.cjs'
+      - 'qa/dashboard-revenue-state.cjs'
+      - 'assets/ops-dashboard.js'
+      - 'assets/ops-intelligence.js'
+      - 'functions/api/admin/ops-intelligence.js'
+      - 'functions/api/admin/ops-revenue.js'
   workflow_dispatch:
 
 permissions:
@@ -60,6 +65,9 @@ jobs:
 
       - name: Run offline revenue funnel regression
         run: node qa/affiliate-revenue.spec.cjs
+
+      - name: Verify unavailable revenue and factory deduplication
+        run: node qa/dashboard-revenue-state.cjs
 
       - name: Verify automated production visits are excluded
         shell: bash

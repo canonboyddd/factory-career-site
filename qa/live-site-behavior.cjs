@@ -1,4 +1,4 @@
-const { chromium } = require('playwright');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 
 const BASE='https://factory-career-site.pages.dev';
 const EXTRA=['/','/diagnosis','/tools/','/tools/salary-compare','/tools/job-offer-score','/tools/resume-draft','/factory-items','/about','/privacy','/disclaimer','/editorial-policy','/sources','/site-map'];
@@ -7,7 +7,7 @@ const cleanPath=p=>{let x=p.replace(/\/index\.html$/i,'/').replace(/\.html$/i,''
 
 (async()=>{
   const failures=[]; const warnings=[]; const internalLinks=new Set();
-  const browser=await chromium.launch({headless:true});
+  const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE}:{})});
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true});
   const request=context.request;
 

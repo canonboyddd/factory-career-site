@@ -37,7 +37,7 @@
     return data;
   }
 
-  function renderActualSummary(items) {
+  function renderActualSummary(items, available=false) {
     const target=$('actualRevenueMetricGrid');
     if(!target) return;
     const totals=(items||[]).reduce((a,x)=>{
@@ -55,13 +55,13 @@
       ['売上金額',yen(totals.sales),'ASPレポート取込分'],
       ['取消・否認報酬',yen(totals.cancelledReward),'成果状態が取消/否認']
     ];
-    target.innerHTML=cards.map(([label,value,note])=>`<div class="actual-metric"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(note)}</small></div>`).join('');
+    target.innerHTML=cards.map(([label,value,note])=>`<div class="actual-metric"><span>${esc(label)}</span><strong>${available?esc(value):'未取得'}</strong><small>${available?esc(note):'ASP実績行未取得'}</small></div>`).join('');
   }
 
   function renderActualProviders(items) {
     const body=$('actualProviderBody');
     if(!body) return;
-    body.innerHTML=(items||[]).map(x=>`<tr>
+    body.innerHTML=(items||[]).map(x=>Number(x.generated_count||0)+Number(x.confirmed_count||0)===0?`<tr><td>${esc(providerLabels[x.provider]||x.provider)}</td><td colspan="6">未取得（当該期間の実績行なし）</td></tr>`:`<tr>
       <td><strong>${esc(providerLabels[x.provider]||x.provider)}</strong></td>
       <td>${fmt(x.generated_count)}</td><td>${yen(x.generated_reward)}</td>
       <td>${fmt(x.confirmed_count)}</td><td class="good">${yen(x.confirmed_reward)}</td>
@@ -193,7 +193,7 @@
     try {
       const data=await api(currentDays());
       if(request!==lastRequest || !data) return;
-      renderActualSummary(data.actual_providers||[]);
+      renderActualSummary(data.actual_providers||[],(data.actual_programs||[]).length>0||(data.actual_daily||[]).length>0);
       renderActualProviders(data.actual_providers||[]);
       renderActualPrograms(data.actual_programs||[]);
       renderActualDaily(data.actual_daily||[]);

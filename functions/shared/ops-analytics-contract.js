@@ -14,3 +14,6 @@ HAVING COUNT(*)>=2000
  AND COUNT(DISTINCT browser_id)>=COUNT(*)*0.98
  AND COUNT(DISTINCT session_id)>=COUNT(*)*0.98
  AND COUNT(DISTINCT page_path)>=300`;
+
+// First deployment with canonical factory central events; retain older local history only.
+export const FACTORY_CENTRAL_SINCE='2026-11-07 16:37:30';

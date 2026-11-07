@@ -1,4 +1,4 @@
-import {CENTRAL_CLICK_SQL,VEHICLE_CLICK_EVENTS,PROBE_PATHS,SUSPICIOUS_BROWSER_SQL,SUSPICIOUS_BURST_SQL} from '../../shared/ops-analytics-contract.js';
+import {CENTRAL_CLICK_SQL,VEHICLE_CLICK_EVENTS,PROBE_PATHS,SUSPICIOUS_BROWSER_SQL,SUSPICIOUS_BURST_SQL,FACTORY_CENTRAL_SINCE} from '../../shared/ops-analytics-contract.js';
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});}
 function auth(request,env){const x=request.headers.get('authorization')||'';return Boolean(env.ADMIN_TOKEN&&x===`Bearer ${env.ADMIN_TOKEN}`);}
 function rows(x){return x?.results||[];}
@@ -52,7 +52,7 @@ export async function onRequestGet({request,env}){
       ON b.site_key=c.site_key AND b.browser_id=c.browser_id AND b.day=date(c.occurred_at,'+9 hours')
     LEFT JOIN (${burst}) burst ON burst.site_key=c.site_key AND burst.day=date(c.occurred_at,'+9 hours')
     WHERE b.browser_id IS NULL AND burst.day IS NULL ${carClause} AND NOT ${probeSql('c')}`;
-  const union=`SELECT 'factory' site_key,event_name,browser_id,session_id,page_path,page_title,occurred_at,program,placement,device_type FROM analytics_events
+  const union=`SELECT 'factory' site_key,event_name,browser_id,session_id,page_path,page_title,occurred_at,program,placement,device_type FROM analytics_events WHERE occurred_at<'${FACTORY_CENTRAL_SINCE}'
     UNION ALL
     SELECT site_key,event_name,browser_id,session_id,page_path,page_title,occurred_at,program,placement,device_type FROM (${centralClean})`;
 

@@ -83,5 +83,7 @@ export async function onRequestGet({request,env}){
     FROM affiliate_results GROUP BY provider,COALESCE(NULLIF(site_name,''),'未判定')
     HAVING generated_count>0 ORDER BY confirmed_reward DESC,generated_reward DESC LIMIT 100`,[modifier]);
   const imports=await q(`SELECT import_id,provider,file_name,row_count,imported_at FROM affiliate_imports ORDER BY imported_at DESC LIMIT 20`);
-  return json({ok:true,days,generated_at:new Date().toISOString(),totals:totals||{},providers:rows(providers),programs:rows(programs),sites:rows(sites),imports:rows(imports)});
+  const revenueSources=rows(await db.prepare('SELECT provider,COUNT(*) imported_result_rows FROM affiliate_results GROUP BY provider').all());
+  const revenue_data_status={available:revenueSources.some(x=>Number(x.imported_result_rows)>0),scope:'imported_rows_only',providers:revenueSources};
+  return json({ok:true,days,revenue_data_status,generated_at:new Date().toISOString(),totals:totals||{},providers:rows(providers),programs:rows(programs),sites:rows(sites),imports:rows(imports)});
 }

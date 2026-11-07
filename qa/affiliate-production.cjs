@@ -42,12 +42,14 @@ async function main(){
       assert.equal(await page.locator('#resultBox.active').count(),1);
       assert.equal(await page.locator('#prBox').isVisible(),false); // first intent is research
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+      await page.waitForTimeout(500);await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
       await page.screenshot({path:path.join(out,`production-diagnosis-${width}.jpg`),type:'jpeg',quality:80,fullPage:true});
       await page.goto(base+'/diagnosis?qa=1');
       const answers={job:'production-tech',experience:'3-5',income:'400',night:'some',overtime:'ok',change:'salary',intent:'open'};
       for(const[key,value]of Object.entries(answers)){await page.locator(`.question[data-key="${key}"] .choice[data-value="${value}"]`).click();await page.locator('#nextBtn').click();}
       assert.equal(await page.locator('#prBox [data-affiliate-link]').count(),2);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+      await page.waitForTimeout(500);await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
       await page.screenshot({path:path.join(out,`production-diagnosis-offers-${width}.jpg`),type:'jpeg',quality:80,fullPage:true});
       response=await page.goto(base+'/articles/manufacturing-agent-guide?qa=1');responses.push({width,path:'/articles/manufacturing-agent-guide',status:response.status()});
       await page.waitForTimeout(700);
