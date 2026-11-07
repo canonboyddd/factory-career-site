@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   audit-public-copy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -91,7 +91,8 @@ jobs:
 
             async function auditUrl(url) {
               const page = await context.newPage();
-              await page.route('**/api/analytics/collect', route => route.abort());
+              await page.route(/\/api\/(?:analytics(?:\/collect)?|central\/collect|ops-collect)(?:[/?]|$)/, route => route.abort());
+              await page.route(/https:\/\/[^/]*(?:a8\.net|accesstrade\.net|affiliate-b\.com|afi-b\.com)\//, route => route.abort());
               try {
                 const res = await page.goto(url, {waitUntil:'domcontentloaded', timeout:25000});
                 if (!res || res.status() >= 400) {

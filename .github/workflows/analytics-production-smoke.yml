@@ -13,6 +13,7 @@ on:
       - 'assets/rakuten-products.js'
       - 'functions/api/analytics/collect.js'
       - 'qa/affiliate-revenue.spec.cjs'
+      - 'qa/affiliate-production.cjs'
   workflow_dispatch:
 
 permissions:
@@ -20,7 +21,7 @@ permissions:
 
 jobs:
   analytics-smoke:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -32,7 +33,7 @@ jobs:
         shell: bash
         run: |
           for attempt in $(seq 1 30); do
-            if curl -fsSL 'https://factory-career-site.pages.dev/assets/analytics.js' | grep -q 'diagnosis_result_view'; then exit 0; fi
+            if curl -fsSL 'https://factory-career-site.pages.dev/assets/analytics.js' -o /tmp/factory-analytics.js && grep -q 'diagnosis_result_view' /tmp/factory-analytics.js; then exit 0; fi
             sleep 10
           done
           echo 'Updated analytics asset did not reach production in five minutes.'
@@ -43,9 +44,12 @@ jobs:
         run: |
           set -euo pipefail
           BASE='https://factory-career-site.pages.dev'
-          curl -fsSL "$BASE/" | grep -q 'assets/main.js'
-          curl -fsSL "$BASE/assets/main.js" | grep -q 'assets/analytics.js'
-          curl -fsSL "$BASE/assets/analytics.js" | grep -q "collect('page_view'"
+          curl -fsSL "$BASE/" -o /tmp/factory-home.html
+          curl -fsSL "$BASE/assets/main.js" -o /tmp/factory-main.js
+          curl -fsSL "$BASE/assets/analytics.js" -o /tmp/factory-analytics.js
+          grep -q 'assets/main.js' /tmp/factory-home.html
+          grep -q 'assets/analytics.js' /tmp/factory-main.js
+          grep -q "collect('page_view'" /tmp/factory-analytics.js
           echo 'Production analytics assets are present.'
 
       - name: Install Playwright
@@ -92,6 +96,9 @@ jobs:
           RESPONSE=$(curl -fsS -X POST 'https://factory-career-site.pages.dev/api/analytics/collect' -H 'content-type: application/json' -H 'x-analytics-test: 1' --data '{}')
           echo "$RESPONSE" | grep -q '"excluded":true'
           echo 'Production collector excluded QA before database writes.'
+
+      - name: Verify deployed revenue paths and responsive screens
+        run: node qa/affiliate-production.cjs
 
       - name: Preserve revenue QA evidence
         if: always()
