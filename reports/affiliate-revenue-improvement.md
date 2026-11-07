@@ -45,6 +45,8 @@
 
 追加修正：`07ddf51dba31eefc13a0aa842f48aa510d449a45` はCI環境と本番QA、`048df3716ed7b10faedf7c61b322c0eebd5d08b8` は未取得報酬の表示と工場イベント重複集計を修正した。後者は `functions/api/admin/{central-dashboard,ops-intelligence,ops-revenue}.js`、`functions/shared/ops-analytics-contract.js`、`assets/{ops-dashboard,ops-intelligence,admin-revenue}.js`、`ops-dashboard.html` と回帰QAを含む。
 
+`863c9c3887127d9656057969e06c05ec59d254a5` では、動的 `assets/ops-health.js` にも残っていた固定の「20 / 20 PASS」等を撤去し、最新GitHub実行結果は未取得と明示した。`functions/api/admin/production-health.js` は車の新しい `/analytics.js` の単一POST設計を確認し、廃止されたクライアント中央送信を必須としない。古いdeploy-markerはバージョン証明として扱わない。新旧クライアントを混同しないfixtureも追加した。
+
 未取得ASPの0円表示をなくし、取込分のみの値であることを明示した。PV/CTRは「既知の巡回を除外した観測値」であり、人間の訪問の保証ではないと画面に記載した。2026-09-28の固定runner失敗表示は現在の状態と誤認されるため、最新Actions履歴を開く案内に置き換えた。案件一覧は車以外の実際に観測した案件も保持する。
 
 `assets/config.js`、案件URL・ID、sitemap、既存記事データ、診断採点、D1の既存データは変更していない。
@@ -93,6 +95,10 @@ GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages
 
 初回GitHub ActionsではSEO core、Full Site Integrity、production headers、search qualityの成功を確認。既存のブラウザー2ジョブはUbuntu最新イメージが26.04へ変更されPlaywright 1.55が起動前に失敗した。analytics smokeは`curl | grep -q`のパイプ早期終了によるcurl exit23だった。`07ddf51`でUbuntu24.04固定と本文完全取得後の検査に修正し、テスト条件は維持した。追加ダッシュボード修正・CI修正の最終反映結果は下記追記欄で確認する。
 
+追加反映：main `a27b893dd3cdaf6ab20702d39e17693a4c4811f4`、Cloudflare Pages `782c21f3-73da-4784-a2d0-f633673ae6eb` が成功。GitHubの全7チェック（Pages、analytics-smoke、production-behavior、public-copy、Ops syntax、2つのaudit）も全成功。証拠：`github-checks-a27.json`。未認証で管理API3本（中央ダッシュボード／収益／intelligence）を読み、いずれも401を確認した。実管理トークンを使った本番画面は取得していない。
+
+4サイト先行計測QA：factory／SuguTsucool／車・バイク／ClipMadeで4テスト全成功（20.2秒）。各ストアのPVは1回、車のクライアント中央送信0、webdriver＋明示QAの送信0、中央のraw／未取得／古いデータ表示の契約を確認。すべての計測とASP通信は遮断。`four-site-measurement.json` に記録した。おかずサイトは当該実行時に本番スナップショット更新中のため対象外であり、5サイト完了とは報告していない。初回CIの全5サイトSEO検査自体は通過した。
+
 ## 8. 実測値と未取得データ
 
 2026-11-08の読み取り専用DB確認、過去30日、既存データの生集計：
@@ -123,7 +129,7 @@ GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages
 
 ## 10. 残る作業・ブロッカー
 
-1. `07ddf51`／`048df37` の追加修正をmainへ反映した後のCI・ダッシュボードQA結果の追記。5サイト全体のQAは他サイトの反映完了後に確認する。
+1. `863c9c3` のヘルス表示修正の最終反映確認と、おかずサイト反映後の5サイト計測QA。実トークンを用いた管理画面確認は未取得。
 2. ASP側の最新提携承認・リンク有効性・掲載条件を管理画面で照合する必要がある。URL未設定のマジキャリは表示しない。
 3. ASP成果CSV／確定報酬とGSC実データのインポート後に成果の帰属期間・取消・確定を照合する。
 4. 新定義で有効な表示・クリック標本が貯まるまで、CTR改善・申込増加・増収は未検証。
