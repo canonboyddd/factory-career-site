@@ -3,7 +3,8 @@
   const programs=cfg.affiliatePrograms||{};
   const page=window.location.pathname.split('/').pop()||'';
   const priority=cfg.articleProgramPriority?.[page]||[];
-  const availablePriority=priority.filter(key=>String(programs[key]?.url||'').trim());
+  const resignationPage=/^(?:resignation-support|zen-review)(?:\.html)?$/.test(page);
+  const availablePriority=priority.filter(key=>(key!=='zen'||resignationPage)&&/^https:\/\//.test(String(programs[key]?.url||'').trim()));
 
   const labels={
     makersJob:{type:'メーカー・製造業転職',desc:'製造業の経験を活かしながら、条件の違う求人を比較したい人向け。'},
@@ -43,7 +44,7 @@
       const key=card.dataset.programCard;
       const program=programs[key]||{};
       const url=String(program.url||'').trim();
-      if(!url){card.hidden=true;return;}
+      if(!/^https:\/\//.test(url)||(key==='zen'&&!resignationPage)){card.hidden=true;return;}
       card.hidden=false;
       card.dataset.programKey=key;
       if(!card.querySelector('.pr-label')){
@@ -55,10 +56,8 @@
         link.target='_blank';
         link.rel='sponsored nofollow noopener';
         link.referrerPolicy=program.referrerPolicy||'no-referrer-when-downgrade';
-        if(!link.dataset.trackingBound){
-          link.dataset.trackingBound='';
-          link.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:window.location.pathname,placement:'offer_card'}));
-        }
+        link.dataset.program=key;
+        link.dataset.placement=link.dataset.placement||'offer_card';
       });
       card.querySelectorAll('[data-program-name]').forEach(el=>{if(program.name)el.textContent=program.name;});
 
@@ -106,10 +105,6 @@
         card.appendChild(img);
       }
 
-      if(!card.dataset.offerViewSent){
-        card.dataset.offerViewSent='1';
-        window.trackSiteEvent?.('affiliate_offer_view',{program:key,placement:'offer_card'});
-      }
     });
 
     if(priority.length){

@@ -1,0 +1,17 @@
+{
+  "base_sha": "aafed820c34530464170a59f0a53c675bf7627ae",
+  "checks": [
+    "before/after diagnosis and comparison screenshots at 375/768/1440; no new overflow",
+    "diagnosis emits one start/completion/result event per store with no answer values",
+    "dynamic diagnosis CTA visible for one second records one impression per store",
+    "script clicks ignored; primary and middle user clicks count once each per store",
+    "diagnosis CTA A/B wording is stable across reloads for the same browser",
+    "research/stay uses preparation; generic roles and people concerns do not imply specialist or resignation services",
+    "comparison-to-review is internal; unrelated resignation/unset offers hidden; salary and resume tools work without input telemetry",
+    "webdriver and explicit QA sessions produce zero collector requests",
+    "collector excludes bot/QA/owner before D1 writes; valid funnel event accepted"
+  ],
+  "js_errors": [],
+  "production_writes": 0,
+  "external_requests_allowed": 0
+}

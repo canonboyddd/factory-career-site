@@ -5,7 +5,7 @@
   const nextBtn=document.getElementById('nextBtn');
   const result=document.getElementById('resultBox');
   const shell=document.getElementById('questionArea');
-  let current=0,started=false;
+  let current=0,started=false,completed=false;
   const answers={};
 
   const syncChoiceA11y=q=>{
@@ -71,6 +71,8 @@
   });
 
   function showResult(){
+    if(completed)return;
+    completed=true;
     let raw=0,expert=0,night=0;Object.values(answers).forEach(a=>{raw+=a.score;expert+=a.expert;night+=a.night;});
     const score=Math.max(24,Math.min(92,Math.round(42+raw*4.2)));
     const job=answers.job?.value||'',intent=answers.intent?.value||'',change=answers.change?.value||'',income=answers.income?.value||'';
@@ -108,14 +110,29 @@
     const programs=window.SITE_CONFIG?.affiliatePrograms||{};
     let preferred=['makersJob'];
     const specialistJobs=['production-tech','quality','mechanical','electrical','maintenance'];
-    if(specialistJobs.includes(job)||expert>=4||(income==='500'||income==='600')) preferred=['samuraiJob','makersJob'];
+    if(specialistJobs.includes(job)) preferred=['samuraiJob','makersJob'];
     else if(change==='work'&&job==='other') preferred=['magicari','makersJob'];
-    else if(intent==='soon'&&change==='people') preferred=['makersJob','zen'];
-    const available=preferred.map(k=>[k,programs[k]]).filter(([,p])=>p&&String(p.url||'').trim());
+    // The diagnosis does not establish a need for resignation assistance.
+    // Information gathering and staying put lead to preparation guides first.
+    if(intent==='stay'||intent==='research')preferred=[];
+    const available=preferred.map(k=>[k,programs[k]]).filter(([,p])=>p&&/^https:\/\//.test(String(p.url||'').trim()));
+    let copyVariant='';
+    try {
+      const browserId=localStorage.getItem('fc_browser_id');
+      if(browserId){let hash=0;for(const character of 'diagnosis-cta-20261108:'+browserId)hash=(hash*31+character.charCodeAt(0))|0;copyVariant=(hash>>>0)%2?'B':'A';}
+    } catch (_) {}
     const pr=document.getElementById('prBox');
     if(available.length){
       pr.style.display='block';
-      pr.innerHTML='<span class="pr-label">PR</span><h3>条件に近い支援サービス</h3><p>診断回答から、比較しやすい順に表示しています。対象者・サービス内容はリンク先の最新情報を確認してください。</p><div class="diag-offers"></div>';
+      const reason=night>=2||change==='worktime'
+        ?'日勤の有無だけでなく、夜勤回数・将来の交替勤務・手当を除いた年収を確認してください。'
+        :specialistJobs.includes(job)
+          ?'担当した製品・技術・工程を伝え、専門経験に合う求人と年収条件があるかを確認してください。'
+          :change==='work'
+            ?'製造業の求人支援です。異職種・異業種への支援範囲は先に確認してください。'
+            :'希望の勤務地・雇用形態・休日と、給与の内訳を同じ基準で比較してください。';
+      pr.innerHTML='<span class="pr-label">PR</span><h3>求人を比較する準備ができた方へ</h3><p>対象職種を確認できる提携サービスです。求人紹介・採用・年収アップを保証するものではありません。</p><p data-result-offer-reason></p><div class="diag-offers"></div>';
+      pr.querySelector('[data-result-offer-reason]').textContent=reason;
       const wrap=pr.querySelector('.diag-offers');
       available.forEach(([key,p],i)=>{
         const a=document.createElement('a');
@@ -124,8 +141,11 @@
         a.target='_blank';
         a.rel='sponsored nofollow noopener';
         a.referrerPolicy=p.referrerPolicy||'no-referrer-when-downgrade';
-        a.textContent=p.name+'を確認する';
-        a.addEventListener('click',()=>window.trackSiteEvent?.('affiliate_click',{program:key,page:'diagnosis',placement:'diagnosis_result'}));
+        a.textContent=copyVariant==='B'?p.name+'の対象求人・利用条件を見る':p.name+'の支援内容を確認する';
+        a.dataset.affiliateLink='';
+        a.dataset.program=key;
+        a.dataset.placement='diagnosis_result';
+        a.dataset.affiliateVariant=copyVariant;
         wrap.appendChild(a);
 
         const pixel=String(p.impressionPixel||'').trim();
@@ -140,7 +160,9 @@
     }else pr.style.display='none';
 
     window.trackSiteEvent?.('diagnosis_complete',{page:'diagnosis'});
-    shell.style.display='none';result.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});
+    shell.style.display='none';result.classList.add('active');
+    window.trackSiteEvent?.('diagnosis_result_view',{page:'diagnosis'});
+    window.scrollTo({top:0,behavior:'smooth'});
   }
   render();
 })();

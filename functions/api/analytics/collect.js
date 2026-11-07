@@ -7,7 +7,10 @@ const ALLOWED_EVENTS = new Set([
   'tool_entry_click',
   'internal_navigation',
   'external_link_click',
-  'affiliate_offer_view'
+  'affiliate_offer_view',
+  'diagnosis_start',
+  'diagnosis_complete',
+  'diagnosis_result_view'
 ]);
 
 function json(data, status = 200) {
@@ -65,6 +68,9 @@ async function ensureSchema(db) {
 }
 
 export async function onRequestPost({ request, env }) {
+  if (/bot|crawler|spider|slurp|bingpreview|google-inspectiontool|lighthouse|pagespeed|headless|phantom|selenium|puppeteer|playwright|facebookexternalhit|twitterbot|linkedinbot|discordbot|uptimerobot|pingdom|monitor/i.test(request.headers.get('user-agent') || '') || request.headers.get('x-analytics-test') === '1') {
+    return json({ ok: true, excluded: true });
+  }
   if (!env.ANALYTICS_DB) {
     return json({ ok: false, setup_required: true, missing: 'ANALYTICS_DB' }, 503);
   }

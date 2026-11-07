@@ -12,14 +12,8 @@
     link.target = '_blank';
     link.rel = 'sponsored nofollow noopener';
     link.referrerPolicy = program.referrerPolicy || 'no-referrer-when-downgrade';
-    if (!link.dataset.reviewBound) {
-      link.dataset.reviewBound = '1';
-      link.addEventListener('click', () => {
-        const placement = link.dataset.placement || 'service_review';
-        window.trackSiteEvent?.('affiliate_click', { program:key, page:location.pathname, placement });
-        window.trackSiteEvent?.('service_review_cta_click', { program:key, page:location.pathname, placement });
-      });
-    }
+    link.dataset.program = key;
+    link.dataset.placement = link.dataset.placement || 'service_review';
   });
 
   document.querySelectorAll('[data-review-internal]').forEach(link => {

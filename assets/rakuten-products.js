@@ -110,11 +110,7 @@
       if (status) status.textContent = `${data.label || 'おすすめ商品'}を表示中。価格・在庫は楽天市場で最新情報をご確認ください。`;
       container.hidden = false;
 
-      if (affiliateActive && typeof window.trackSiteEvent === 'function') {
-        items.forEach((_, index) => window.trackSiteEvent('affiliate_offer_view', {
-          program:'rakuten', placement:`rakuten_${category}_card_${index + 1}`
-        }));
-      }
+      // analytics.js observes actual visible affiliate links, including dynamic cards.
     } catch (error) { renderFailure(container,error); }
   }
 

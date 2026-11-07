@@ -7,6 +7,12 @@
   const browserKey = 'fc_browser_id';
   const sessionKey = 'fc_session_id';
   const ownerExcludedKey = 'fc_owner_excluded';
+  const query = new URLSearchParams(location.search);
+  const automated = navigator.webdriver === true || /bot|crawler|spider|slurp|bingpreview|google-inspectiontool|lighthouse|pagespeed|headless|phantom|selenium|puppeteer|playwright|facebookexternalhit|twitterbot|linkedinbot|discordbot|uptimerobot|pingdom|monitor/i.test(navigator.userAgent || '');
+  const excluded = () => {
+    if (automated || query.get('qa') === '1' || query.get('ops_qa') === '1') return true;
+    try { return localStorage.getItem(ownerExcludedKey) === '1' || localStorage.getItem('ops_owner_excluded') === '1' || /(?:^|;\s*)ops_owner_excluded=1(?:;|$)/.test(document.cookie); } catch (_) { return true; }
+  };
   try {
     const ownerParams = new URLSearchParams(location.search);
     if (ownerParams.get('ops_owner') === '1') {
@@ -17,6 +23,7 @@
       history.replaceState(null, '', location.pathname + (q ? '?' + q : '') + location.hash);
     }
   } catch (_) {}
+  if (excluded()) { window.trackSiteEvent = () => {}; return; }
 
   function randomId(prefix) {
     const id = crypto.randomUUID ? crypto.randomUUID() :
@@ -24,12 +31,11 @@
     return prefix + id;
   }
   function storedId(storage, key, prefix) {
-    let id = storage.getItem(key);
-    if (!id) {
-      id = randomId(prefix);
-      storage.setItem(key, id);
-    }
-    return id;
+    try {
+      let id = storage.getItem(key);
+      if (!id) { id = randomId(prefix); storage.setItem(key, id); }
+      return id;
+    } catch (_) { return randomId(prefix); }
   }
   const browserId = storedId(localStorage, browserKey, 'b-');
   const sessionId = storedId(sessionStorage, sessionKey, 's-');
@@ -52,12 +58,13 @@
   })();
 
   const params = new URLSearchParams(location.search);
+  const campaignValue = value => /^[a-z0-9_.-]{1,80}$/i.test(value || '') ? value : '';
   const attribution = {
     landing_page: sessionStorage.getItem('fc_landing_page') || path,
     first_referrer: sessionStorage.getItem('fc_first_referrer') || safeReferrer,
-    utm_source: params.get('utm_source') || sessionStorage.getItem('fc_utm_source') || '',
-    utm_medium: params.get('utm_medium') || sessionStorage.getItem('fc_utm_medium') || '',
-    utm_campaign: params.get('utm_campaign') || sessionStorage.getItem('fc_utm_campaign') || ''
+    utm_source: campaignValue(params.get('utm_source') || sessionStorage.getItem('fc_utm_source')),
+    utm_medium: campaignValue(params.get('utm_medium') || sessionStorage.getItem('fc_utm_medium')),
+    utm_campaign: campaignValue(params.get('utm_campaign') || sessionStorage.getItem('fc_utm_campaign'))
   };
   if (!sessionStorage.getItem('fc_landing_page')) {
     sessionStorage.setItem('fc_landing_page', path);
@@ -79,11 +86,22 @@
 
   const d1Events = new Set([
     'scroll_depth','engaged_30s','affiliate_click_unified','comparison_page_click',
-    'diagnosis_entry_click','tool_entry_click','internal_navigation','external_link_click','affiliate_offer_view'
+    'diagnosis_entry_click','tool_entry_click','internal_navigation','external_link_click','affiliate_offer_view',
+    'diagnosis_start','diagnosis_complete','diagnosis_result_view'
   ]);
+  const funnelEvents = new Set(['diagnosis_start','diagnosis_complete','diagnosis_result_view']);
+  const funnelQueue = [];
+  if (!window.__centralOpsTracker && !document.querySelector('[data-factory-central]')) {
+    const script = document.createElement('script');
+    script.src = '/assets/central-tracker.js';
+    script.dataset.site = 'factory';
+    script.dataset.factoryCentral = '';
+    script.onload = () => funnelQueue.splice(0).forEach(name => window.trackCentralOps?.(name));
+    document.head.appendChild(script);
+  }
 
   function collect(eventName, detail={}) {
-    if (localStorage.getItem(ownerExcludedKey) === '1' || localStorage.getItem('ops_owner_excluded') === '1') return;
+    if (excluded()) return;
     const payload = {
       event_name: eventName,
       browser_id: browserId,
@@ -138,10 +156,15 @@
   loadPostHog();
 
   window.trackSiteEvent = function(name, detail={}) {
+    if (excluded()) return;
     const payload = common(detail);
     originalTrack(name, payload);
     try { window.posthog?.capture?.(name, payload); } catch (_) {}
     if (d1Events.has(name)) collect(name, detail);
+    if (funnelEvents.has(name)) {
+      if (window.trackCentralOps) window.trackCentralOps(name);
+      else funnelQueue.push(name);
+    }
   };
 
   collect('page_view', {});
@@ -167,6 +190,7 @@
   }, 30000);
 
   function affiliateProgram(link) {
+    if (link.dataset.program) return link.dataset.program;
     if (link.matches('[data-rakuten-link]') || link.closest('[data-rakuten-card]')) return 'rakuten';
     const card = link.closest('[data-program-card],[data-review-program]');
     const fromData = card?.dataset?.programCard || card?.dataset?.reviewProgram || '';
@@ -178,7 +202,8 @@
     return 'other';
   }
 
-  document.addEventListener('click', e => {
+  function trackLink(e) {
+    if (!e.isTrusted || (e.type === 'auxclick' ? e.button !== 1 : e.button !== 0)) return;
     const link = e.target.closest('a[href]');
     if (!link) return;
     let target;
@@ -191,15 +216,16 @@
       || 'link';
 
     const rakutenAffiliate = link.matches('[data-rakuten-link]') && link.dataset.affiliateActive === '1';
-    const knownAffiliate = link.matches('[data-program-link],[data-review-affiliate],[data-affiliate-link]')
+    const knownAffiliate = target.origin !== location.origin && (link.matches('[data-program-link],[data-review-affiliate],[data-affiliate-link]')
       || target.hostname.includes('a8.net')
       || target.hostname.includes('accesstrade.net')
-      || rakutenAffiliate;
+      || rakutenAffiliate);
 
     if (knownAffiliate) {
       window.trackSiteEvent('affiliate_click_unified', {
         program: affiliateProgram(link),
         placement: String(placement).slice(0,100),
+        variant: link.dataset.affiliateVariant || '',
         outbound_domain: target.hostname
       });
       return;
@@ -214,21 +240,45 @@
     } else {
       window.trackSiteEvent('external_link_click', {outbound_domain:target.hostname});
     }
-  }, true);
+  }
+  document.addEventListener('click', trackLink, true);
+  document.addEventListener('auxclick', trackLink, true);
 
   if ('IntersectionObserver' in window) {
     const seen = new Set();
+    const pending = new Map();
+    const selector = '[data-program-link],[data-review-affiliate],[data-affiliate-link],[data-rakuten-link][data-affiliate-active="1"]';
     const io = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        if (!entry.isIntersecting || entry.intersectionRatio < 0.35) return;
         const el = entry.target;
-        const key = el.dataset.programCard || el.closest('[data-review-program]')?.dataset?.reviewProgram || '';
-        const id = key + ':' + path + ':' + (el.dataset.placement || el.className);
-        if (!key || seen.has(id)) return;
-        seen.add(id);
-        window.trackSiteEvent('affiliate_offer_view', {program:key,placement:el.dataset.placement || 'offer'});
+        clearTimeout(pending.get(el)); pending.delete(el);
+        if (!entry.isIntersecting || entry.intersectionRatio < 0.5 || document.hidden) return;
+        const key = affiliateProgram(el);
+        const placement = el.dataset.placement || 'offer';
+        const id = key + ':' + path + ':' + placement + ':' + (el.closest('[data-rakuten-card]')?.dataset.rakutenCard || '');
+        if (!key || seen.has(id) || el.closest('[hidden]')) return;
+        pending.set(el, setTimeout(() => {
+          pending.delete(el);
+          if (document.hidden || !el.isConnected || el.closest('[hidden]') || seen.has(id)) return;
+          seen.add(id);
+          window.trackSiteEvent('affiliate_offer_view', {program:key,placement,variant:el.dataset.affiliateVariant || ''});
+          io.unobserve(el);
+        }, 1000));
       });
-    }, {threshold:[0.35]});
-    document.querySelectorAll('[data-program-card]:not([hidden]), [data-review-affiliate]').forEach(el => io.observe(el));
+    }, {threshold:[0,0.5]});
+    const watch = root => {
+      const observe = el => { try { if(new URL(el.href,location.href).origin!==location.origin)io.observe(el); } catch (_) {} };
+      if (root.matches?.(selector)) observe(root);
+      root.querySelectorAll?.(selector).forEach(observe);
+    };
+    watch(document);
+    new MutationObserver(list => list.forEach(change => {
+      if (change.type === 'attributes') watch(change.target);
+      change.addedNodes.forEach(node => { if (node.nodeType === 1) watch(node); });
+    })).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','data-affiliate-active']});
+    document.addEventListener('visibilitychange', () => {
+      pending.forEach(clearTimeout); pending.clear();
+      if (!document.hidden) document.querySelectorAll(selector).forEach(el => { io.unobserve(el); io.observe(el); });
+    });
   }
 })();

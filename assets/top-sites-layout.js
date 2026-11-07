@@ -52,10 +52,9 @@
     link.target = '_blank';
     link.rel = 'sponsored nofollow noopener';
     link.referrerPolicy = p.referrerPolicy || 'no-referrer-when-downgrade';
-    link.addEventListener('click', () => {
-      track('affiliate_click', { program: key, placement });
-      track('top_sites_cta_click', { kind: 'affiliate', program: key, placement });
-    });
+    link.dataset.affiliateLink='';
+    link.dataset.program=key;
+    link.dataset.placement=placement;
     return true;
   }
 
@@ -136,6 +135,7 @@
         link.removeAttribute('referrerpolicy');
         link.removeAttribute('data-program-link');
         link.removeAttribute('data-affiliate-shortlist');
+        link.removeAttribute('data-affiliate-link');
         link.textContent = '特徴・向いている人を確認 →';
         link.addEventListener('click', () => track('service_review_entry_click', { program:key, placement:'guide_existing_card', to_url:review }));
         oldLink.replaceWith(link);

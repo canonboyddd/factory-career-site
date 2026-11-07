@@ -24,6 +24,21 @@
 /assets/config.js
   Cache-Control: no-store, no-cache, must-revalidate
 
+/assets/main.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/assets/analytics.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/assets/diagnosis.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/assets/offers.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/reports/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+
 /assets/core-intent-upgrade.js
   Cache-Control: no-store, no-cache, must-revalidate
 

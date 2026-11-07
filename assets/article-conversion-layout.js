@@ -136,10 +136,9 @@
     link.target = '_blank';
     link.rel = 'sponsored nofollow noopener';
     link.referrerPolicy = p.referrerPolicy || 'no-referrer-when-downgrade';
-    link.addEventListener('click', () => {
-      window.trackSiteEvent?.('affiliate_click', { program:key, page:location.pathname, placement });
-      trackStage(placement, 'affiliate', { program:key });
-    });
+    link.dataset.affiliateLink='';
+    link.dataset.program=key;
+    link.dataset.placement=placement;
     return true;
   }
 
