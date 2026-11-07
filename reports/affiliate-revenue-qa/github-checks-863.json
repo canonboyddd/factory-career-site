@@ -1,0 +1,61 @@
+{
+  "commit": "863c9c3887127d9656057969e06c05ec59d254a5",
+  "checks": [
+    {
+      "name": "Cloudflare Pages",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/runs/128466285554",
+      "started_at": "2026-11-07T16:54:38Z",
+      "completed_at": "2026-11-07T16:54:38Z"
+    },
+    {
+      "name": "syntax",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42393620928/job/128466203810",
+      "started_at": "2026-11-07T16:54:21Z",
+      "completed_at": "2026-11-07T16:54:33Z"
+    },
+    {
+      "name": "live-analytics",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42393620903/job/128466203742",
+      "started_at": "2026-11-07T16:54:21Z",
+      "completed_at": "2026-11-07T16:55:15Z"
+    },
+    {
+      "name": "audit-public-copy",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42393620886/job/128466203733",
+      "started_at": "2026-11-07T16:54:21Z",
+      "completed_at": "2026-11-07T16:55:19Z"
+    },
+    {
+      "name": "production-behavior",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42393620912/job/128466203715",
+      "started_at": "2026-11-07T16:54:21Z",
+      "completed_at": "2026-11-07T16:56:32Z"
+    },
+    {
+      "name": "audit",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42393620913/job/128466203461",
+      "started_at": "2026-11-07T16:54:21Z",
+      "completed_at": "2026-11-07T16:54:30Z"
+    },
+    {
+      "name": "analytics-smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/canonboyddd/factory-career-site/actions/runs/42393620885/job/128466203413",
+      "started_at": "2026-11-07T16:54:20Z",
+      "completed_at": "2026-11-07T16:56:09Z"
+    }
+  ]
+}

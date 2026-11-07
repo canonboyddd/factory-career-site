@@ -1,0 +1,26 @@
+[
+  {
+    "file": "assets/ops-health.js",
+    "status": 200,
+    "matches_source": true,
+    "has_frozen_claim": false
+  },
+  {
+    "file": "assets/ops-dashboard.js",
+    "status": 200,
+    "matches_source": true,
+    "has_frozen_claim": false
+  },
+  {
+    "file": "assets/ops-intelligence.js",
+    "status": 200,
+    "matches_source": true,
+    "has_frozen_claim": false
+  },
+  {
+    "file": "ops-dashboard.html",
+    "status": 200,
+    "matches_source": true,
+    "has_frozen_claim": false
+  }
+]

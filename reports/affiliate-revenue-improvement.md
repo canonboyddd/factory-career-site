@@ -99,6 +99,10 @@ GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages
 
 4サイト先行計測QA：factory／SuguTsucool／車・バイク／ClipMadeで4テスト全成功（20.2秒）。各ストアのPVは1回、車のクライアント中央送信0、webdriver＋明示QAの送信0、中央のraw／未取得／古いデータ表示の契約を確認。すべての計測とASP通信は遮断。`four-site-measurement.json` に記録した。おかずサイトは当該実行時に本番スナップショット更新中のため対象外であり、5サイト完了とは報告していない。初回CIの全5サイトSEO検査自体は通過した。
 
+最終ヘルス表示修正も `43d95ba1e6c604c72b2aa7c87e0abad5c361cc73` までGitHub mainへ反映済み。Cloudflare Pages `982994f8-fac5-41a2-903a-b5489f0b78e6` が成功し、`ops-health.js`／`ops-dashboard.js`／`ops-intelligence.js`／`ops-dashboard.html` がHTTP200・検証済み本文と一致、固定の過去QA成功表現なしを確認した（`dashboard-production-source.json`）。待ち状態ではない。
+
+`863c9c3` のコードチェックでは工場のPages／Ops syntax／public-copy／production-behavior／Integrity／analytics-smokeは成功。全サイトlive QAだけは更新途中のおかずサイトのPV二重送信と、新しい車本番で `/feedback` がsitemap掲載なのにnoindexである不一致を検出した（`github-checks-863.json`）。後者は車担当へ修正を依頼し、テストを緩和していない。両サイトの反映完了後に全5サイトの最終確認が必要。
+
 ## 8. 実測値と未取得データ
 
 2026-11-08の読み取り専用DB確認、過去30日、既存データの生集計：
@@ -129,7 +133,7 @@ GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages
 
 ## 10. 残る作業・ブロッカー
 
-1. `863c9c3` のヘルス表示修正の最終反映確認と、おかずサイト反映後の5サイト計測QA。実トークンを用いた管理画面確認は未取得。
+1. おかずサイトの更新と車 `/feedback` のsitemap不一致修正後、5サイト計測・SEO QAを再確認する。工場の最終ヘルス表示修正は反映済み。実トークンを用いた管理画面確認は未取得。
 2. ASP側の最新提携承認・リンク有効性・掲載条件を管理画面で照合する必要がある。URL未設定のマジキャリは表示しない。
 3. ASP成果CSV／確定報酬とGSC実データのインポート後に成果の帰属期間・取消・確定を照合する。
 4. 新定義で有効な表示・クリック標本が貯まるまで、CTR改善・申込増加・増収は未検証。
