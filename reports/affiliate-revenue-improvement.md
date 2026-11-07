@@ -39,7 +39,7 @@
 - `qa/factory-seo-core.spec.cjs`：CRLFをLFに正規化。Windowsの改行差で既存_headers規則が見つからない偽失敗の原因を修正し、検査条件は維持。
 - `.github/workflows/analytics-production-smoke.yml`：既存Pages反映待ち・回帰・安全な本番除外確認・証拠保存。
 
-実装コミットはこのレポートと同じ変更系列の `Improve factory diagnosis intent matching and trustworthy revenue measurement`。実装SHAはコミット後の本レポート追記に記録する。
+実装コミット：`e533cf75da7dbce459fe191276df324a72c7de1d` — `Improve factory diagnosis intent matching and trustworthy revenue measurement`。この行の追記は実装後の監査記録コミット。
 
 `assets/config.js`、案件URL・ID、sitemap、既存記事データ、診断採点、D1の既存データは変更していない。
 
