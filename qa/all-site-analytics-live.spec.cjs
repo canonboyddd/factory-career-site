@@ -12,8 +12,8 @@ const sites=[
   {key:'okazu',url:'https://okazu-yoridori-midori.pages.dev/',must:['/api/ops-collect']},
   {key:'clipmade',url:'https://clipmade-site.pages.dev/',must:['/api/ops-collect']}
 ];
-const requestedSites=(process.env.MEASUREMENT_SITE_KEYS||'').split(',').filter(Boolean);
-if(requestedSites.some(key=>!sites.some(site=>site.key===key)))throw new Error('Unknown MEASUREMENT_SITE_KEYS entry');
+const requestedSites=(process.env.QA_SITE_KEYS||process.env.MEASUREMENT_SITE_KEYS||'').split(',').filter(Boolean);
+if(requestedSites.some(key=>!sites.some(site=>site.key===key)))throw new Error('Unknown QA_SITE_KEYS entry');
 const measurementSites=requestedSites.length?sites.filter(site=>requestedSites.includes(site.key)):sites;
 const isAnalytics=url=>/\/api\/(?:analytics(?:\/collect)?|ops-collect|central\/collect)(?:[/?]|$)/.test(url)||/sugutsucool-analytics\.super-canon-boy\.workers\.dev\/collect/.test(url);
 const isTrackingHost=url=>/https:\/\/[^/]*(?:a8\.net|accesstrade\.net|affiliate-b\.com|afi-b\.com|affiliate\.dmm\.com|af\.fc2\.com|google-analytics\.com|googletagmanager\.com|doubleclick\.net|posthog\.com)\//.test(url);
@@ -165,7 +165,7 @@ async function sitemapUrls(entry){
   return extractLocs(root.body);
 }
 test('all five production sites keep public search pages indexable',async()=>{
-  for(const site of seoSites){
+  for(const site of seoSites.filter(site=>!requestedSites.length||requestedSites.includes(site.key))){
     const urls=await sitemapUrls(site);
     const unique=[...new Set(urls)];
     expect(unique.length,`${site.key}: sitemap URL count`).toBeGreaterThan(0);

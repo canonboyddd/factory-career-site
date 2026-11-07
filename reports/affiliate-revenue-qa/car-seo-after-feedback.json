@@ -1,0 +1,20 @@
+{
+  "site": "car-bike",
+  "commit": "4466928d9beeb8e74a6a6051a7390c88f8c2a06f",
+  "cloudflare_deployment": "7eafd93f-b3b3-4d20-8f2f-f7a4821463eb",
+  "cloudflare_status": "success",
+  "tests_passed": 1,
+  "sitemap_urls_checked": 428,
+  "home_links_checked": 15,
+  "verified": [
+    "direct HTTP 200",
+    "no X-Robots-Tag noindex for sitemap entries",
+    "no meta robots noindex for sitemap entries",
+    "canonical matches sitemap URL",
+    "no duplicate sitemap URLs",
+    "home-linked public pages indexability"
+  ],
+  "duration_seconds": 6.1,
+  "production_analytics_writes": 0,
+  "asp_clicks": 0
+}

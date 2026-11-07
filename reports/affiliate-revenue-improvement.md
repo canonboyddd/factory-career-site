@@ -103,6 +103,8 @@ GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages
 
 `863c9c3` のコードチェックでは工場のPages／Ops syntax／public-copy／production-behavior／Integrity／analytics-smokeは成功。全サイトlive QAだけは更新途中のおかずサイトのPV二重送信と、新しい車本番で `/feedback` がsitemap掲載なのにnoindexである不一致を検出した（`github-checks-863.json`）。後者は車担当へ修正を依頼し、テストを緩和していない。両サイトの反映完了後に全5サイトの最終確認が必要。
 
+車の不一致は `4466928` で修正され、Cloudflare Pages `7eafd93f-b3b3-4d20-8f2f-f7a4821463eb` の成功後に統合QAから再検証した。sitemap全428URLとホーム15リンクで、直接200・noindexなし・canonical一致・重複なしを確認し、1テスト成功（6.1秒）。`car-seo-after-feedback.json` を参照。車のブロッカーは解消した。5サイト最終計測はおかずサイト反映後に確認する。
+
 ## 8. 実測値と未取得データ
 
 2026-11-08の読み取り専用DB確認、過去30日、既存データの生集計：
@@ -133,7 +135,7 @@ GitHub main `2960b3bfeee2adc2396efd95a22282cf29c65160` の既存Cloudflare Pages
 
 ## 10. 残る作業・ブロッカー
 
-1. おかずサイトの更新と車 `/feedback` のsitemap不一致修正後、5サイト計測・SEO QAを再確認する。工場の最終ヘルス表示修正は反映済み。実トークンを用いた管理画面確認は未取得。
+1. おかずサイト更新後の5サイト計測・SEO QA。車 `/feedback` の不一致は修正・本番検証済み。工場の最終ヘルス表示修正も反映済み。実トークンを用いた管理画面確認は未取得。
 2. ASP側の最新提携承認・リンク有効性・掲載条件を管理画面で照合する必要がある。URL未設定のマジキャリは表示しない。
 3. ASP成果CSV／確定報酬とGSC実データのインポート後に成果の帰属期間・取消・確定を照合する。
 4. 新定義で有効な表示・クリック標本が貯まるまで、CTR改善・申込増加・増収は未検証。
