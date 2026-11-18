@@ -130,7 +130,8 @@ for(const [route,expected] of [['/car-goods?q='+encodeURIComponent('ホンダ N-
   console.log(`GOODS ${route.split('?')[0]} calls=${calls.length} input=${input}`);calls.forEach((u,i)=>console.log(`GOODS_CALL ${i+1} ${u}`));
   if(input!==expected)fail('goods-query',`${route}: 入力欄がURL qを反映していない (${input})`);
   if(calls.length!==1)fail('goods-duplicate-request',`${route}: 初期表示で楽天商品APIを${calls.length}回呼び出し`);
-  if(calls[0]&&!decodeURIComponent(calls[0]).includes(expected))fail('goods-query',`${route}: 最初のAPIリクエストがURL qではない: ${calls[0]}`);
+  // Compare the parsed q parameter: the page encodes spaces as "+", which decodeURIComponent keeps.
+  if(calls[0]&&new URL(calls[0]).searchParams.get('q')!==expected)fail('goods-query',`${route}: 最初のAPIリクエストがURL qではない: ${calls[0]}`);
   if(/RAKUTEN_APP_ID|RAKUTEN_ACCESS_KEY|設定がまだ反映/.test(text))fail('goods-config',`${route}: 楽天API設定エラーが利用者に表示されている`);
   await p.close();
 }
