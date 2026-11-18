@@ -11,6 +11,7 @@ on:
       - ".github/workflows/norimono-production-qa.yml"
       - "qa/norimono-production.spec.cjs"
       - "qa/norimono-indexability.spec.cjs"
+      - "qa/norimono-production.config.cjs"
 
 permissions:
   contents: read
@@ -34,7 +35,7 @@ jobs:
           npm install --no-save @playwright/test
           npx playwright install --with-deps chromium
       - name: Run live production QA
-        run: npx playwright test qa/norimono-production.spec.cjs qa/norimono-indexability.spec.cjs --reporter=line
+        run: npx playwright test --config qa/norimono-production.config.cjs --reporter=line
       - name: Upload QA artifacts
         if: always()
         uses: actions/upload-artifact@v4

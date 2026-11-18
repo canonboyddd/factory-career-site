@@ -13,7 +13,8 @@ permissions:
 
 jobs:
   deep-audit:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 cannot install its system dependencies on the newer ubuntu-latest image.
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4

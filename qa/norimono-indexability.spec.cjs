@@ -28,11 +28,13 @@ test('strengthened vehicle SEO pages exist exactly once across the sitemap set',
   expect(allXml).not.toMatch(/<loc>[^<]*\.html<\/loc>/i);
 });
 
-test('public feedback board is indexable while generic product detail stays intentionally noindex',async({page,request})=>{
+// 2026-11-08: norimono-cost.com serves /feedback with "X-Robots-Tag: noindex, follow" and no longer
+// submits it in the sitemap (car-bike-cost-site commit 4466928). This test still expected the
+// board to be indexable, which made the weekly production QA fail from 2026-11-08 on.
+test('feedback board and generic product detail stay intentionally noindex',async({page,request})=>{
   const response=await page.goto(base+'/feedback',{waitUntil:'domcontentloaded',timeout:45000});expect(response?.status()).toBeLessThan(400);
-  expect(String(response?.headers()['x-robots-tag']||''),'feedback X-Robots-Tag').not.toMatch(/noindex/i);
-  const meta=page.locator('meta[name="robots"]');expect(await meta.count()).toBe(1);await expect(meta).toHaveAttribute('content',/index,follow/i);
-  const canonical=page.locator('link[rel="canonical"]');expect(await canonical.count()).toBe(1);await expect(canonical).toHaveAttribute('href',base+'/feedback');
+  expect(String(response?.headers()['x-robots-tag']||''),'feedback X-Robots-Tag').toMatch(/noindex/i);
+  const sitemap=await request.get(base+'/sitemap.xml');expect(sitemap.status()).toBeLessThan(400);expect(await sitemap.text(),'feedback must not be submitted').not.toMatch(/<loc>[^<]*\/feedback(?:\.html)?<\/loc>/);
   const product=await request.get(base+'/product');expect(product.status()).toBeLessThan(400);expect(await product.text()).toMatch(/name=["']robots["'][^>]*content=["'][^"']*noindex/i);
 });
 
