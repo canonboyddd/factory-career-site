@@ -7,10 +7,27 @@ const failures=[];
 const warnings=[];
 const stats={};
 
+// Show a crash or the findings as GitHub annotations, so the run page states the cause
+// without opening the raw log. (2026-11-18: a run died one second in and left no visible reason.)
+function annotate(message){if(process.env.GITHUB_ACTIONS)console.log(`::error title=Norimono deep audit::${String(message).replace(/\s*\r?\n\s*/g,' | ').slice(0,900)}`);}
+process.on('uncaughtException',e=>{annotate(`crashed: ${e?.stack||e}`);console.error(e);process.exit(1);});
+
 function fail(kind,detail){failures.push({kind,detail:String(detail)});}
 function warn(kind,detail){warnings.push({kind,detail:String(detail)});}
 function urlsFromXml(xml){return [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m=>m[1].replace(/&amp;/g,'&'));}
-async function getText(url){const r=await fetch(url,{redirect:'follow',headers:{'user-agent':'NorimonoDeepAudit/1.0'}});if(!r.ok)throw new Error(`${r.status} ${url}`);return r.text();}
+// The sitemap fetches come first and used to abort the whole audit on one transient error.
+async function getText(url){
+  let lastError;
+  for(let attempt=1;attempt<=3;attempt++){
+    try{
+      const r=await fetch(url,{redirect:'follow',headers:{'user-agent':'NorimonoDeepAudit/1.0'}});
+      if(r.ok)return await r.text();
+      lastError=new Error(`${r.status} ${url}`);
+    }catch(e){lastError=new Error(`${url}: ${e?.cause?.code||e?.message||e}`);}
+    if(attempt<3)await new Promise(resolve=>setTimeout(resolve,attempt*3000));
+  }
+  throw lastError;
+}
 async function collectSitemaps(){const seen=new Set(),pages=new Set(),queue=[START];while(queue.length){const u=queue.shift();if(seen.has(u))continue;seen.add(u);const xml=await getText(u);for(const loc of urlsFromXml(xml)){if(/\.xml(?:$|\?)/i.test(loc))queue.push(loc);else if(loc.startsWith(ORIGIN))pages.add(loc);}}return [...pages];}
 function sameOriginHref(raw,base){try{const u=new URL(raw,base);if(u.origin!==ORIGIN)return null;if(!/^https?:$/.test(u.protocol))return null;u.hash='';return u.href;}catch{return null;}}
 
@@ -127,4 +144,6 @@ console.log(`DEEP_AUDIT_STATS ${JSON.stringify(stats)}`);
 for(const w of warnings)console.log(`WARNING\t${w.kind}\t${w.detail}`);
 for(const f of failures)console.log(`FAILURE\t${f.kind}\t${f.detail}`);
 console.log(`DEEP_AUDIT_RESULT failures=${failures.length} warnings=${warnings.length}`);
+for(const f of failures.slice(0,10))annotate(`${f.kind}: ${f.detail}`);
+if(failures.length>10)annotate(`${failures.length-10} more failures are listed in the log`);
 if(failures.length)process.exitCode=1;
