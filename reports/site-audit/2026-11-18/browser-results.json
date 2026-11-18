@@ -1,0 +1,3848 @@
+{
+ "site": "factory",
+ "name": "工場キャリア診断",
+ "base": "https://factory-career-site.pages.dev",
+ "auditDate": "2026-11-18",
+ "safety": {
+  "browser": "Playwright 1.65.0 / Chromium（ヘッドレス）。Claude in Chrome拡張は未接続だったため代替した。",
+  "viewports": "375x812（モバイル）/ 768x1024（タブレット）/ 1440x900（PC）",
+  "analytics": "navigator.webdriver=true・除外Cookie・計測エンドポイントのモック応答で、本番計測への書き込みは0件。",
+  "asp": "ASP/広告主ホストへの通信は全て遮断。広告クリックはローカルの模擬LPで応答。実トラッキングURLへの到達は0件。",
+  "forms": "第三者サービスへの申込み・購入・登録・メール送信は0件。自サイトの計算・診断フォームのみ操作。"
+ },
+ "pageAudit": {
+  "tag": "full-before",
+  "at": "2026-11-18T13:48:46.815Z",
+  "method": "Playwright Chromium (headless), ASP/advertiser/analytics hosts blocked at network layer, first-party writes mocked",
+  "pageViews": 200,
+  "pages": [
+   {
+    "path": "/diagnosis",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場・メーカー勤務者 転職検討度診断｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 9
+   },
+   {
+    "path": "/articles/",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業・工場勤務の転職記事一覧｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 2
+   },
+   {
+    "path": "/",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業・工場勤務者の転職検討度診断｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 20
+   },
+   {
+    "path": "/tools/",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業・工場勤務の無料キャリアツール｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 3
+   },
+   {
+    "path": "/factory-items",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務に便利な持ち物・仕事グッズ｜楽天市場の商品比較｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 4
+   },
+   {
+    "path": "/workstyle-guide",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務の働き方・シフト悩みガイド｜夜勤・交替勤務・残業・休日",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 23
+   },
+   {
+    "path": "/salary-guide",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業の年収・給与ガイド【2026年】職種別年収・基本給・賞与・夜勤手当",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 20
+   },
+   {
+    "path": "/career-guide",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業の職種別キャリアガイド｜年収・きつい・転職先を職種別に比較",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 24
+   },
+   {
+    "path": "/articles/manufacturing-role-salary-comparison",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業の職種別年収を比較【2026年】生産技術・設備保全・品質管理・生産管理",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 13
+   },
+   {
+    "path": "/job-change-guide",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場・製造業の転職完全ガイド｜求人比較・年収・職種・面接",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 30
+   },
+   {
+    "path": "/site-map",
+    "viewport": "375",
+    "status": 200,
+    "title": "サイトマップ｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/about",
+    "viewport": "375",
+    "status": 200,
+    "title": "このサイトについて｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 12
+   },
+   {
+    "path": "/privacy",
+    "viewport": "375",
+    "status": 200,
+    "title": "プライバシーポリシー｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 2
+   },
+   {
+    "path": "/disclaimer",
+    "viewport": "375",
+    "status": 200,
+    "title": "免責事項・広告表記｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 8
+   },
+   {
+    "path": "/editorial-policy",
+    "viewport": "375",
+    "status": 200,
+    "title": "編集・広告ポリシー｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 2
+   },
+   {
+    "path": "/sources",
+    "viewport": "375",
+    "status": 200,
+    "title": "参考情報・出典方針｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 3
+   },
+   {
+    "path": "/articles/assembly-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "組立作業から転職するには｜活かせる経験と次の職種",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/automotive-parts-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "自動車部品メーカーから転職するには｜他業界・同業転職・経験の活かし方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/cleanroom-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "クリーンルーム勤務がきつい人へ｜半導体・電子部品工場の転職条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/electrical-design-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "電気・制御設計の転職｜PLC・回路・立ち上げ・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-basic-salary-low",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務で基本給が低いと感じたら｜手当込み月給に惑わされない比較方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-body-hard",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務が体力的にきつい人へ｜負担を減らす転職条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/factory-heat-hard",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場が暑くてきつい人へ｜職場の熱中症対策と転職条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-bonus-low",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場のボーナスが少ない・ない人へ｜転職で年収を見る方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-commute-long",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場の通勤時間が長くて辞めたい人へ｜転職条件の決め方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/factory-contract-worker-permanent",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場の契約社員から正社員へ｜登用と転職を比較するポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-day-shift-job",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場の日勤のみ正社員求人【2026年】夜勤なし転職で確認する8条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 10
+   },
+   {
+    "path": "/articles/factory-day-shift-salary-drop",
+    "viewport": "375",
+    "status": 200,
+    "title": "夜勤から日勤で年収は下がる？【2026年】手当・深夜割増・残業を分けて比較",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 10
+   },
+   {
+    "path": "/articles/factory-fixed-night-shift",
+    "viewport": "375",
+    "status": 200,
+    "title": "夜勤専属の工場を辞めたい｜日勤へ移る前に確認する年収と求人条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/factory-high-school-graduate-job-change",
+    "viewport": "375",
+    "status": 200,
+    "title": "高卒の製造業転職で見るべき条件｜工場経験を活かす求人の選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-holidays",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場の休日が少なくて辞めたい人へ｜求人で見る休みの条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-human-relations",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場の人間関係がきつい・辞めたい人へ｜異動と転職の判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 16
+   },
+   {
+    "path": "/articles/factory-interview",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場・製造業の転職面接対策｜志望動機・退職理由・逆質問の答え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 6,
+    "smallTapTargets": 28
+   },
+   {
+    "path": "/articles/factory-job-change-difficulty",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場への転職は難しい？未経験・正社員・年代別の難易度｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 10
+   },
+   {
+    "path": "/articles/factory-job-change-failure",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場転職で失敗・後悔しやすい7パターン【2026年】応募前の防ぎ方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 14
+   },
+   {
+    "path": "/articles/factory-job-change-no-experience",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務から未経験職へ転職するには｜経験の言い換えと求人の選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-job-offer-check",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場・製造業の求人票の見方｜応募前・面接・内定後チェックリスト",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 6,
+    "smallTapTargets": 26
+   },
+   {
+    "path": "/articles/factory-logistics-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場内物流から転職するには｜フォークリフト・在庫・供給経験の活かし方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-night-to-day",
+    "viewport": "375",
+    "status": 200,
+    "title": "夜勤から日勤へ転職する方法【2026年】年収差・日勤求人・失敗しない確認項目",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 11
+   },
+   {
+    "path": "/articles/factory-no-future",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務に将来性がないと不安な人へ｜転職前に見る4つの軸",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-no-qualification-job-change",
+    "viewport": "375",
+    "status": 200,
+    "title": "資格なしの工場勤務でも転職できる？｜経験を求人に合わせて見せる方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-overtime",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場の残業が多くて辞めたい人へ｜転職前に見る条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-permanent-employee",
+    "viewport": "375",
+    "status": 200,
+    "title": "派遣・期間工から工場正社員を目指す方法｜転職前に確認したい条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 17
+   },
+   {
+    "path": "/articles/factory-quit",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務を辞めたい人へ【2026年】辞める前の判断基準・転職先・失敗しない順番",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 4,
+    "aspVisible": 4,
+    "smallTapTargets": 30
+   },
+   {
+    "path": "/articles/factory-resignation-reasons",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場を辞める理由の整理方法｜転職面接で伝える考え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-resume",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場・製造業の職務経歴書の書き方｜例文・職種別のまとめ方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 6,
+    "smallTapTargets": 28
+   },
+   {
+    "path": "/articles/factory-salary-up",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場・製造業で年収アップする方法｜転職前に見るべき基本給・手当・職種",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 16
+   },
+   {
+    "path": "/articles/factory-shift-change",
+    "viewport": "375",
+    "status": 200,
+    "title": "交替勤務を辞めたい人へ【2026年】2交替・3交替から日勤へ変える判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 13
+   },
+   {
+    "path": "/articles/factory-temp-worker-job-change",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場派遣から転職するには｜正社員・直接雇用・別メーカーの選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-short-tenure-job-change",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場を1年未満で辞めたい｜短期離職の転職で整理すること",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-small-company",
+    "viewport": "375",
+    "status": 200,
+    "title": "中小工場から転職したい人へ｜経験を大手・他社で伝える方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-transfer-relocation",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務で転勤したくない人へ｜勤務地限定求人の確認ポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/factory-two-shift-hard",
+    "viewport": "375",
+    "status": 200,
+    "title": "2交替勤務がきつい人へ【2026年】シフト例・生活リズム・日勤転職の判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 11
+   },
+   {
+    "path": "/articles/factory-three-shift-hard",
+    "viewport": "375",
+    "status": 200,
+    "title": "3交替勤務がきつい人へ【2026年】シフト例・生活リズム・日勤転職の判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 11
+   },
+   {
+    "path": "/articles/factory-weekend-work",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場の休日出勤が多い人へ｜求人票で確認する休日・残業・代休",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/inspection-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "検査から転職するには｜品質・製造・生産管理へ経験を活かす方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/factory-white-company",
+    "viewport": "375",
+    "status": 200,
+    "title": "ホワイトな工場の見分け方【2026年】求人票・面接・工場見学の確認ポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 18
+   },
+   {
+    "path": "/articles/line-work-quit",
+    "viewport": "375",
+    "status": 200,
+    "title": "ライン作業を辞めたい人へ｜向いている転職先と経験の伝え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/low-salary",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務の給料が低いと感じたら｜年収を上げる方法と求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 16
+   },
+   {
+    "path": "/articles/machine-design-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "機械設計の転職｜CAD・担当範囲・年収・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/machining-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "機械加工から転職するには｜旋盤・フライス・マシニング経験の活かし方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/maintenance-salary",
+    "viewport": "375",
+    "status": 200,
+    "title": "設備保全の年収はいくら？【2026年】435万円・535万円の違いと年収アップ条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 7
+   },
+   {
+    "path": "/articles/maintenance-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "設備保全の転職で失敗しない求人の見方｜年収・夜勤・呼び出し・資格・経験",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 6,
+    "smallTapTargets": 32
+   },
+   {
+    "path": "/articles/maintenance-hard",
+    "viewport": "375",
+    "status": 200,
+    "title": "設備保全がきつい・辞めたい人へ｜呼び出し・夜勤・休日対応の見直し方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 8
+   },
+   {
+    "path": "/articles/maintenance-qualification",
+    "viewport": "375",
+    "status": 200,
+    "title": "設備保全の転職で資格は必要？｜実務経験と求人要件の見分け方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/makers-job-review",
+    "viewport": "375",
+    "status": 200,
+    "title": "メーカーズジョブとは？特徴・向いている人・利用前チェック｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 3,
+    "aspVisible": 3,
+    "smallTapTargets": 13
+   },
+   {
+    "path": "/articles/manufacturing-20s",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業20代の転職｜未経験・経験者で変わる求人の選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/manufacturing-40s",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業40代の転職｜経験を活かす求人の選び方と失敗を減らす条件整理",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/manufacturing-30s",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業30代の転職｜強みになる経験・年収・求人の選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 6,
+    "smallTapTargets": 23
+   },
+   {
+    "path": "/articles/manufacturing-500-income",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業で年収500万円を目指すには【2026年】職種・経験・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 6,
+    "smallTapTargets": 27
+   },
+   {
+    "path": "/articles/manufacturing-50s",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業50代の転職｜経験を活かす求人の選び方と条件整理",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/manufacturing-agent-guide",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業・メーカーに強い転職サービスの選び方｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 27
+   },
+   {
+    "path": "/articles/manufacturing-job-change-age",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業の転職は何歳まで？20代・30代・40代・50代の考え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 9
+   },
+   {
+    "path": "/articles/manufacturing-other-industry",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業から異業種へ転職するには｜活かせる経験と失敗しない選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 4,
+    "aspVisible": 4,
+    "smallTapTargets": 23
+   },
+   {
+    "path": "/articles/manufacturing-supervisor-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場の班長・リーダー経験を活かす転職｜人数・品質・生産管理の伝え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/night-shift-hard",
+    "viewport": "375",
+    "status": 200,
+    "title": "夜勤がきつい・辞めたい人へ【2026年】交替勤務から日勤へ変える判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 4,
+    "aspVisible": 4,
+    "smallTapTargets": 29
+   },
+   {
+    "path": "/articles/no-night-shift",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場で夜勤なしの仕事・職種を探す｜日勤で働ける選択肢と注意点",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 15
+   },
+   {
+    "path": "/articles/operator-quit",
+    "viewport": "375",
+    "status": 200,
+    "title": "機械オペレーターを辞めたい人へ｜転職先と活かせる経験",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/plc-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "PLC経験を活かす転職｜ラダー修正・新規設計・立上げで評価を分ける",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/period-worker-next",
+    "viewport": "375",
+    "status": 200,
+    "title": "期間工のその後はどうする？正社員・転職・異業種の4つの進路",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/production-control-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "生産管理の転職｜仕事内容・必要経験・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/production-control-salary",
+    "viewport": "375",
+    "status": 200,
+    "title": "生産管理の年収はいくら？【2026年】484万円と500〜600万円求人帯の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 6
+   },
+   {
+    "path": "/articles/production-control-overtime",
+    "viewport": "375",
+    "status": 200,
+    "title": "生産管理は残業が多い？【2026年】忙しい原因と残業が少ない求人の見分け方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 9
+   },
+   {
+    "path": "/articles/production-tech-agent",
+    "viewport": "375",
+    "status": 200,
+    "title": "生産技術の転職エージェント・サービス選び｜設備・工程・年収別",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/production-tech-salary",
+    "viewport": "375",
+    "status": 200,
+    "title": "生産技術の年収はいくら？【2026年】494万円・523.8万円の違いと年収アップ条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 7
+   },
+   {
+    "path": "/articles/production-tech-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "生産技術の転職｜仕事内容・年収・求人で確認すべきポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 6,
+    "smallTapTargets": 23
+   },
+   {
+    "path": "/articles/production-tech-hard",
+    "viewport": "375",
+    "status": 200,
+    "title": "生産技術がきつい・辞めたい人へ｜激務の原因と転職前の確認ポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 9
+   },
+   {
+    "path": "/articles/production-tech-overseas-travel",
+    "viewport": "375",
+    "status": 200,
+    "title": "生産技術で出張が多くてきつい人へ｜立上げ頻度・海外出張・転職条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/quality-agent",
+    "viewport": "375",
+    "status": 200,
+    "title": "品質管理・品質保証の転職エージェント選び｜経験別・目的別の使い分け",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/quality-assurance-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "品質保証の転職｜仕事内容・経験の棚卸し・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/quality-audit-hard",
+    "viewport": "375",
+    "status": 200,
+    "title": "品質保証の監査対応がきつい人へ｜監査頻度・出張・役割の見直し方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/quality-claim-hard",
+    "viewport": "375",
+    "status": 200,
+    "title": "品質管理のクレーム対応がつらい人へ｜顧客対応を減らす転職先の探し方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/articles/quality-quit",
+    "viewport": "375",
+    "status": 200,
+    "title": "品質管理を辞めたい人へ｜転職先・向いている職種・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 6,
+    "smallTapTargets": 23
+   },
+   {
+    "path": "/articles/quality-salary",
+    "viewport": "375",
+    "status": 200,
+    "title": "品質管理の年収はいくら？【2026年】484万円・654.2万円の差と年収アップ条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 7
+   },
+   {
+    "path": "/articles/samurai-job-review",
+    "viewport": "375",
+    "status": 200,
+    "title": "Samurai Jobとは？特徴・向いている人・利用前チェック｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 3,
+    "aspVisible": 3,
+    "smallTapTargets": 14
+   },
+   {
+    "path": "/articles/welding-career",
+    "viewport": "375",
+    "status": 200,
+    "title": "溶接工から転職するには｜資格・図面・品質経験を活かせる仕事",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 5
+   },
+   {
+    "path": "/tools/job-offer-score",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場・製造業の求人条件スコア比較｜無料ツール",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 4
+   },
+   {
+    "path": "/tools/resume-draft",
+    "viewport": "375",
+    "status": 200,
+    "title": "製造業の職務経歴書たたき台作成ツール｜無料・登録不要",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 4
+   },
+   {
+    "path": "/tools/salary-compare",
+    "viewport": "375",
+    "status": 200,
+    "title": "工場勤務の年収・手当依存度チェック｜無料計算",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 4
+   },
+   {
+    "path": "/resignation-support",
+    "viewport": "375",
+    "status": 200,
+    "title": "退職代行を使う前に確認すること｜工場勤務の退職手続き・相談先｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 4
+   },
+   {
+    "path": "/diagnosis",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場・メーカー勤務者 転職検討度診断｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業・工場勤務の転職記事一覧｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業・工場勤務者の転職検討度診断｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/tools/",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業・工場勤務の無料キャリアツール｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/factory-items",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務に便利な持ち物・仕事グッズ｜楽天市場の商品比較｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 16,
+    "aspVisible": 16,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/workstyle-guide",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務の働き方・シフト悩みガイド｜夜勤・交替勤務・残業・休日",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/salary-guide",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業の年収・給与ガイド【2026年】職種別年収・基本給・賞与・夜勤手当",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/career-guide",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業の職種別キャリアガイド｜年収・きつい・転職先を職種別に比較",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-role-salary-comparison",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業の職種別年収を比較【2026年】生産技術・設備保全・品質管理・生産管理",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/job-change-guide",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場・製造業の転職完全ガイド｜求人比較・年収・職種・面接",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/about",
+    "viewport": "1440",
+    "status": 200,
+    "title": "このサイトについて｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/site-map",
+    "viewport": "1440",
+    "status": 200,
+    "title": "サイトマップ｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/privacy",
+    "viewport": "1440",
+    "status": 200,
+    "title": "プライバシーポリシー｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/disclaimer",
+    "viewport": "1440",
+    "status": 200,
+    "title": "免責事項・広告表記｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/editorial-policy",
+    "viewport": "1440",
+    "status": 200,
+    "title": "編集・広告ポリシー｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/sources",
+    "viewport": "1440",
+    "status": 200,
+    "title": "参考情報・出典方針｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/assembly-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "組立作業から転職するには｜活かせる経験と次の職種",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/automotive-parts-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "自動車部品メーカーから転職するには｜他業界・同業転職・経験の活かし方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/cleanroom-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "クリーンルーム勤務がきつい人へ｜半導体・電子部品工場の転職条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-basic-salary-low",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務で基本給が低いと感じたら｜手当込み月給に惑わされない比較方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/electrical-design-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "電気・制御設計の転職｜PLC・回路・立ち上げ・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-body-hard",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務が体力的にきつい人へ｜負担を減らす転職条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-heat-hard",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場が暑くてきつい人へ｜職場の熱中症対策と転職条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-bonus-low",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場のボーナスが少ない・ない人へ｜転職で年収を見る方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-commute-long",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場の通勤時間が長くて辞めたい人へ｜転職条件の決め方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-contract-worker-permanent",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場の契約社員から正社員へ｜登用と転職を比較するポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-day-shift-job",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場の日勤のみ正社員求人【2026年】夜勤なし転職で確認する8条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-day-shift-salary-drop",
+    "viewport": "1440",
+    "status": 200,
+    "title": "夜勤から日勤で年収は下がる？【2026年】手当・深夜割増・残業を分けて比較",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-fixed-night-shift",
+    "viewport": "1440",
+    "status": 200,
+    "title": "夜勤専属の工場を辞めたい｜日勤へ移る前に確認する年収と求人条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 9,
+    "aspVisible": 9,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-high-school-graduate-job-change",
+    "viewport": "1440",
+    "status": 200,
+    "title": "高卒の製造業転職で見るべき条件｜工場経験を活かす求人の選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-holidays",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場の休日が少なくて辞めたい人へ｜求人で見る休みの条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-human-relations",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場の人間関係がきつい・辞めたい人へ｜異動と転職の判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-interview",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場・製造業の転職面接対策｜志望動機・退職理由・逆質問の答え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 5,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-job-change-difficulty",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場への転職は難しい？未経験・正社員・年代別の難易度｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-job-change-failure",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場転職で失敗・後悔しやすい7パターン【2026年】応募前の防ぎ方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-job-change-no-experience",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務から未経験職へ転職するには｜経験の言い換えと求人の選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-job-offer-check",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場・製造業の求人票の見方｜応募前・面接・内定後チェックリスト",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 5,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-logistics-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場内物流から転職するには｜フォークリフト・在庫・供給経験の活かし方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-night-to-day",
+    "viewport": "1440",
+    "status": 200,
+    "title": "夜勤から日勤へ転職する方法【2026年】年収差・日勤求人・失敗しない確認項目",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-no-qualification-job-change",
+    "viewport": "1440",
+    "status": 200,
+    "title": "資格なしの工場勤務でも転職できる？｜経験を求人に合わせて見せる方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-overtime",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場の残業が多くて辞めたい人へ｜転職前に見る条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-no-future",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務に将来性がないと不安な人へ｜転職前に見る4つの軸",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-resignation-reasons",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場を辞める理由の整理方法｜転職面接で伝える考え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-permanent-employee",
+    "viewport": "1440",
+    "status": 200,
+    "title": "派遣・期間工から工場正社員を目指す方法｜転職前に確認したい条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-quit",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務を辞めたい人へ【2026年】辞める前の判断基準・転職先・失敗しない順番",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 4,
+    "aspVisible": 3,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-salary-up",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場・製造業で年収アップする方法｜転職前に見るべき基本給・手当・職種",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-shift-change",
+    "viewport": "1440",
+    "status": 200,
+    "title": "交替勤務を辞めたい人へ【2026年】2交替・3交替から日勤へ変える判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-resume",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場・製造業の職務経歴書の書き方｜例文・職種別のまとめ方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 5,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-short-tenure-job-change",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場を1年未満で辞めたい｜短期離職の転職で整理すること",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-small-company",
+    "viewport": "1440",
+    "status": 200,
+    "title": "中小工場から転職したい人へ｜経験を大手・他社で伝える方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-temp-worker-job-change",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場派遣から転職するには｜正社員・直接雇用・別メーカーの選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-three-shift-hard",
+    "viewport": "1440",
+    "status": 200,
+    "title": "3交替勤務がきつい人へ【2026年】シフト例・生活リズム・日勤転職の判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-transfer-relocation",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務で転勤したくない人へ｜勤務地限定求人の確認ポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-two-shift-hard",
+    "viewport": "1440",
+    "status": 200,
+    "title": "2交替勤務がきつい人へ【2026年】シフト例・生活リズム・日勤転職の判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-weekend-work",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場の休日出勤が多い人へ｜求人票で確認する休日・残業・代休",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/inspection-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "検査から転職するには｜品質・製造・生産管理へ経験を活かす方法",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/factory-white-company",
+    "viewport": "1440",
+    "status": 200,
+    "title": "ホワイトな工場の見分け方【2026年】求人票・面接・工場見学の確認ポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/line-work-quit",
+    "viewport": "1440",
+    "status": 200,
+    "title": "ライン作業を辞めたい人へ｜向いている転職先と経験の伝え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/low-salary",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務の給料が低いと感じたら｜年収を上げる方法と求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/machine-design-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "機械設計の転職｜CAD・担当範囲・年収・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/machining-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "機械加工から転職するには｜旋盤・フライス・マシニング経験の活かし方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/maintenance-salary",
+    "viewport": "1440",
+    "status": 200,
+    "title": "設備保全の年収はいくら？【2026年】435万円・535万円の違いと年収アップ条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/maintenance-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "設備保全の転職で失敗しない求人の見方｜年収・夜勤・呼び出し・資格・経験",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 5,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/maintenance-hard",
+    "viewport": "1440",
+    "status": 200,
+    "title": "設備保全がきつい・辞めたい人へ｜呼び出し・夜勤・休日対応の見直し方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/maintenance-qualification",
+    "viewport": "1440",
+    "status": 200,
+    "title": "設備保全の転職で資格は必要？｜実務経験と求人要件の見分け方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/makers-job-review",
+    "viewport": "1440",
+    "status": 200,
+    "title": "メーカーズジョブとは？特徴・向いている人・利用前チェック｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 3,
+    "aspVisible": 3,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-20s",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業20代の転職｜未経験・経験者で変わる求人の選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-40s",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業40代の転職｜経験を活かす求人の選び方と失敗を減らす条件整理",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-30s",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業30代の転職｜強みになる経験・年収・求人の選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 5,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-500-income",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業で年収500万円を目指すには【2026年】職種・経験・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 5,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-50s",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業50代の転職｜経験を活かす求人の選び方と条件整理",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-job-change-age",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業の転職は何歳まで？20代・30代・40代・50代の考え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-agent-guide",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業・メーカーに強い転職サービスの選び方｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-supervisor-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場の班長・リーダー経験を活かす転職｜人数・品質・生産管理の伝え方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/manufacturing-other-industry",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業から異業種へ転職するには｜活かせる経験と失敗しない選び方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 4,
+    "aspVisible": 3,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/night-shift-hard",
+    "viewport": "1440",
+    "status": 200,
+    "title": "夜勤がきつい・辞めたい人へ【2026年】交替勤務から日勤へ変える判断基準",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 4,
+    "aspVisible": 3,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/no-night-shift",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場で夜勤なしの仕事・職種を探す｜日勤で働ける選択肢と注意点",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/operator-quit",
+    "viewport": "1440",
+    "status": 200,
+    "title": "機械オペレーターを辞めたい人へ｜転職先と活かせる経験",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/period-worker-next",
+    "viewport": "1440",
+    "status": 200,
+    "title": "期間工のその後はどうする？正社員・転職・異業種の4つの進路",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 1,
+    "aspVisible": 1,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/plc-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "PLC経験を活かす転職｜ラダー修正・新規設計・立上げで評価を分ける",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/production-control-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "生産管理の転職｜仕事内容・必要経験・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/production-control-salary",
+    "viewport": "1440",
+    "status": 200,
+    "title": "生産管理の年収はいくら？【2026年】484万円と500〜600万円求人帯の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/production-control-overtime",
+    "viewport": "1440",
+    "status": 200,
+    "title": "生産管理は残業が多い？【2026年】忙しい原因と残業が少ない求人の見分け方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/production-tech-agent",
+    "viewport": "1440",
+    "status": 200,
+    "title": "生産技術の転職エージェント・サービス選び｜設備・工程・年収別",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/production-tech-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "生産技術の転職｜仕事内容・年収・求人で確認すべきポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 5,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/production-tech-salary",
+    "viewport": "1440",
+    "status": 200,
+    "title": "生産技術の年収はいくら？【2026年】494万円・523.8万円の違いと年収アップ条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/production-tech-hard",
+    "viewport": "1440",
+    "status": 200,
+    "title": "生産技術がきつい・辞めたい人へ｜激務の原因と転職前の確認ポイント",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/production-tech-overseas-travel",
+    "viewport": "1440",
+    "status": 200,
+    "title": "生産技術で出張が多くてきつい人へ｜立上げ頻度・海外出張・転職条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/quality-agent",
+    "viewport": "1440",
+    "status": 200,
+    "title": "品質管理・品質保証の転職エージェント選び｜経験別・目的別の使い分け",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/quality-assurance-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "品質保証の転職｜仕事内容・経験の棚卸し・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/quality-audit-hard",
+    "viewport": "1440",
+    "status": 200,
+    "title": "品質保証の監査対応がきつい人へ｜監査頻度・出張・役割の見直し方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/quality-claim-hard",
+    "viewport": "1440",
+    "status": 200,
+    "title": "品質管理のクレーム対応がつらい人へ｜顧客対応を減らす転職先の探し方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/quality-quit",
+    "viewport": "1440",
+    "status": 200,
+    "title": "品質管理を辞めたい人へ｜転職先・向いている職種・求人の見方",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 6,
+    "aspVisible": 5,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/quality-salary",
+    "viewport": "1440",
+    "status": 200,
+    "title": "品質管理の年収はいくら？【2026年】484万円・654.2万円の差と年収アップ条件",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/samurai-job-review",
+    "viewport": "1440",
+    "status": 200,
+    "title": "Samurai Jobとは？特徴・向いている人・利用前チェック｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 3,
+    "aspVisible": 3,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/tools/job-offer-score",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場・製造業の求人条件スコア比較｜無料ツール",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/articles/welding-career",
+    "viewport": "1440",
+    "status": 200,
+    "title": "溶接工から転職するには｜資格・図面・品質経験を活かせる仕事",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/tools/resume-draft",
+    "viewport": "1440",
+    "status": 200,
+    "title": "製造業の職務経歴書たたき台作成ツール｜無料・登録不要",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/tools/salary-compare",
+    "viewport": "1440",
+    "status": 200,
+    "title": "工場勤務の年収・手当依存度チェック｜無料計算",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 0,
+    "aspVisible": 0,
+    "smallTapTargets": 0
+   },
+   {
+    "path": "/resignation-support",
+    "viewport": "1440",
+    "status": 200,
+    "title": "退職代行を使う前に確認すること｜工場勤務の退職手続き・相談先｜工場キャリア診断",
+    "overflowX": 0,
+    "brokenImages": 0,
+    "jsErrors": 0,
+    "aspLinks": 2,
+    "aspVisible": 2,
+    "smallTapTargets": 0
+   }
+  ],
+  "viewports": [
+   "375",
+   "1440"
+  ],
+  "totals": {
+   "non200": 0,
+   "horizontalOverflow": 0,
+   "brokenImages": 0,
+   "uncaughtJsErrors": 0,
+   "pagesWithConsoleErrors": 130,
+   "firstParty4xx5xx": 1
+  },
+  "detail": {
+   "non200": [],
+   "overflow": [],
+   "brokenImages": [],
+   "pageErrors": [],
+   "badResponses": [
+    {
+     "path": "/factory-items",
+     "viewport": "375",
+     "responses": [
+      {
+       "url": "https://factory-career-site.pages.dev/api/rakuten/items?category=work&hits=8",
+       "status": 429,
+       "page": "https://factory-career-site.pages.dev/factory-items"
+      }
+     ]
+    }
+   ],
+   "consoleErrorsSample": [
+    {
+     "path": "/",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/"
+      },
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/"
+      }
+     ]
+    },
+    {
+     "path": "/factory-items",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/factory-items"
+      },
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/factory-items"
+      },
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/factory-items"
+      },
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/factory-items"
+      },
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/factory-items"
+      },
+      {
+       "type": "error",
+       "text": "Failed to load resource: the server responded with a status of 429 ()",
+       "page": "https://factory-career-site.pages.dev/factory-items"
+      }
+     ]
+    },
+    {
+     "path": "/articles/assembly-career",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/assembly-career"
+      }
+     ]
+    },
+    {
+     "path": "/articles/automotive-parts-career",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/automotive-parts-career"
+      },
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/automotive-parts-career"
+      }
+     ]
+    },
+    {
+     "path": "/articles/electrical-design-career",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/electrical-design-career"
+      },
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/electrical-design-career"
+      }
+     ]
+    },
+    {
+     "path": "/articles/factory-body-hard",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/factory-body-hard"
+      }
+     ]
+    },
+    {
+     "path": "/articles/factory-heat-hard",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/factory-heat-hard"
+      }
+     ]
+    },
+    {
+     "path": "/articles/factory-bonus-low",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/factory-bonus-low"
+      },
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/factory-bonus-low"
+      }
+     ]
+    },
+    {
+     "path": "/articles/factory-commute-long",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/factory-commute-long"
+      }
+     ]
+    },
+    {
+     "path": "/articles/factory-day-shift-job",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/factory-day-shift-job"
+      }
+     ]
+    },
+    {
+     "path": "/articles/factory-fixed-night-shift",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/factory-fixed-night-shift"
+      }
+     ]
+    },
+    {
+     "path": "/articles/factory-holidays",
+     "viewport": "375",
+     "errors": [
+      {
+       "type": "error",
+       "text": "Failed to load resource: net::ERR_FAILED",
+       "page": "https://factory-career-site.pages.dev/articles/factory-holidays"
+      }
+     ]
+    }
+   ]
+  },
+  "network": [
+   {
+    "viewportSummary": "375",
+    "network": {
+     "consoleErrors": 0,
+     "consoleWarnings": 0,
+     "pageErrors": 0,
+     "failedFirstPartyRequests": 0,
+     "badFirstPartyResponses": 0,
+     "aspRequestsBlocked": 109,
+     "analyticsRequestsBlocked": 0,
+     "collectorCallsMocked": 0,
+     "firstPartyWritesMocked": 0,
+     "otherThirdPartyBlocked": 0
+    },
+    "aspHosts": [
+     "www15.a8.net",
+     "h.accesstrade.net",
+     "thumbnail.image.rakuten.co.jp"
+    ],
+    "firstPartyWrites": [],
+    "collector": []
+   },
+   {
+    "viewportSummary": "1440",
+    "network": {
+     "consoleErrors": 0,
+     "consoleWarnings": 0,
+     "pageErrors": 0,
+     "failedFirstPartyRequests": 0,
+     "badFirstPartyResponses": 0,
+     "aspRequestsBlocked": 116,
+     "analyticsRequestsBlocked": 0,
+     "collectorCallsMocked": 0,
+     "firstPartyWritesMocked": 0,
+     "otherThirdPartyBlocked": 0
+    },
+    "aspHosts": [
+     "www15.a8.net",
+     "h.accesstrade.net",
+     "thumbnail.image.rakuten.co.jp"
+    ],
+    "firstPartyWrites": [],
+    "collector": []
+   }
+  ]
+ },
+ "flows": {
+  "production": {
+   "tag": "before",
+   "at": "2026-11-18T14:09:40.655Z",
+   "steps": 191,
+   "passed": 191,
+   "failed": 0,
+   "failedSteps": [],
+   "allSteps": [
+    {
+     "viewport": "375",
+     "step": "mobile menu opens and shows the diagnosis link",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "home CTA leads to the diagnosis page",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: result type matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: offers shown = [samuraiJob, makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "A-specialist-soon: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: result type matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: offers shown = [makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "B-line-nightshift-open: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "C-other-workchange-open: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "C-other-workchange-open: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "C-other-workchange-open: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "C-other-workchange-open: offers shown = [makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "C-other-workchange-open: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "C-other-workchange-open: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "C-other-workchange-open: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "C-other-workchange-open: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "C-other-workchange-open: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "D-line-people-research: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "D-line-people-research: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "D-line-people-research: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "D-line-people-research: offers shown = [none]",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "D-line-people-research: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "D-line-people-research: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "E-quality-none-stay: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "E-quality-none-stay: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "E-quality-none-stay: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "E-quality-none-stay: offers shown = [none]",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "E-quality-none-stay: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "E-quality-none-stay: \"stay\" answer does not push the service comparison",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "E-quality-none-stay: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "F-line-people-soon: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "F-line-people-soon: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "F-line-people-soon: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "F-line-people-soon: offers shown = [makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "F-line-people-soon: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "F-line-people-soon: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "F-line-people-soon: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "F-line-people-soon: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "F-line-people-soon: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "article sticky bar appears while reading",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "sticky bar does not cover another CTA at that position",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "sticky bar affiliate button opens a new tab with the configured URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "sticky bar can be dismissed",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "salary tool: calculation is correct (4,880,000円 / 900,000円 / 18%)",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "salary tool: reset clears the result",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "job-offer tool: incomplete input is rejected with a message",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "job-offer tool: score is correct (21/30, 70点, weakest 年収・基本給)",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "resume tool: draft text is generated from the inputs",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "tools: nothing was posted to the server while using them",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "goods page: shows product cards (or a clear fallback) with PR labelling",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "goods page: category switch (安全靴) updates the list or shows a clear fallback",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "no JavaScript errors or failed first-party requests during the flows",
+     "ok": true
+    },
+    {
+     "viewport": "375",
+     "step": "404 page returns HTTP 404 and links home",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "home CTA leads to the diagnosis page",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: result type matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: offers shown = [samuraiJob, makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "A-specialist-soon: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: result type matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: offers shown = [makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "B-line-nightshift-open: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "C-other-workchange-open: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "C-other-workchange-open: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "C-other-workchange-open: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "C-other-workchange-open: offers shown = [makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "C-other-workchange-open: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "C-other-workchange-open: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "C-other-workchange-open: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "C-other-workchange-open: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "C-other-workchange-open: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "D-line-people-research: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "D-line-people-research: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "D-line-people-research: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "D-line-people-research: offers shown = [none]",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "D-line-people-research: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "D-line-people-research: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "E-quality-none-stay: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "E-quality-none-stay: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "E-quality-none-stay: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "E-quality-none-stay: offers shown = [none]",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "E-quality-none-stay: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "E-quality-none-stay: \"stay\" answer does not push the service comparison",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "E-quality-none-stay: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "F-line-people-soon: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "F-line-people-soon: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "F-line-people-soon: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "F-line-people-soon: offers shown = [makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "F-line-people-soon: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "F-line-people-soon: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "F-line-people-soon: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "F-line-people-soon: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "F-line-people-soon: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "salary tool: calculation is correct (4,880,000円 / 900,000円 / 18%)",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "salary tool: reset clears the result",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "job-offer tool: incomplete input is rejected with a message",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "job-offer tool: score is correct (21/30, 70点, weakest 年収・基本給)",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "resume tool: draft text is generated from the inputs",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "tools: nothing was posted to the server while using them",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "goods page: shows product cards (or a clear fallback) with PR labelling",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "goods page: category switch (安全靴) updates the list or shows a clear fallback",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "no JavaScript errors or failed first-party requests during the flows",
+     "ok": true
+    },
+    {
+     "viewport": "768",
+     "step": "404 page returns HTTP 404 and links home",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "home CTA leads to the diagnosis page",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: result type matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: offers shown = [samuraiJob, makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "A-specialist-soon: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: result type matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: offers shown = [makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "B-line-nightshift-open: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "C-other-workchange-open: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "C-other-workchange-open: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "C-other-workchange-open: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "C-other-workchange-open: offers shown = [makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "C-other-workchange-open: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "C-other-workchange-open: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "C-other-workchange-open: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "C-other-workchange-open: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "C-other-workchange-open: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "D-line-people-research: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "D-line-people-research: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "D-line-people-research: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "D-line-people-research: offers shown = [none]",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "D-line-people-research: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "D-line-people-research: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "E-quality-none-stay: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "E-quality-none-stay: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "E-quality-none-stay: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "E-quality-none-stay: offers shown = [none]",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "E-quality-none-stay: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "E-quality-none-stay: \"stay\" answer does not push the service comparison",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "E-quality-none-stay: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "F-line-people-soon: next button is disabled until an answer is chosen",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "F-line-people-soon: result is shown after 7 answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "F-line-people-soon: guide link matches the answers",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "F-line-people-soon: offers shown = [makersJob]",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "F-line-people-soon: no resignation-agency offer or wording in the diagnosis result",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "F-line-people-soon: offers carry PR label, https URL, sponsored/nofollow/noopener and open a new tab",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "F-line-people-soon: offer buttons are large enough to tap",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "F-line-people-soon: tapping the first offer opens a new tab with the configured tracking URL (mocked)",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "F-line-people-soon: result screen has no horizontal overflow",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "salary tool: calculation is correct (4,880,000円 / 900,000円 / 18%)",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "salary tool: reset clears the result",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "job-offer tool: incomplete input is rejected with a message",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "job-offer tool: score is correct (21/30, 70点, weakest 年収・基本給)",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "resume tool: draft text is generated from the inputs",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "tools: nothing was posted to the server while using them",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "goods page: shows product cards (or a clear fallback) with PR labelling",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "goods page: category switch (安全靴) updates the list or shows a clear fallback",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "no JavaScript errors or failed first-party requests during the flows",
+     "ok": true
+    },
+    {
+     "viewport": "1440",
+     "step": "404 page returns HTTP 404 and links home",
+     "ok": true
+    }
+   ],
+   "perViewport": [
+    {
+     "viewport": "375",
+     "network": {
+      "consoleErrors": 9,
+      "consoleWarnings": 0,
+      "pageErrors": 0,
+      "failedFirstPartyRequests": 0,
+      "badFirstPartyResponses": 1,
+      "aspRequestsBlocked": 13,
+      "analyticsRequestsBlocked": 0,
+      "collectorCallsMocked": 0,
+      "firstPartyWritesMocked": 0,
+      "otherThirdPartyBlocked": 0
+     },
+     "goodsNames": {
+      "work": [
+       "【メール便対応】 ヘルメットペンホルダー ヘルメットオプション品 進和化学工業 ",
+       "オーエッチ工業 ワイヤー荷締機 PRX-600 | 小型 中型 トラック用 荷締",
+       "機器銘板 アルミ札 A 小判型 プレート 札 アルミ 日本製 （ 吊り下げ 吊下",
+       "ファイバー札 小判型 30mm 100枚1組 プレート 札 ひも付き 日本製 （",
+       "機器銘板 ステンレス札 B 丸型 プレート 札 ステンレス 日本製 （ 吊り下げ",
+       "機器銘板 アルミ札 B 丸型 プレート 札 アルミ 日本製 （ 吊り下げ 吊下げ",
+       "機器銘板 アルミ札 C プレート 札 ステンレス 日本製 （ 吊り下げ 吊下げ札",
+       "ファイバー札 丸型 15mm 100枚1組 プレート 札 ひも付き 日本製 （ "
+      ],
+      "shoes": [
+       "【楽天1位】＼10%OFFクーポン配布中／PAFHL 安全靴 あんぜん靴 作業靴",
+       "安全靴 スニーカー ハイパーV 2000 HyperV #2000 樹脂先芯入り",
+       "安全靴 おしゃれ レディース メンズ 軽作業用 超軽量 通気性 作業靴 5164",
+       "＼楽天1位／【半額以下セール★5,960円⇒2,580円】PAFHL 安全靴 作",
+       "【送料無料】安全靴 アイトス タルテックス TULTEX セーフティシューズ A",
+       "セーフティーブーツ N5053 軽量長編チャック 【24.5〜27.0・28.0",
+       "＼期間限定★5,980円⇒2,999円／PAFHL 安全靴 スニーカー 作業靴 ",
+       "安全靴 スニーカー おしゃれ レディース メンズ 軽作業用 超軽量 通気性 作業"
+      ]
+     },
+     "dialogs": [
+      "6項目すべて選択してください"
+     ],
+     "aspHosts": [
+      "www15.a8.net",
+      "h.accesstrade.net",
+      "px.a8.net"
+     ]
+    },
+    {
+     "viewport": "768",
+     "network": {
+      "consoleErrors": 8,
+      "consoleWarnings": 0,
+      "pageErrors": 0,
+      "failedFirstPartyRequests": 0,
+      "badFirstPartyResponses": 1,
+      "aspRequestsBlocked": 11,
+      "analyticsRequestsBlocked": 0,
+      "collectorCallsMocked": 0,
+      "firstPartyWritesMocked": 0,
+      "otherThirdPartyBlocked": 0
+     },
+     "goodsNames": {
+      "work": [
+       "【メール便対応】 ヘルメットペンホルダー ヘルメットオプション品 進和化学工業 ",
+       "オーエッチ工業 ワイヤー荷締機 PRX-600 | 小型 中型 トラック用 荷締",
+       "機器銘板 アルミ札 A 小判型 プレート 札 アルミ 日本製 （ 吊り下げ 吊下",
+       "ファイバー札 小判型 30mm 100枚1組 プレート 札 ひも付き 日本製 （",
+       "機器銘板 ステンレス札 B 丸型 プレート 札 ステンレス 日本製 （ 吊り下げ",
+       "機器銘板 アルミ札 B 丸型 プレート 札 アルミ 日本製 （ 吊り下げ 吊下げ",
+       "機器銘板 アルミ札 C プレート 札 ステンレス 日本製 （ 吊り下げ 吊下げ札",
+       "ファイバー札 丸型 15mm 100枚1組 プレート 札 ひも付き 日本製 （ "
+      ],
+      "shoes": [
+       "【楽天1位】＼10%OFFクーポン配布中／PAFHL 安全靴 あんぜん靴 作業靴",
+       "安全靴 スニーカー ハイパーV 2000 HyperV #2000 樹脂先芯入り",
+       "安全靴 おしゃれ レディース メンズ 軽作業用 超軽量 通気性 作業靴 5164",
+       "＼楽天1位／【半額以下セール★5,960円⇒2,580円】PAFHL 安全靴 作",
+       "【送料無料】安全靴 アイトス タルテックス TULTEX セーフティシューズ A",
+       "セーフティーブーツ N5053 軽量長編チャック 【24.5〜27.0・28.0",
+       "＼期間限定★5,980円⇒2,999円／PAFHL 安全靴 スニーカー 作業靴 ",
+       "安全靴 スニーカー おしゃれ レディース メンズ 軽作業用 超軽量 通気性 作業"
+      ]
+     },
+     "dialogs": [
+      "6項目すべて選択してください"
+     ],
+     "aspHosts": [
+      "www15.a8.net",
+      "h.accesstrade.net",
+      "px.a8.net"
+     ]
+    },
+    {
+     "viewport": "1440",
+     "network": {
+      "consoleErrors": 8,
+      "consoleWarnings": 0,
+      "pageErrors": 0,
+      "failedFirstPartyRequests": 0,
+      "badFirstPartyResponses": 1,
+      "aspRequestsBlocked": 11,
+      "analyticsRequestsBlocked": 0,
+      "collectorCallsMocked": 0,
+      "firstPartyWritesMocked": 0,
+      "otherThirdPartyBlocked": 0
+     },
+     "goodsNames": {
+      "work": [
+       "【メール便対応】 ヘルメットペンホルダー ヘルメットオプション品 進和化学工業 ",
+       "オーエッチ工業 ワイヤー荷締機 PRX-600 | 小型 中型 トラック用 荷締",
+       "機器銘板 アルミ札 A 小判型 プレート 札 アルミ 日本製 （ 吊り下げ 吊下",
+       "ファイバー札 小判型 30mm 100枚1組 プレート 札 ひも付き 日本製 （",
+       "機器銘板 ステンレス札 B 丸型 プレート 札 ステンレス 日本製 （ 吊り下げ",
+       "機器銘板 アルミ札 B 丸型 プレート 札 アルミ 日本製 （ 吊り下げ 吊下げ",
+       "機器銘板 アルミ札 C プレート 札 ステンレス 日本製 （ 吊り下げ 吊下げ札",
+       "ファイバー札 丸型 15mm 100枚1組 プレート 札 ひも付き 日本製 （ "
+      ],
+      "shoes": [
+       "【楽天1位】＼10%OFFクーポン配布中／PAFHL 安全靴 あんぜん靴 作業靴",
+       "安全靴 スニーカー ハイパーV 2000 HyperV #2000 樹脂先芯入り",
+       "安全靴 おしゃれ レディース メンズ 軽作業用 超軽量 通気性 作業靴 5164",
+       "＼楽天1位／【半額以下セール★5,960円⇒2,580円】PAFHL 安全靴 作",
+       "【送料無料】安全靴 アイトス タルテックス TULTEX セーフティシューズ A",
+       "セーフティーブーツ N5053 軽量長編チャック 【24.5〜27.0・28.0",
+       "＼期間限定★5,980円⇒2,999円／PAFHL 安全靴 スニーカー 作業靴 ",
+       "安全靴 スニーカー おしゃれ レディース メンズ 軽作業用 超軽量 通気性 作業"
+      ]
+     },
+     "dialogs": [
+      "6項目すべて選択してください"
+     ],
+     "aspHosts": [
+      "www15.a8.net",
+      "h.accesstrade.net",
+      "px.a8.net"
+     ]
+    }
+   ]
+  }
+ },
+ "ctaSimulatedClicks": {
+  "records": 124,
+  "clicked": 78,
+  "ok": 74,
+  "failed": 4,
+  "hiddenNotClicked": 4,
+  "failedDetail": [
+   {
+    "page": "/articles/production-tech-career",
+    "viewport": "375",
+    "text": "PR 求人・支援内容を見る",
+    "href": "https://px.a8.net/svt/ejp?a8mat=4BCA79+GHL6WI+5B0Y+TRVYQ",
+    "reason": "locator.tap: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-qa-cta=\"qa-cta-5\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a target=\"_blank\" data-affiliate-link=\"\" data-qa-cta=\"qa-cta-5\" data-sticky-affiliate=\"\" dat"
+   },
+   {
+    "page": "/articles/maintenance-career",
+    "viewport": "375",
+    "text": "PR 求人・支援内容を見る",
+    "href": "https://px.a8.net/svt/ejp?a8mat=4BCA79+GHL6WI+5B0Y+TRVYQ",
+    "reason": "locator.tap: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-qa-cta=\"qa-cta-5\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a target=\"_blank\" data-affiliate-link=\"\" data-qa-cta=\"qa-cta-5\" data-sticky-affiliate=\"\" dat"
+   },
+   {
+    "page": "/articles/night-shift-hard",
+    "viewport": "375",
+    "text": "PR 求人・支援内容を見る",
+    "href": "https://px.a8.net/svt/ejp?a8mat=4BCA79+GHL6WI+5B0Y+TRVYQ",
+    "reason": "locator.tap: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-qa-cta=\"qa-cta-3\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a target=\"_blank\" data-affiliate-link=\"\" data-qa-cta=\"qa-cta-3\" data-sticky-affiliate=\"\" dat"
+   },
+   {
+    "page": "/articles/factory-quit",
+    "viewport": "375",
+    "text": "PR 求人・支援内容を見る",
+    "href": "https://px.a8.net/svt/ejp?a8mat=4BCA79+GHL6WI+5B0Y+TRVYQ",
+    "reason": "locator.tap: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-qa-cta=\"qa-cta-3\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a target=\"_blank\" data-affiliate-link=\"\" data-qa-cta=\"qa-cta-3\" data-sticky-affiliate=\"\" dat"
+   }
+  ],
+  "aspRequestsReachedNetwork": 0,
+  "note": "ASPホストへの通信は監査ブラウザ内で遮断し、ローカルの模擬ランディングページで応答した。"
+ },
+ "productionVsMain": {
+  "site": "factory",
+  "base": "https://factory-career-site.pages.dev",
+  "commit": "25586c98323707323b765688ef12b4571f2b0c37",
+  "checkedAt": "2026-11-18T14:11:41.597Z",
+  "compared": 209,
+  "match": 209,
+  "mismatch": [],
+  "notFound": [],
+  "errors": []
+ },
+ "siteChange": "サイト本体のファイルは変更していない（CIワークフローとQAスクリプトのみ変更）ため、before=afterの状態。",
+ "screenshots": [
+  "home-375.jpg",
+  "home-1440.jpg",
+  "home-768.jpg",
+  "diagnosis-q1-375.jpg",
+  "diagnosis-result-375.jpg",
+  "diagnosis-result-768.jpg",
+  "diagnosis-result-1440.jpg",
+  "diagnosis-result-stay-375.jpg",
+  "factory-items-768.jpg",
+  "article-sticky-cta-375.jpg",
+  "factory-items-375.jpg",
+  "factory-items-1440.jpg",
+  "404-375.jpg"
+ ],
+ "affiliateRows": 178
+}

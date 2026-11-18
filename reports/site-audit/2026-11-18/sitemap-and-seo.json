@@ -1,0 +1,75 @@
+{
+  "site": "factory",
+  "base": "https://factory-career-site.pages.dev",
+  "checkedAt": "2026-11-18T13:38:29.357Z",
+  "finishedAt": "2026-11-18T13:38:34.964Z",
+  "method": "HTTP GET without JavaScript; QA/bot user agent; redirects followed manually; only <head> read",
+  "concurrency": 6,
+  "robots": {
+    "status": 200,
+    "text": "User-agent: *\nAllow: /\nDisallow: /admin-analytics\nDisallow: /admin-seo\nDisallow: /ops-dashboard\nDisallow: /rakuten-check\nDisallow: /api/admin/\nDisallow: /shorts-content-factory/\nDisallow: /shorts-content-factory-audit/\nSitemap: https://factory-career-site.pages.dev/sitemap.xml\nSitemap: https://factory-career-site.pages.dev/sitemap-core.xml\nSitemap: https://factory-career-site.pages.dev/feed.xml\nSitemap: https://factory-career-site.pages.dev/sitemap.txt\n",
+    "declaredSitemaps": [
+      "https://factory-career-site.pages.dev/sitemap.xml",
+      "https://factory-career-site.pages.dev/sitemap-core.xml",
+      "https://factory-career-site.pages.dev/feed.xml",
+      "https://factory-career-site.pages.dev/sitemap.txt"
+    ]
+  },
+  "sitemaps": [
+    {
+      "url": "https://factory-career-site.pages.dev/sitemap.xml",
+      "status": 200,
+      "type": "urlset",
+      "entries": 99
+    },
+    {
+      "url": "https://factory-career-site.pages.dev/sitemap-core.xml",
+      "status": 200,
+      "type": "urlset",
+      "entries": 44
+    },
+    {
+      "url": "https://factory-career-site.pages.dev/feed.xml",
+      "status": 200,
+      "type": "urlset",
+      "entries": 0
+    },
+    {
+      "url": "https://factory-career-site.pages.dev/sitemap.txt",
+      "status": 200,
+      "type": "urlset",
+      "entries": 0
+    }
+  ],
+  "sitemapUrlTotal": 143,
+  "uniqueUrls": 100,
+  "duplicateSitemapEntries": 43,
+  "statusCounts": {
+    "200": 100
+  },
+  "counts": {
+    "non200": 0,
+    "redirected": 0,
+    "noindex": 0,
+    "canonicalMissing": 0,
+    "canonicalMultiple": 0,
+    "canonicalMismatch": 0,
+    "errors": 0,
+    "offHost": 0,
+    "titleMissing": 0
+  },
+  "duplicateTitleGroups": 0,
+  "unknownUrlStatus": 404,
+  "problems": {
+    "non200": [],
+    "redirected": [],
+    "noindex": [],
+    "canonicalMissing": [],
+    "canonicalMultiple": [],
+    "canonicalMismatch": [],
+    "errors": [],
+    "offHost": [],
+    "titleMissing": []
+  },
+  "duplicateTitlesSample": []
+}
