@@ -33,7 +33,13 @@ jobs:
           npm init -y
           npm install --no-save @playwright/test
           npx playwright install --with-deps chromium
-      - name: Run all-site live analytics QA
+      # Keep ordinary pushes low-impact: run measurement, dedupe and receipt checks only.
+      # The full ~16k-URL live SEO crawl is retained for explicit manual dispatch.
+      - name: Run lightweight all-site analytics QA
+        if: github.event_name == 'push'
+        run: npx playwright test qa/all-site-analytics-live.spec.cjs --reporter=line --grep-invert 'all five production sites keep public search pages indexable'
+      - name: Run full all-site production and indexing audit
+        if: github.event_name == 'workflow_dispatch'
         run: npx playwright test qa/all-site-analytics-live.spec.cjs --reporter=line
 
 # cross-site rerun after intentional Okazu product-router noindex classification: 2026-10-08
